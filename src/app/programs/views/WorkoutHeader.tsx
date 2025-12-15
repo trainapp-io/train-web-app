@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router';
 import './WorkoutHeader.css';
 import { tokenService } from '../../../services/tokenService';
 import { userProfileService } from '../../profiles/services/userProfileService';
@@ -30,6 +31,8 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   onSave,
   hasUnsavedChanges,
 }) => {
+  const navigate = useNavigate();
+  const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
   const [showAfterDemoDialog, setShowAfterDemoDialog] = useState(false);
   const [difficulty, setDifficulty] = useState<number>(5);
   const [feedback, setFeedback] = useState<string>('');
@@ -118,6 +121,12 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
     }
   };
 
+  const handleLogWorkout = () => {
+    if (programId && weekId && workoutId) {
+      navigate(`/programs/${programId}/weeks/${weekId}/workouts/${workoutId}/log`);
+    }
+  };
+
   return (
     <>
       <div className="workout-header">
@@ -127,6 +136,12 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
 
         <div className="header-actions">
           {hasUnsavedChanges && <span className="unsaved-indicator">Unsaved changes</span>}
+
+          {!editMode && (
+            <button className="log-workout-button" onClick={handleLogWorkout}>
+              Log This Workout
+            </button>
+          )}
 
           {isOwner && (
             <button className="edit-button" onClick={editMode ? handleDoneClick : onToggleEdit}>
