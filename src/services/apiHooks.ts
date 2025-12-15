@@ -14,7 +14,9 @@ import {
   SearchProfilesResponse,
   CertificationResponse,
   CustomSectionRequest,
-  CustomSectionResponse
+  CustomSectionResponse,
+  WorkoutLogRequest,
+  WorkoutLogResponse
 } from '@seenelm/train-core';
 import { tokenService } from './tokenService';
 
@@ -331,6 +333,81 @@ export function useDeleteCustomSection() {
       onSuccess: () => {
         // Invalidate user profile queries to trigger refetch
         // queryClient.invalidateQueries(['userProfile']);
+      }
+    }
+  );
+}
+
+// WORKOUT LOG API HOOKS
+
+/**
+ * Hook to create a new workout log
+ */
+export function useCreateWorkoutLog() {
+  return useApiMutation<WorkoutLogRequest, WorkoutLogResponse>(
+    'POST',
+    '/api/workout-logs',
+    {
+      onSuccess: () => {
+        // Invalidate workout log queries to trigger refetch
+        // queryClient.invalidateQueries(['workoutLogs']);
+      }
+    }
+  );
+}
+
+/**
+ * Hook to fetch workout log history for a user
+ */
+export function useWorkoutLogHistory(userId: string, options?: any) {
+  return useApiQuery<WorkoutLogResponse[]>(
+    ['workoutLogs', 'history', userId],
+    '/api/workout-logs',
+    { userId },
+    options
+  );
+}
+
+/**
+ * Hook to fetch a specific workout log
+ */
+export function useWorkoutLog(logId: string, options?: any) {
+  return useApiQuery<WorkoutLogResponse>(
+    ['workoutLog', logId],
+    `/api/workout-logs/${logId}`,
+    undefined,
+    options
+  );
+}
+
+/**
+ * Hook to update a workout log
+ */
+export function useUpdateWorkoutLog() {
+  return useDynamicApiMutation<string, WorkoutLogRequest, WorkoutLogResponse>(
+    'PUT',
+    (logId) => `/api/workout-logs/${logId}`,
+    {
+      onSuccess: () => {
+        // Invalidate relevant queries
+        // queryClient.invalidateQueries(['workoutLogs']);
+        // queryClient.invalidateQueries(['workoutLog']);
+      }
+    }
+  );
+}
+
+/**
+ * Hook to delete a workout log
+ */
+export function useDeleteWorkoutLog() {
+  return useDynamicApiMutation<string, {}, {}>(
+    'DELETE',
+    (logId) => `/api/workout-logs/${logId}`,
+    {
+      onSuccess: () => {
+        // Invalidate workout log queries to trigger refetch
+        // queryClient.invalidateQueries(['workoutLogs']);
       }
     }
   );

@@ -75,12 +75,13 @@
 }
 
 .close-dialog-btn:hover {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: #007bff;
+  color: white;
 }
 
 @media (prefers-color-scheme: dark) {
   .close-dialog-btn:hover {
+    background-color: #0056b3;
     background-color: var(--bg-primary);
     color: var(--text-primary);
   }
