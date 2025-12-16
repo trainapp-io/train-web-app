@@ -423,24 +423,25 @@
   flex-direction: column;
   padding: 0;
   margin: 6px;
-  border-radius: 2px;
-  background: linear-gradient(135deg, #3a3a3a 0%, #2d2d2d 100%);
+  border-radius: var(--card-border-radius);
+  background: var(--bg-secondary);
   position: relative;
   overflow: visible;
   gap: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-speed);
 }
 
 .exercise-item:hover {
-  background: linear-gradient(135deg, #424242 0%, #353535 100%);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  background: var(--bg-primary);
+  box-shadow: 0 6px 16px var(--shadow-color);
   transform: translateY(-2px);
 }
 
 .exercise-item.completed {
   opacity: 0.7;
-  background: linear-gradient(135deg, #2d4a2d 0%, #243824 100%);
+  background: var(--bg-primary);
 }
 
 .exercise-header {
@@ -456,7 +457,7 @@
   width: 70px;
   height: 70px;
   border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -472,7 +473,7 @@
 
 .exercise-icon-placeholder {
   font-size: 32px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
 }
 
 .exercise-header-info {
@@ -483,7 +484,7 @@
 }
 
 .exercise-name {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
   font-weight: 600;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
@@ -493,7 +494,7 @@
 }
 
 .exercise-set-count {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 400;
   margin-top: 2px;
@@ -509,13 +510,13 @@
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 12px;
   padding: 10px 14px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+  background-color: var(--bg-primary);
+  border-radius: var(--input-border-radius);
   margin-bottom: 8px;
 }
 
 .exercise-sets-header span {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 600;
   text-align: center;
@@ -525,14 +526,14 @@
 
 .exercise-sets-header .clickable-header {
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-speed);
   border-radius: 4px;
   padding: 2px 4px;
 }
 
 .exercise-sets-header .clickable-header:hover {
-  color: rgba(74, 144, 226, 0.9);
-  background-color: rgba(74, 144, 226, 0.1);
+  color: var(--accent-color);
+  background-color: var(--bg-secondary);
 }
 
 .exercise-set-row {
@@ -540,14 +541,14 @@
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 12px;
   padding: 12px 14px;
-  background-color: rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
+  background-color: var(--bg-primary);
+  border-radius: var(--input-border-radius);
   margin-bottom: 6px;
   align-items: center;
 }
 
 .exercise-set-value {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
   text-align: center;
@@ -567,7 +568,7 @@
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 12px;
   padding: 12px;
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--bg-primary);
   border-radius: 8px;
   margin: 0 16px 16px;
 }
@@ -578,12 +579,12 @@
   align-items: center;
   gap: 4px;
   padding: 8px;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-secondary);
   border-radius: 6px;
 }
 
 .exercise-value {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1;
@@ -592,7 +593,7 @@
 
 .exercise-unit {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -872,8 +873,8 @@
 }
 
 .exercise-item.rest-item {
-  border-left: 3px solid #9e9e9e;
-  background-color: rgba(158, 158, 158, 0.05);
+  border-left: 3px solid var(--border-color);
+  background-color: var(--bg-primary);
 }
 
 .exercise-item.rest-item .exercise-name {
@@ -1422,7 +1423,7 @@
 }
 
 .exercise-set-value {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
   text-align: center;
@@ -1432,76 +1433,73 @@
 /* Edit Mode Styles */
 .drag-handle {
   margin-right: 8px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-primary);
   cursor: grab;
   font-size: 18px;
   transition: opacity 0.2s;
 }
 
 .drag-handle:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
 }
 
 .exercise-name-input-inline {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 6px 10px;
-  color: #ffffff;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-border-radius);
+  padding: 8px 12px;
+  color: var(--text-primary);
   font-size: 1.15rem;
   font-weight: 600;
   width: 100%;
-  outline: none;
-  transition: all 0.2s;
+  transition: all var(--transition-speed);
 }
 
 .exercise-name-input-inline:focus {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: rgba(74, 144, 226, 0.5);
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .exercise-set-count-input {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-border-radius);
   padding: 4px 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
   font-size: 0.95rem;
   width: 60px;
-  outline: none;
-  margin-top: 2px;
-  transition: all 0.2s;
+  text-align: center;
+  transition: all var(--transition-speed);
 }
 
 .exercise-set-count-input:focus {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: rgba(74, 144, 226, 0.5);
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .exercise-set-input {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-border-radius);
   padding: 8px;
-  color: #ffffff;
-  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-size: 1.2rem;
   font-weight: 600;
   text-align: center;
   width: 100%;
-  outline: none;
-  transition: all 0.2s;
+  transition: all var(--transition-speed);
   font-variant-numeric: tabular-nums;
 }
 
 .exercise-set-input:focus {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: rgba(74, 144, 226, 0.5);
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .remove-exercise-btn-header {
-  background: rgba(255, 59, 48, 0.2);
-  border: 1px solid rgba(255, 59, 48, 0.3);
-  color: #ff3b30;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -1553,19 +1551,19 @@
 }
 
 .suggestion-name {
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 500;
   text-transform: capitalize;
 }
 
 .suggestion-target {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   text-transform: capitalize;
 }
 
 .suggestion-loading {
   padding: 10px 14px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   text-align: center;
 }
