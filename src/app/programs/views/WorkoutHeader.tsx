@@ -12,6 +12,7 @@ interface WorkoutHeaderProps {
   onSave: () => void;
   hasUnsavedChanges: boolean;
   saving: boolean;
+  isStandaloneWorkout?: boolean;
 }
 
 interface AfterDemoQuestions {
@@ -30,6 +31,7 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   onToggleEdit,
   onSave,
   hasUnsavedChanges,
+  isStandaloneWorkout = false,
 }) => {
   const navigate = useNavigate();
   const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
@@ -131,7 +133,7 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
     <>
       <div className="workout-header">
         <button className="back-button" onClick={onBack}>
-          &larr; Back to Week
+          &larr; {isStandaloneWorkout ? 'Back to Workouts' : 'Back to Week'}
         </button>
 
         <div className="header-actions">

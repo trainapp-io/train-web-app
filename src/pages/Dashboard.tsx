@@ -12,6 +12,7 @@ import ProgramBuilder from "../app/programs/views/ProgramBuilder";
 import ProgramView from "../app/programs/views/ProgramView";
 import WeekView from "../app/programs/views/WeekView";
 import WorkoutView from "../app/programs/views/WorkoutView";
+import Workouts from "../app/programs/views/Workouts";
 import { ProgramProvider } from "../app/programs/contexts/ProgramContext";
 import WorkoutLogCreate from "../app/workout-logs/pages/WorkoutLogCreate";
 import WorkoutLogDetail from "../app/workout-logs/pages/WorkoutLogDetail";
@@ -27,11 +28,13 @@ import {
   AiOutlineSchedule,
   AiOutlineCheckCircle
 } from "react-icons/ai";
+import { FaDumbbell } from "react-icons/fa";
 
 const Dashboard: React.FC = () => {
   const tabs = [
     { id: "", label: "Home", icon: <AiOutlineHome /> }, // id "" so route = "/"
     { id: "programs", label: "Programs", icon: <AiOutlineSchedule /> },
+    { id: "workouts", label: "Workouts", icon: <FaDumbbell /> },
     { id: "workout-logs/history", label: "Workout Logs", icon: <AiOutlineCheckCircle /> },
     { id: "profile", label: "Profile", icon: <AiOutlineUser /> },
     // { id: "groups", label: "Groups", icon: <AiOutlineTeam /> },
@@ -55,6 +58,12 @@ const Dashboard: React.FC = () => {
             <Route path="/programs/:programId" element={<ProgramView />} />
             <Route path="/programs/:programId/weeks/:weekId" element={<WeekView />} />
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId" element={<WorkoutView />} />
+            
+            {/* Standalone Workouts Routes */}
+            <Route path="/workouts" element={<Workouts />} />
+            <Route path="/workouts/create" element={<WorkoutView />} />
+            <Route path="/workouts/:workoutId" element={<WorkoutView />} />
+            <Route path="/workouts/:workoutId/edit" element={<WorkoutView />} />
             
             {/* Workout Log Routes */}
             <Route path="/workout-logs/history" element={<WorkoutLogHistory />} />

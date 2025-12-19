@@ -192,8 +192,16 @@ const WorkoutView: React.FC = () => {
 
   const handleBackToWeek = () => {
     clearCurrentWorkout();
-    navigate(`/programs/${programId}/weeks/${weekId}`);
+    // Check if this is a standalone workout (accessed via /workouts route)
+    if (!programId || !weekId) {
+      navigate('/workouts');
+    } else {
+      navigate(`/programs/${programId}/weeks/${weekId}`);
+    }
   };
+
+  // Determine if this is a standalone workout
+  const isStandaloneWorkout = !programId || !weekId;
 
   if (state.workoutLoading) return <p>Loading workout...</p>;
 
@@ -207,6 +215,7 @@ const WorkoutView: React.FC = () => {
         hasUnsavedChanges={state.workoutHasUnsavedChanges}
         onSave={saveWorkout}
         onToggleEdit={() => setWorkoutEditMode(!state.workoutEditMode)}
+        isStandaloneWorkout={isStandaloneWorkout}
       />
 
       <WorkoutDetailsSection
