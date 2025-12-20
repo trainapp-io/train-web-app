@@ -11,13 +11,15 @@ import Programs from "../app/programs/views/Programs";
 import ProgramBuilder from "../app/programs/views/ProgramBuilder";
 import ProgramView from "../app/programs/views/ProgramView";
 import WeekView from "../app/programs/views/WeekView";
-import WorkoutView from "../app/programs/views/WorkoutView";
-import Workouts from "../app/programs/views/Workouts";
+import ProgramWorkoutView from "../app/programs/views/ProgramWorkoutView";
+import Workouts from "../app/workouts/views/Workouts";
 import { ProgramProvider } from "../app/programs/contexts/ProgramContext";
 import WorkoutLogCreate from "../app/workout-logs/pages/WorkoutLogCreate";
 import WorkoutLogDetail from "../app/workout-logs/pages/WorkoutLogDetail";
 import WorkoutLogEdit from "../app/workout-logs/pages/WorkoutLogEdit";
 import WorkoutLogHistory from "../app/workout-logs/pages/WorkoutLogHistory";
+import { WorkoutProvider } from "../app/workouts/contexts/WorkoutContext";
+import WorkoutView from "../app/workouts/views/WorkoutView";
 
 import {
   AiOutlineHome,
@@ -57,13 +59,7 @@ const Dashboard: React.FC = () => {
             <Route path="/programs/builder" element={<ProgramBuilder />} />
             <Route path="/programs/:programId" element={<ProgramView />} />
             <Route path="/programs/:programId/weeks/:weekId" element={<WeekView />} />
-            <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId" element={<WorkoutView />} />
-            
-            {/* Standalone Workouts Routes */}
-            <Route path="/workouts" element={<Workouts />} />
-            <Route path="/workouts/create" element={<WorkoutView />} />
-            <Route path="/workouts/:workoutId" element={<WorkoutView />} />
-            <Route path="/workouts/:workoutId/edit" element={<WorkoutView />} />
+            <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId" element={<ProgramWorkoutView />} />
             
             {/* Workout Log Routes */}
             <Route path="/workout-logs/history" element={<WorkoutLogHistory />} />
@@ -72,6 +68,14 @@ const Dashboard: React.FC = () => {
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
           </Routes>
         </ProgramProvider>
+        <WorkoutProvider>
+          <Routes>
+            <Route path="/workouts" element={<Workouts />} />
+            <Route path="/workouts/create" element={<WorkoutView />} />
+            <Route path="/workouts/:workoutId" element={<WorkoutView />} />
+            <Route path="/workouts/:workoutId/edit" element={<WorkoutView />} />
+          </Routes>
+        </WorkoutProvider>
       </ContentView>
     </div>
   );

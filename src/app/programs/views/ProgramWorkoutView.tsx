@@ -13,7 +13,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { WorkoutRequest, BlockType, Block } from '@seenelm/train-core';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 
-const WorkoutView: React.FC = () => {
+const ProgramWorkoutView: React.FC = () => {
   const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
   const navigate = useNavigate();
 
@@ -205,6 +205,16 @@ const WorkoutView: React.FC = () => {
 
   if (state.workoutLoading) return <p>Loading workout...</p>;
 
+  const updateBlock = (updated: Block) => {
+    setWorkoutRequest({ ...state.workoutRequest, blocks: state.workoutRequest.blocks?.map((c) => (c.order === updated.order ? updated : c)) });
+    setWorkoutHasUnsavedChanges(true);
+  };
+
+  const removeBlock = (block: Block) => {
+    setWorkoutRequest({ ...state.workoutRequest, blocks: state.workoutRequest.blocks?.filter((c) => c.order !== block.order) });
+    setWorkoutHasUnsavedChanges(true);
+  };
+
   return (
     <div className="workout-view">
       <WorkoutHeader
@@ -233,6 +243,9 @@ const WorkoutView: React.FC = () => {
                   block={circuit}
                   editMode={state.workoutEditMode && state.workoutIsOwner}
                   workout={state.workoutRequest!}
+                  onUpdateBlock={updateBlock}
+                  onRemoveBlock={() => removeBlock(circuit)}
+                  onSetHasUnsavedChanges={setWorkoutHasUnsavedChanges}
                 />
               ))}
             </SortableContext>
@@ -251,4 +264,4 @@ const WorkoutView: React.FC = () => {
   );
 };
 
-export default WorkoutView;
+export default ProgramWorkoutView;

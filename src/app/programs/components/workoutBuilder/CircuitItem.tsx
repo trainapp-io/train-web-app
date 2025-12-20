@@ -4,36 +4,33 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import ExerciseItem from './ExerciseItem';
 import TimePicker from './TimePicker';
-import { Block, WorkoutRequest, MeasurementType } from '@seenelm/train-core';
-import { useProgramContext } from '../../contexts/ProgramContext';
+import { Block, WorkoutRequest, MeasurementType, MeasurementUnit } from '@seenelm/train-core';
+
 
 interface Props {
   block: Block;
   editMode: boolean;
   workout: WorkoutRequest;
+  onUpdateBlock: (updated: Block) => void;
+  onRemoveBlock: () => void;
+  onSetHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
 const CircuitItem: React.FC<Props> = ({
   block,
   editMode,
   workout,
+  onUpdateBlock,
+  onRemoveBlock,
+  onSetHasUnsavedChanges,
 }) => {
-  const { updateWorkoutRequest, setWorkoutHasUnsavedChanges } = useProgramContext();
 
   const updateBlock = (updated: Block) => {
-    updateWorkoutRequest({
-      ...workout,
-      blocks: workout.blocks?.map((c) => (c.order === updated.order ? updated : c)),
-    });
-    setWorkoutHasUnsavedChanges(true);
+    onUpdateBlock(updated);
   };
 
   const removeBlock = () => {
-    updateWorkoutRequest({
-      ...workout,
-      blocks: workout.blocks?.filter((c) => c.order !== block.order),
-    });
-    setWorkoutHasUnsavedChanges(true);
+    onRemoveBlock();
   };
 
   const handleDragEnd = (event: any) => {
@@ -54,7 +51,7 @@ const CircuitItem: React.FC<Props> = ({
     }));
     
     updateBlock({ ...block, exercises: reorderedWithUpdatedOrder });
-    setWorkoutHasUnsavedChanges(true);
+    onSetHasUnsavedChanges(true);
   };
 
   return (
@@ -143,9 +140,14 @@ const CircuitItem: React.FC<Props> = ({
                   targetDurationSec: 0,
                   targetWeight: 0,
                   targetDistance: 0,
-                  measurementType: MeasurementType.REPS,
+                  measurement: {
+                    measurementType: MeasurementType.REPS,
+                    measurementUnit: MeasurementUnit.POUND,
+                  },
                   notes: '',
                   order: block.exercises.length,
+                  sets: 1,
+                  hasSuperset: false,
                 },
               ],
             })
