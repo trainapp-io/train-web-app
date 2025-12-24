@@ -4,7 +4,6 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { GiWeightLiftingUp } from 'react-icons/gi';
 import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
-import { useProgramContext } from '../../contexts/ProgramContext';
 
 
 interface Props {
@@ -12,16 +11,29 @@ interface Props {
   editMode: boolean;
   blockIndex: number;
   exerciseIndex: number;
+  updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
+  removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
 }
 
-const ExerciseItem: React.FC<Props> = ({ exercise, editMode, blockIndex, exerciseIndex }) => {
+const ExerciseItem: React.FC<Props> = ({ 
+  exercise, 
+  editMode, 
+  blockIndex, 
+  exerciseIndex,
+  updateExerciseInBlockPartial,
+  removeExerciseFromBlock 
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.order });
   const style = { transform: CSS.Transform.toString(transform), transition };
   const [exerciseSuggestions, setExerciseSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const { updateExerciseInBlockPartial, removeExerciseFromBlock } = useProgramContext();
+  
+  if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) {
+    console.error('ExerciseItem: Missing required context methods');
+    return null;
+  }
 
   const measurementType = exercise.measurementType || MeasurementType.REPS;
   const isRest = exercise.name?.toLowerCase().includes('rest') || false;

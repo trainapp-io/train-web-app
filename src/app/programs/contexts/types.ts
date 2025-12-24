@@ -6,6 +6,7 @@ import {
   WorkoutResponse,
   WorkoutRequest,
   Exercise,
+  Block,
   MeasurementType,
   ProfileAccess,
   WorkoutDifficulty,
@@ -245,6 +246,27 @@ export const programUtils = {
     return errors;
   },
 
+  // Sanitize WorkoutRequest by removing MongoDB-specific fields
+  sanitizeWorkoutRequest: (request: WorkoutRequest): WorkoutRequest => {
+    const sanitizeExercise = (exercise: Exercise): Exercise => {
+      const { _id, createdAt, updatedAt, ...rest } = exercise as any;
+      return rest as Exercise;
+    };
+
+    const sanitizeBlock = (block: Block): Block => {
+      const { _id, createdAt, updatedAt, ...blockRest } = block as any;
+      return {
+        ...blockRest,
+        exercises: block.exercises?.map(sanitizeExercise) || [],
+      } as Block;
+    };
+
+    return {
+      ...request,
+      blocks: request.blocks?.map(sanitizeBlock) || [],
+    };
+  },
+
   // Transform WeekResponse to WeekRequest
   weekResponseToRequest: (response: WeekResponse): WeekRequest => {
     return {
@@ -265,6 +287,9 @@ export const programUtils = {
       programUtils.weekResponseToRequest(response)
     );
   },
+
+  // Note: WeekRequest doesn't contain workouts, they are managed separately
+  // Sanitization happens at the workout level when updating individual workouts
 
   // Create default WeekRequest for new weeks
   createDefaultWeekRequest: (weekNumber: number = 1): WeekRequest => {

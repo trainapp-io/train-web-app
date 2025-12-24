@@ -14,6 +14,8 @@ interface Props {
   onUpdateBlock: (updated: Block) => void;
   onRemoveBlock: () => void;
   onSetHasUnsavedChanges: (hasChanges: boolean) => void;
+  updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => void;
+  removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
 }
 
 const CircuitItem: React.FC<Props> = ({
@@ -23,6 +25,8 @@ const CircuitItem: React.FC<Props> = ({
   onUpdateBlock,
   onRemoveBlock,
   onSetHasUnsavedChanges,
+  updateExerciseInBlockPartial,
+  removeExerciseFromBlock,
 }) => {
 
   const updateBlock = (updated: Block) => {
@@ -120,6 +124,8 @@ const CircuitItem: React.FC<Props> = ({
               editMode={editMode}
               blockIndex={workout.blocks?.findIndex(b => b.order === block.order) ?? 0}
               exerciseIndex={exerciseIndex}
+              updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+              removeExerciseFromBlock={removeExerciseFromBlock}
             />
           ))}
         </SortableContext>

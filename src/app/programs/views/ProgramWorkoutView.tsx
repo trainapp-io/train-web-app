@@ -27,6 +27,8 @@ const ProgramWorkoutView: React.FC = () => {
     setWorkoutIsOwner,
     setWorkoutHasUnsavedChanges,
     clearCurrentWorkout,
+    updateExerciseInBlockPartial,
+    removeExerciseFromBlock,
   } = useProgramContext();
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -141,7 +143,10 @@ const ProgramWorkoutView: React.FC = () => {
 
   const handleUpdateWorkout = async (request: WorkoutRequest) => {
     try {
-      await programService.updateWorkout(programId!, weekId!, workoutId!, request);
+      // Sanitize the request to remove MongoDB-specific fields
+      const sanitizedRequest = programUtils.sanitizeWorkoutRequest(request);
+      await programService.updateWorkout(programId!, weekId!, workoutId!, sanitizedRequest);
+      setWorkoutHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error updating workout:', error);
       setWorkoutError(error instanceof Error ? error.message : 'Failed to update workout');
@@ -246,6 +251,8 @@ const ProgramWorkoutView: React.FC = () => {
                   onUpdateBlock={updateBlock}
                   onRemoveBlock={() => removeBlock(circuit)}
                   onSetHasUnsavedChanges={setWorkoutHasUnsavedChanges}
+                  updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                  removeExerciseFromBlock={removeExerciseFromBlock}
                 />
               ))}
             </SortableContext>
