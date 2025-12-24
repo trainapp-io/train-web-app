@@ -5,7 +5,7 @@ import { programService } from '../services/programService';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 import { tokenService } from '../../../services/tokenService';
 import { IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { WeekResponse } from '@seenelm/train-core';
+import { WeekResponse } from '@trainapp-io/train-core';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 // Types for our workout events

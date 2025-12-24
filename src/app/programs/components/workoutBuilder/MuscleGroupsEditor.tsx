@@ -1,6 +1,6 @@
 // // WorkoutView/components/MuscleGroupsEditor.tsx
 // import React from 'react';
-// import { MuscleGroup } from '@seenelm/train-core';
+// import { MuscleGroup } from '@trainapp-io/train-core';
 
 // interface Props {
 //   muscleGroups: MuscleGroup[];

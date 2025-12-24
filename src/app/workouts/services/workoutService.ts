@@ -1,4 +1,4 @@
-import { WorkoutResponse, WorkoutRequest } from "@seenelm/train-core";
+import { WorkoutResponse, WorkoutRequest } from "@trainapp-io/train-core";
 import { BaseApiService } from "../../../services/BaseApiService";
 import { SuccessResponse } from "../../../types/api.types";
 

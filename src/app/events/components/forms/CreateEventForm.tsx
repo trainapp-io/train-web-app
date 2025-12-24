@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { eventService } from '../../services/EventService2';
 import { authService } from '../../../access/services/authService';
-import { EventRequest } from '@seenelm/train-core';
+import { EventRequest } from '@trainapp-io/train-core';
 import '../../components/ui/EventManager.css';
 import Form from '../../../../components/ui/Form';
 import TextInput from '../../../../components/ui/TextInput';

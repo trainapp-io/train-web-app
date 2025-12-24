@@ -9,7 +9,7 @@ import {
   MeasurementType,
   ProfileAccess,
   WorkoutDifficulty,
-} from "@seenelm/train-core";
+} from "@trainapp-io/train-core";
 import { MuscleGroup } from "../views/types";
 
 // ============================================================================

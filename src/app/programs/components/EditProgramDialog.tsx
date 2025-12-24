@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaUpload } from 'react-icons/fa';
-import { ProgramRequest, ProfileAccess } from '@seenelm/train-core';
+import { ProgramRequest, ProfileAccess } from '@trainapp-io/train-core';
 import './EditProgramDialog.css';
 
 interface EditProgramDialogProps {

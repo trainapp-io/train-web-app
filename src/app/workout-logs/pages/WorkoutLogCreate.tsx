@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot } from '@seenelm/train-core';
+import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot } from '@trainapp-io/train-core';
 import { useCreateWorkoutLog } from '../../../services/apiHooks';
 import { programService } from '../../programs/services/programService';
 import { tokenService } from '../../../services/tokenService';

@@ -3,7 +3,7 @@ import {
   PaginationResponse,
   CertificationResponse,
   SearchProfilesResponse,
-} from "@seenelm/train-core";
+} from "@trainapp-io/train-core";
 
 /**
  * Service for search operations

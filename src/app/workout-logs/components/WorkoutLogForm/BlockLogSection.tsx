@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockLog, BlockSnapshot } from '@seenelm/train-core';
+import { BlockLog, BlockSnapshot } from '@trainapp-io/train-core';
 import ExerciseLogItem from './ExerciseLogItem';
 import './WorkoutLogForm.css';
 

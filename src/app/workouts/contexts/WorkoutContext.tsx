@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, 
-  MeasurementType, MeasurementUnit } from '@seenelm/train-core';
+  MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 import { MuscleGroup } from '../../programs/views/types';
 
 function createDefaultWorkoutRequest(): WorkoutRequest {

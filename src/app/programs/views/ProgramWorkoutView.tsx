@@ -10,7 +10,7 @@ import WorkoutDetailsSection from './WorkoutDetailsSection';
 import CircuitItem from '../components/workoutBuilder/CircuitItem';
 import EmptyState from '../components/workoutBuilder/EmptyState';
 import { arrayMove } from '@dnd-kit/sortable';
-import { WorkoutRequest, BlockType, Block } from '@seenelm/train-core';
+import { WorkoutRequest, BlockType, Block } from '@trainapp-io/train-core';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 
 const ProgramWorkoutView: React.FC = () => {

@@ -9,7 +9,7 @@ import {
   Exercise,
   WorkoutDifficulty,
   ProfileAccess,
-} from '@seenelm/train-core';
+} from '@trainapp-io/train-core';
 import { programService } from '../services/programService';
 import { 
   ProgramState, 

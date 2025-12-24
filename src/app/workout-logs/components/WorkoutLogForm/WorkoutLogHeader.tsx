@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutSnapshot } from '@seenelm/train-core';
+import { WorkoutSnapshot } from '@trainapp-io/train-core';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogHeaderProps {

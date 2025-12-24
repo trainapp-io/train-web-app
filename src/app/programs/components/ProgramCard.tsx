@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
 import { FaEdit } from 'react-icons/fa';
 import { programService } from '../services/programService';
-import { ProgramResponse } from '@seenelm/train-core';
+import { ProgramResponse } from '@trainapp-io/train-core';
 
 // interface Program {
 //   id: string;

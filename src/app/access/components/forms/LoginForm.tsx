@@ -9,7 +9,7 @@ import { tokenService } from '../../../../services/tokenService';
 import { AuthErrorTypes } from '../../../../common/enums/authEnum';
 import { AxiosError } from 'axios';
 import { ErrorResponse } from '../../../../mocks/handlers';
-import { UserLoginRequest } from '@seenelm/train-core';
+import { UserLoginRequest } from '@trainapp-io/train-core';
 
 interface LoginFormProps {
   sessionExpired?: boolean;

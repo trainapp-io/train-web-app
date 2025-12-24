@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaUpload } from 'react-icons/fa';
-import { WeekRequest } from '@seenelm/train-core';
+import { WeekRequest } from '@trainapp-io/train-core';
 import './EditWeekDialog.css';
 
 interface EditWeekDialogProps {

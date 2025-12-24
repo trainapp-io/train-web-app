@@ -1,6 +1,6 @@
 import axios from "axios";
 import { tokenService } from "./tokenService";
-import { RefreshTokenResponse, RefreshTokenRequest } from "@seenelm/train-core";
+import { RefreshTokenResponse, RefreshTokenRequest } from "@trainapp-io/train-core";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 

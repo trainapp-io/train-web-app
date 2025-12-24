@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { GiWeightLiftingUp } from 'react-icons/gi';
-import { Exercise, MeasurementType, Unit } from '@seenelm/train-core';
+import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
 import { useProgramContext } from '../../contexts/ProgramContext';
 
 
