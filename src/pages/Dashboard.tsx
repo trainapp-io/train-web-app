@@ -12,7 +12,7 @@ import ProgramBuilder from "../app/programs/views/ProgramBuilder";
 import ProgramView from "../app/programs/views/ProgramView";
 import WeekView from "../app/programs/views/WeekView";
 import WorkoutView from "../app/programs/views/WorkoutView";
-import Workouts from "../app/programs/views/Workouts";
+import Workouts from "../app/workouts/views/Workouts";
 import { ProgramProvider } from "../app/programs/contexts/ProgramContext";
 import WorkoutLogCreate from "../app/workout-logs/pages/WorkoutLogCreate";
 import WorkoutLogDetail from "../app/workout-logs/pages/WorkoutLogDetail";

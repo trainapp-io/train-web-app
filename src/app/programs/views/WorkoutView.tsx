@@ -4,6 +4,7 @@ import './WorkoutView.css';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { programService } from '../services/programService';
+import { workoutService } from '../../workouts/services/workoutService';
 import { tokenService } from '../../../services/tokenService';
 import WorkoutHeader from './WorkoutHeader';
 import WorkoutDetailsSection from './WorkoutDetailsSection';
@@ -31,6 +32,9 @@ const WorkoutView: React.FC = () => {
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
+  // Determine if this is a standalone workout
+  const isStandaloneWorkout = !programId || !weekId;
+
   useEffect(() => {
     return () => {
       clearCurrentWorkout();
@@ -51,22 +55,14 @@ const WorkoutView: React.FC = () => {
       try {
         const user = JSON.parse(tokenService.getUser() || '{}');
         // Handle 'new' workout - don't fetch from API
-        if (workoutId === 'new') {
+        if (workoutId === 'new' || workoutId === 'create') {
           if (!state.workoutRequest) {
-            console.log('No workout request');
-            return;
+            console.log('No workout request, creating default');
+            const defaultRequest = programUtils.createDefaultWorkoutRequest(user.userId);
+            setWorkoutRequest(defaultRequest);
           }
 
           console.log('Workout request:', state.workoutRequest);
-
-          // Ensure createdBy is set to the current user's ID
-          // if (!state.workoutRequest.createdBy || state.workoutRequest.createdBy === '') {
-          //   console.log('Setting createdBy to user ID:', user.userId);
-          //   setWorkoutRequest({
-          //     ...state.workoutRequest,
-          //     createdBy: user.userId
-          //   });
-          // }
 
           setWorkoutIsOwner(true);
           setWorkoutEditMode(true);
@@ -74,13 +70,18 @@ const WorkoutView: React.FC = () => {
           return;
         }
 
-        // Ensure required params exist
-        if (!programId || !weekId || !workoutId) {
-          throw new Error('Missing required parameters');
+        // Fetch standalone workout or program-based workout
+        let response;
+        if (isStandaloneWorkout) {
+          // Standalone workout: GET /workout/:workoutId
+          response = await workoutService.getWorkoutById(workoutId!);
+        } else {
+          // Program-based workout: GET /program/:programId/week/:weekId/workout/:workoutId
+          if (!programId || !weekId || !workoutId) {
+            throw new Error('Missing required parameters');
+          }
+          response = await programService.getWorkout(programId, weekId, workoutId);
         }
-
-        
-        const response = await programService.getWorkout(programId, weekId, workoutId);
         
         const workoutRequest = programUtils.workoutResponseToRequest(response, user.userId);
         setWorkoutRequest(workoutRequest);
@@ -119,7 +120,7 @@ const WorkoutView: React.FC = () => {
 
     console.log('Saving workout Request: ', state.workoutRequest);
   
-    if (workoutId === 'new') {
+    if (workoutId === 'new' || workoutId === 'create') {
       await handleCreateWorkout(state.workoutRequest);
     } else {
       await handleUpdateWorkout(state.workoutRequest);
@@ -129,8 +130,22 @@ const WorkoutView: React.FC = () => {
   const handleCreateWorkout = async (request: WorkoutRequest) => {
     try {
       console.log('Creating workout:', request);
-      const response = await programService.createWorkout(programId!, weekId!, request);
+      let response;
+      
+      if (isStandaloneWorkout) {
+        // Create standalone workout: POST /workout
+        response = await workoutService.createWorkout(request);
+        // Navigate to the new workout
+        navigate(`/workouts/${response.id}`);
+      } else {
+        // Create program-based workout: POST /program/:programId/week/:weekId/workout
+        response = await programService.createWorkout(programId!, weekId!, request);
+        // Navigate to the new workout in the program
+        navigate(`/programs/${programId}/weeks/${weekId}/workouts/${response.id}`);
+      }
+      
       setWorkoutRequest(response);
+      setWorkoutHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error creating workout:', error);
       setWorkoutError(error instanceof Error ? error.message : 'Failed to create workout');
@@ -141,7 +156,14 @@ const WorkoutView: React.FC = () => {
 
   const handleUpdateWorkout = async (request: WorkoutRequest) => {
     try {
-      await programService.updateWorkout(programId!, weekId!, workoutId!, request);
+      if (isStandaloneWorkout) {
+        // Update standalone workout: PUT /workout/:workoutId
+        await workoutService.updateWorkout(workoutId!, request);
+      } else {
+        // Update program-based workout: PUT /program/:programId/week/:weekId/workout/:workoutId
+        await programService.updateWorkout(programId!, weekId!, workoutId!, request);
+      }
+      setWorkoutHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error updating workout:', error);
       setWorkoutError(error instanceof Error ? error.message : 'Failed to update workout');
@@ -199,9 +221,6 @@ const WorkoutView: React.FC = () => {
       navigate(`/programs/${programId}/weeks/${weekId}`);
     }
   };
-
-  // Determine if this is a standalone workout
-  const isStandaloneWorkout = !programId || !weekId;
 
   if (state.workoutLoading) return <p>Loading workout...</p>;
 

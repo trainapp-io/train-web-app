@@ -5,6 +5,7 @@ import {WorkoutCard } from '../components/WorkoutCard';
 import { tokenService } from '../../../services/tokenService';
 import { WorkoutResponse } from '@seenelm/train-core';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { workoutService } from '../services/workoutService';
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
@@ -30,10 +31,10 @@ const Workouts: React.FC = () => {
         throw new Error("User not logged in");
       }
       
-      // TODO: Update this endpoint when backend supports standalone workouts
-      // For now, we'll use an empty array as placeholder
-      // const workoutsData = await programService.fetchUserWorkouts(userData.userId);
-      const workoutsData: WorkoutResponse[] = [];
+      const userData = JSON.parse(userString);
+      
+      // Fetch standalone workouts from /workout endpoint
+      const workoutsData = await workoutService.fetchUserWorkouts(userData.userId);
       
       setWorkouts(workoutsData);
     } catch (err) {
@@ -62,8 +63,7 @@ const Workouts: React.FC = () => {
 
     try {
       setIsDeleting(true);
-      // TODO: Update this endpoint when backend supports standalone workouts
-      // await programService.deleteStandaloneWorkout(deletingWorkoutId);
+      await workoutService.deleteWorkout(deletingWorkoutId);
       
       setWorkouts(workouts.filter(workout => workout.id !== deletingWorkoutId));
       setShowDeleteConfirm(false);

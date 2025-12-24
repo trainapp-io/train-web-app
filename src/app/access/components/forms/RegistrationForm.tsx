@@ -64,7 +64,7 @@ const RegistrationForm: React.FC = () => {
     }
     
     if (!registrationForm.agreeToTerms) {
-      setError('You must agree to the Terms of Service and Privacy Policy');
+      setError(RegistrationErrorTypes.TermsNotAgreed);
       return;
     }
     
@@ -89,7 +89,15 @@ const RegistrationForm: React.FC = () => {
       if (err instanceof AxiosError) {
         const errorResponse = err.response?.data as ErrorResponse;
         console.error('Registration error:', err);
-        setError(errorResponse.message || RegistrationErrorTypes.UnknownError);
+        
+        // Check if it's a server error (5xx)
+        if (err.response && err.response.status >= 500) {
+          setError(RegistrationErrorTypes.UnknownError);
+        } else {
+          setError(errorResponse?.message || RegistrationErrorTypes.UnknownError);
+        }
+      } else {
+        setError(RegistrationErrorTypes.UnknownError);
       }
     } finally {
       setIsLoading(false);

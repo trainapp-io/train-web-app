@@ -280,7 +280,8 @@ describe('authService', () => {
         expect.stringContaining('/user/google-auth'),
         {
           name: 'Test User',
-          deviceId: 'mock-device-id'
+          deviceId: 'mock-device-id',
+          agreeToTerms: true
         },
         {
           headers: {
@@ -341,7 +342,7 @@ describe('authService', () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${mockIdToken}`
         },
-        body: JSON.stringify({ name: mockName })
+        body: JSON.stringify({ name: mockName, agreeToTerms: true })
       });
       expect(tokenService.setTokens).toHaveBeenCalledWith(
         'access-token',

@@ -19,8 +19,11 @@ export interface ErrorResponse {
   requestId?: string;
 }
 
+// Use wildcard to match any host/port combination
+const API_URL = "*/api";
+
 export const handlers = [
-  http.post("http://localhost:3000/api/user/login", async ({ request }) => {
+  http.post(`${API_URL}/user/login`, async ({ request }) => {
     const body = (await request.json()) as UserRequest;
 
     if (body.password === "invalid-password@example.com") {
@@ -47,7 +50,7 @@ export const handlers = [
 
     return HttpResponse.json(mockUserResponse);
   }),
-  http.post("http://localhost:3000/api/user/register", async ({ request }) => {
+  http.post(`${API_URL}/user/register`, async ({ request }) => {
     console.log("MSW: Registering user");
     const body = (await request.json()) as UserRequest;
     console.log("MSW: Registration request body:", body);
@@ -96,22 +99,26 @@ export const handlers = [
     }
     return HttpResponse.json(mockUserResponse);
   }),
-  http.post("http://localhost:3000/api/user/logout", async () => {
+  http.post(`${API_URL}/user/logout`, async () => {
     console.log("MSW: Logging out user");
     return HttpResponse.json({ message: "Logged out successfully" });
   }),
   http.post(
-    "http://localhost:3000/api/user/request-password-reset",
+    `${API_URL}/user/request-password-reset`,
     async () => {
       console.log("MSW: Requesting password reset");
       return HttpResponse.json({ message: "Password reset request sent" });
     }
   ),
   http.post(
-    "http://localhost:3000/api/user/reset-password-with-code",
+    `${API_URL}/user/reset-password-with-code`,
     async () => {
       console.log("MSW: Requesting reset password with code");
       return HttpResponse.json({ message: "Password reset successful" });
     }
   ),
+  http.post(`${API_URL}/user/google-auth`, async () => {
+    console.log('MSW: Google auth');
+    return HttpResponse.json(mockUserResponse);
+  }),
 ];
