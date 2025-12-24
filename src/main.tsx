@@ -4,14 +4,16 @@ import { BrowserRouter } from "react-router";
 import './styles/global.css'
 import App from './App.tsx'
 
-// Start MSW in development and test environments
-if (import.meta.env.MODE === 'development' || import.meta.env.MODE === 'test') {
-  import('./mocks/browser').then(({ worker }) => {
-    worker.start({
+// Function to prepare MSW
+async function prepareMSW() {
+  if (import.meta.env.MODE === 'development' || import.meta.env.MODE === 'test') {
+    const { worker } = await import('./mocks/browser');
+    await worker.start({
       onUnhandledRequest: 'bypass',
     });
     console.log('🔶 MSW worker started');
-  });
+  }
+  return Promise.resolve();
 }
 import {
   createRoutesFromChildren,
@@ -84,9 +86,11 @@ try {
 
 const root = document.getElementById("root");
 
-
-ReactDOM.createRoot(root!).render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
-);
+// Start MSW before rendering the app
+prepareMSW().then(() => {
+  ReactDOM.createRoot(root!).render(
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+});
