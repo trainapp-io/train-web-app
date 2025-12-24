@@ -5,7 +5,7 @@ import logo from "@/assets/logo.svg";
 import logoWhite from "@/assets/logo-white.svg";
 import { authService } from "../app/access/services/authService";
 import { tokenService } from "../services/tokenService";
-import { LogoutRequest } from "@seenelm/train-core";
+import { LogoutRequest } from "@trainapp-io/train-core";
 import "./styles/sidebar.css";
 
 interface TabItem {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, MeasurementType } from '@seenelm/train-core';
+import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, MeasurementType } from '@trainapp-io/train-core';
 import { MuscleGroup } from '../views/types';
 
 // State interface

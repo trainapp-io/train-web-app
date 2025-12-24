@@ -1,6 +1,6 @@
 // src/mocks/handlers.ts
 import { http, HttpResponse } from "msw";
-import { UserResponse, UserRequest } from "@seenelm/train-core";
+import { UserResponse, UserRequest } from "@trainapp-io/train-core";
 import { RegistrationErrorTypes } from "../common/enums/authEnum";
 import { LoginErrorTypes } from "../common/enums/authEnum";
 

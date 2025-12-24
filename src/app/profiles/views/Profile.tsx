@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Profile.css';
 import { FaPhone, FaEdit, FaTimes, FaEnvelope, FaPlus } from 'react-icons/fa';
-import { UserProfileRequest, UserProfileResponse } from '@seenelm/train-core';
+import { UserProfileRequest, UserProfileResponse } from '@trainapp-io/train-core';
 import { userProfileService } from '../services/userProfileService';
 
 const Profile: React.FC = () => {

@@ -5,7 +5,7 @@ import { programService } from '../services/programService';
 import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
 import { FaEdit } from 'react-icons/fa';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
-import { ProgramResponse, WeekRequest, WeekResponse } from '@seenelm/train-core';
+import { ProgramResponse, WeekRequest, WeekResponse } from '@trainapp-io/train-core';
 import EditWeekDialog from '../components/EditWeekDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 

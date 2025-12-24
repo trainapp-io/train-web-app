@@ -4,7 +4,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import ExerciseItem from './ExerciseItem';
 import TimePicker from './TimePicker';
-import { Block, WorkoutRequest, MeasurementType } from '@seenelm/train-core';
+import { Block, WorkoutRequest, MeasurementType } from '@trainapp-io/train-core';
 import { useProgramContext } from '../../contexts/ProgramContext';
 
 interface Props {

@@ -2,7 +2,7 @@ import { BaseApiService } from "../../../services/BaseApiService";
 import {
   WorkoutLogRequest,
   WorkoutLogResponse,
-} from "@seenelm/train-core";
+} from "@trainapp-io/train-core";
 import { SuccessResponse } from "../../../types/api.types";
 
 /**

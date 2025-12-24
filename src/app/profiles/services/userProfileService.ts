@@ -5,7 +5,7 @@ import {
   UserFollowersResponse,
   UserGroupsResponse,
 } from "../../../types/api.types";
-import { UserProfileResponse, UserProfileRequest } from "@seenelm/train-core";
+import { UserProfileResponse, UserProfileRequest } from "@trainapp-io/train-core";
 import { tokenService } from "../../../services/tokenService";
 
 /**

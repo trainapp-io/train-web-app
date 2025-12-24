@@ -4,7 +4,7 @@ import {
   RegistrationErrorTypes,
   LoginErrorTypes,
 } from "../../../common/enums/authEnum";
-import { UserLoginRequest } from "@seenelm/train-core";
+import { UserLoginRequest } from "@trainapp-io/train-core";
 import { AuthErrorTypes } from "../../../common/enums/authEnum";
 
 export interface ErrorTestCase<T> {

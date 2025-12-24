@@ -3,7 +3,7 @@ import { searchService } from '../../services/searchService';
 import { 
   CertificationResponse, 
   SearchProfilesResponse,
-} from '@seenelm/train-core';
+} from '@trainapp-io/train-core';
 import { FaSearch, FaUser, FaUsers, FaCertificate, FaTimes, FaChevronRight } from 'react-icons/fa';
 import './SearchInterface.css';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutLogRequest, WorkoutSnapshot, BlockLog, ExerciseLog } from '@seenelm/train-core';
+import { WorkoutLogRequest, WorkoutSnapshot, BlockLog, ExerciseLog } from '@trainapp-io/train-core';
 import WorkoutLogHeader from './WorkoutLogHeader';
 import BlockLogSection from './BlockLogSection';
 import CompletionFooter from './CompletionFooter';

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import './Workouts.css';
 import { WorkoutCard } from '../components/WorkoutCard';
 import { tokenService } from '../../../services/tokenService';
-import { WorkoutResponse } from '@seenelm/train-core';
+import { WorkoutResponse } from '@trainapp-io/train-core';
 import ConfirmDialog from '../../programs/components/ConfirmDialog';
 import { workoutService } from '../services/workoutService';
 

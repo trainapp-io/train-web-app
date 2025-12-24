@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExerciseLog, ExerciseSnapshot, MeasurementType } from '@seenelm/train-core';
+import { ExerciseLog, ExerciseSnapshot, MeasurementType } from '@trainapp-io/train-core';
 import './WorkoutLogForm.css';
 
 interface ExerciseLogItemProps {

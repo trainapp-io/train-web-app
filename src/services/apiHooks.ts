@@ -17,7 +17,7 @@ import {
   CustomSectionResponse,
   WorkoutLogRequest,
   WorkoutLogResponse
-} from '@seenelm/train-core';
+} from '@trainapp-io/train-core';
 import { tokenService } from './tokenService';
 
 /**

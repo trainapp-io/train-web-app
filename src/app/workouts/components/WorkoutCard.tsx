@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
 import { FaEdit, FaDumbbell } from 'react-icons/fa';
-import { WorkoutResponse } from '@seenelm/train-core';
+import { WorkoutResponse } from '@trainapp-io/train-core';
 
 interface WorkoutCardProps {
   workout: WorkoutResponse;

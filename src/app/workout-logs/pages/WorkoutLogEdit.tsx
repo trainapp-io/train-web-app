@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { WorkoutLogRequest } from '@seenelm/train-core';
+import { WorkoutLogRequest } from '@trainapp-io/train-core';
 import { useWorkoutLog, useUpdateWorkoutLog } from '../../../services/apiHooks';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
 import './WorkoutLogPages.css';

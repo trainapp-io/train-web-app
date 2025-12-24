@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import "./Programs.css"
 import { programService } from '../services/programService';
 import { tokenService } from '../../../services/tokenService';
-import { ProgramResponse, ProgramRequest } from '@seenelm/train-core';
+import { ProgramResponse, ProgramRequest } from '@trainapp-io/train-core';
 import { useProgramContext } from '../contexts/ProgramContext';
 import EditProgramDialog from '../components/EditProgramDialog';
 import ConfirmDialog from '../components/ConfirmDialog';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProgramCard } from './ProgramCard';
-import { ProgramResponse } from '@seenelm/train-core';
+import { ProgramResponse } from '@trainapp-io/train-core';
 
 // Renamed to ProgramSectionItem to avoid conflicts
 // interface ProgramSectionItem {

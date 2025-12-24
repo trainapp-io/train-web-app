@@ -8,7 +8,7 @@ import NutritionStep from "../components/programBuilder/NutritionStep";
 import VisibilityStep from "../components/programBuilder/VisibilityStep";
 import { useNavigate } from "react-router"; // if using React Router v6
 import { programService } from "../services/programService";
-import { ProgramRequest, ProfileAccess } from "@seenelm/train-core";
+import { ProgramRequest, ProfileAccess } from "@trainapp-io/train-core";
 import { tokenService } from '../../../services/tokenService';
 
 import { IoClose } from 'react-icons/io5';
