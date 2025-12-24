@@ -4,90 +4,25 @@ import { BrowserRouter } from "react-router";
 import './styles/global.css'
 import App from './App.tsx'
 
-// Function to prepare MSW
-async function prepareMSW() {
-  if (import.meta.env.MODE === 'development' || import.meta.env.MODE === 'test') {
-    const { worker } = await import('./mocks/browser');
-    await worker.start({
-      onUnhandledRequest: 'bypass',
-    });
-    console.log('🔶 MSW worker started');
-  }
-  return Promise.resolve();
-}
-import {
-  createRoutesFromChildren,
-  matchRoutes,
-  Routes,
-  useLocation,
-  useNavigationType,
-} from "react-router";
-import {
-  createReactRouterV6Options,
-  getWebInstrumentations,
-  initializeFaro,
-  ReactIntegration,
-} from "@grafana/faro-react";
-import { TracingInstrumentation } from "@grafana/faro-web-tracing";
-
 console.log("Instrumentation file executing...");
-const faroUrl = import.meta.env.VITE_FARO_URL;
 const environment = import.meta.env.MODE || "production";
 
 console.log("Environment:", environment);
-console.log("Faro URL:", faroUrl || "Using default URL");
 console.log("All env vars:", import.meta.env);
 
-// Validate Faro URL
-if (!faroUrl) {
-  console.warn("⚠️ VITE_FARO_URL is not set! Using default fallback URL.");
-}
-
-try {
-  const faro = initializeFaro({
-    url: faroUrl,
-    app: {
-      name: "TrainApp",
-      version: "1.0.0",
-      environment: environment,
-    },
-
-    instrumentations: [
-      // Mandatory, omits default instrumentations otherwise.
-      ...getWebInstrumentations(),
-
-      // Tracing package to get end-to-end visibility for HTTP requests.
-      new TracingInstrumentation({
-        instrumentationOptions: {
-          // Requests to these URLs have tracing headers attached.
-          propagateTraceHeaderCorsUrls: [new RegExp('https://api.trainapp.io/*')],
-      }}),
-
-      // React integration for React applications.
-      new ReactIntegration({
-        router: createReactRouterV6Options({
-          createRoutesFromChildren,
-          matchRoutes,
-          Routes,
-          useLocation,
-          useNavigationType,
-        }),
-      }),
-    ],
-  });
-
-  console.log("✅ Grafana Faro initialized successfully", faro);
-
-  // Test if Faro can send data
-  faro.api.pushLog(["Faro initialization test from " + environment]);
-} catch (error) {
-  console.error("❌ Failed to initialize Grafana Faro:", error);
+// Start MSW in development mode
+async function enableMocking() {
+  if (import.meta.env.MODE === 'development') {
+    const { worker } = await import('./mocks/browser');
+    return worker.start({
+      onUnhandledRequest: 'bypass',
+    });
+  }
 }
 
 const root = document.getElementById("root");
 
-// Start MSW before rendering the app
-prepareMSW().then(() => {
+enableMocking().then(() => {
   ReactDOM.createRoot(root!).render(
     <BrowserRouter>
       <App />
