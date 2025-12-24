@@ -3,6 +3,16 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import './styles/global.css'
 import App from './App.tsx'
+
+// Start MSW in development and test environments
+if (import.meta.env.MODE === 'development' || import.meta.env.MODE === 'test') {
+  import('./mocks/browser').then(({ worker }) => {
+    worker.start({
+      onUnhandledRequest: 'bypass',
+    });
+    console.log('🔶 MSW worker started');
+  });
+}
 import {
   createRoutesFromChildren,
   matchRoutes,
