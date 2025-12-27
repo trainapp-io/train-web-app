@@ -34,7 +34,7 @@ const Workouts: React.FC = () => {
       const userData = JSON.parse(userString);
       
       // Fetch standalone workouts from /workout endpoint
-      const workoutsData = await workoutService.fetchUserWorkouts(userData.userId);
+      const workoutsData = await workoutService.fetchUserWorkouts();
       
       setWorkouts(workoutsData);
     } catch (err) {

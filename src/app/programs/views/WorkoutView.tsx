@@ -1,5 +1,5 @@
 import React, { useEffect,   } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import './WorkoutView.css';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -17,6 +17,7 @@ import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 const WorkoutView: React.FC = () => {
   const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     state,
@@ -120,9 +121,22 @@ const WorkoutView: React.FC = () => {
 
     console.log('Saving workout Request: ', state.workoutRequest);
   
-    if (workoutId === 'new' || workoutId === 'create') {
+    // Check if we're creating a new workout
+    // For standalone workouts, the route is /workouts/create (no workoutId param)
+    // For program workouts, the route is /programs/:programId/weeks/:weekId/workouts/new or /workouts/:workoutId
+    const isCreatingNew = 
+      workoutId === 'new' || 
+      workoutId === 'create' || 
+      !workoutId || 
+      location.pathname === '/workouts/create' ||
+      location.pathname.endsWith('/workouts/new') ||
+      location.pathname.endsWith('/workouts/create');
+  
+    if (isCreatingNew) {
+      console.log("Creating workout");
       await handleCreateWorkout(state.workoutRequest);
     } else {
+      console.log("Updating workout");
       await handleUpdateWorkout(state.workoutRequest);
     }
   };
@@ -133,11 +147,14 @@ const WorkoutView: React.FC = () => {
       let response;
       
       if (isStandaloneWorkout) {
+        console.log("Is standalone workout");
+        console.log('Creating standalone workout:', request);
         // Create standalone workout: POST /workout
         response = await workoutService.createWorkout(request);
         // Navigate to the new workout
         navigate(`/workouts/${response.id}`);
       } else {
+        console.log("Is program-based workout");
         // Create program-based workout: POST /program/:programId/week/:weekId/workout
         response = await programService.createWorkout(programId!, weekId!, request);
         // Navigate to the new workout in the program

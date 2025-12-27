@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { GiWeightLiftingUp } from 'react-icons/gi';
-import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
+import { Exercise, MeasurementType, MeasurementUnit, Measurement, Unit } from '@trainapp-io/train-core';
 import { useProgramContext } from '../../contexts/ProgramContext';
 
 
@@ -23,7 +23,8 @@ const ExerciseItem: React.FC<Props> = ({ exercise, editMode, blockIndex, exercis
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const { updateExerciseInBlockPartial, removeExerciseFromBlock } = useProgramContext();
 
-  const measurementType = exercise.measurementType || MeasurementType.REPS;
+  const measurementType = exercise.measurement?.measurementType || MeasurementType.REPS;
+  const measurementUnit = exercise.measurement?.measurementUnit || MeasurementUnit.POUND;
   const isRest = exercise.name?.toLowerCase().includes('rest') || false;
 
   const updateExercise = (blockIdx: number, exerciseIdx: number, updatedExercise: Partial<Exercise>) => {
@@ -35,19 +36,28 @@ const ExerciseItem: React.FC<Props> = ({ exercise, editMode, blockIndex, exercis
     const types = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
     const currentIndex = types.indexOf(measurementType);
     const nextIndex = (currentIndex + 1) % types.length;
-    updateExercise(blockIndex, exerciseIndex, { measurementType: types[nextIndex] });
+    updateExercise(blockIndex, exerciseIndex, { 
+      measurement: {
+        measurementType: types[nextIndex],
+        measurementUnit: measurementUnit,
+      } as Measurement
+    });
   };
 
   const cycleWeightUnit = () => {
     // Cycle through weight units: lb -> kg -> lb
-    const currentUnit = (exercise as any).weightUnit || Unit.POUND;
-    const nextUnit = currentUnit === Unit.POUND ? Unit.KILOGRAM : Unit.POUND;
-    updateExercise(blockIndex, exerciseIndex, { weightUnit: nextUnit } as any);
+    const currentUnit = measurementUnit;
+    const nextUnit = currentUnit === MeasurementUnit.POUND ? MeasurementUnit.KILOGRAM : MeasurementUnit.POUND;
+    updateExercise(blockIndex, exerciseIndex, { 
+      measurement: {
+        measurementType: measurementType,
+        measurementUnit: nextUnit,
+      } as Measurement
+    });
   };
 
   const getWeightUnitLabel = () => {
-    const unit = (exercise as any).weightUnit || Unit.POUND;
-    return unit === Unit.KILOGRAM ? 'kg' : 'lb';
+    return measurementUnit === MeasurementUnit.KILOGRAM ? 'kg' : 'lb';
   };
 
   const searchExercises = async (query: string) => {

@@ -1,8 +1,5 @@
 import { BaseApiService } from "../../../services/BaseApiService";
-import {
-  WorkoutRequest,
-  WorkoutResponse,
-} from "@trainapp-io/train-core";
+import { WorkoutRequest, WorkoutResponse } from "@trainapp-io/train-core";
 import { SuccessResponse } from "../../../types/api.types";
 
 /**
@@ -26,8 +23,8 @@ class WorkoutService extends BaseApiService<
    * Get all workouts for a user
    * GET /workout/user/:userId
    */
-  async fetchUserWorkouts(userId: string): Promise<WorkoutResponse[]> {
-    return this.get<WorkoutResponse[]>(`/workout/user/${userId}`);
+  async fetchUserWorkouts(): Promise<WorkoutResponse[]> {
+    return this.get<WorkoutResponse[]>("/workout/");
   }
 
   /**
@@ -42,7 +39,9 @@ class WorkoutService extends BaseApiService<
    * Create a new standalone workout
    * POST /workout
    */
-  async createWorkout(workoutRequest: WorkoutRequest): Promise<WorkoutResponse> {
+  async createWorkout(
+    workoutRequest: WorkoutRequest
+  ): Promise<WorkoutResponse> {
     return this.create(workoutRequest);
   }
 

@@ -52,7 +52,7 @@ const WorkoutLogCreate: React.FC = () => {
               targetDistance: exercise.targetDistance,
               notes: exercise.notes,
               order: exercise.order,
-              measurementType: exercise.measurementType,
+              measurement: exercise.measurement,
             })),
             order: block.order,
           })) || [],
