@@ -31,7 +31,7 @@ const Workouts: React.FC = () => {
         throw new Error("User not logged in");
       }
       
-      const userData = JSON.parse(userString);
+      // const userData = JSON.parse(userString);
       
       // Fetch standalone workouts from /workout endpoint
       const workoutsData = await workoutService.fetchUserWorkouts();

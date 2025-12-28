@@ -38,7 +38,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   useEffect(() => {
     if (initialData?.blockLogs) {
       setBlockLogs(initialData.blockLogs);
-    } else {
+    } else if (workoutSnapshot.blockSnapshot) {
       // Create initial block logs from snapshot
       const initialBlockLogs: BlockLog[] = workoutSnapshot.blockSnapshot.map((blockSnapshot) => ({
         actualRest: blockSnapshot.rest,
@@ -95,20 +95,24 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       />
 
       <div className="block-logs-container">
-        {workoutSnapshot.blockSnapshot.map((blockSnapshot, index) => (
-          <BlockLogSection
-            key={index}
-            blockSnapshot={blockSnapshot}
-            blockLog={blockLogs[index] || {
-              actualRest: 0,
-              actualSets: 0,
-              exerciseLogs: [],
-              order: blockSnapshot.order,
-              isCompleted: false,
-            }}
-            onUpdate={(updated) => handleBlockLogUpdate(index, updated)}
-          />
-        ))}
+        {workoutSnapshot.blockSnapshot ? (
+          workoutSnapshot.blockSnapshot.map((blockSnapshot, index) => (
+            <BlockLogSection
+              key={index}
+              blockSnapshot={blockSnapshot}
+              blockLog={blockLogs[index] || {
+                actualRest: 0,
+                actualSets: 0,
+                exerciseLogs: [],
+                order: blockSnapshot.order,
+                isCompleted: false,
+              }}
+              onUpdate={(updated) => handleBlockLogUpdate(index, updated)}
+            />
+          ))
+        ) : (
+          <p>No workout blocks available</p>
+        )}
       </div>
 
       <CompletionFooter

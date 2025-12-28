@@ -121,19 +121,19 @@ const WorkoutLogDetail: React.FC = () => {
 
         <div className="blocks-section">
           <h2>Blocks</h2>
-          {workoutLog.blockLogs.map((blockLog, blockIndex) => {
-            const blockSnapshot = workoutLog.workoutSnapshot.blockSnapshot[blockIndex];
+          {workoutLog.blockLogs?.map((blockLog, blockIndex) => {
+            const blockSnapshot = workoutLog.workoutSnapshot.blockSnapshot?.[blockIndex];
             return (
               <div key={blockIndex} className={`block-detail ${blockLog.isCompleted ? 'completed' : ''}`}>
                 <div className="block-header">
-                  <h3>{blockSnapshot.name || blockSnapshot.type}</h3>
+                  <h3>{blockSnapshot?.name || blockSnapshot?.type}</h3>
                   {blockLog.isCompleted && <span className="check-icon">✓</span>}
                 </div>
                 
                 <div className="block-stats">
                   <div className="stat">
                     <span className="stat-label">Sets:</span>
-                    <span className="stat-value">{blockLog.actualSets || 0} / {blockSnapshot.targetSets || 0}</span>
+                    <span className="stat-value">{blockLog.actualSets || 0} / {blockSnapshot?.targetSets || 0}</span>
                   </div>
                   <div className="stat">
                     <span className="stat-label">Rest:</span>
@@ -142,13 +142,13 @@ const WorkoutLogDetail: React.FC = () => {
                 </div>
 
                 <div className="exercises-list">
-                  {blockLog.exerciseLogs.map((exerciseLog, exerciseIndex) => {
-                    const exerciseSnapshot = blockSnapshot.exerciseSnapshot[exerciseIndex];
+                  {blockLog.exerciseLogs?.map((exerciseLog, exerciseIndex) => {
+                    const exerciseSnapshot = blockSnapshot?.exerciseSnapshot?.[exerciseIndex];
                     return (
                       <div key={exerciseIndex} className={`exercise-detail ${exerciseLog.isCompleted ? 'completed' : ''}`}>
                         <div className="exercise-name">
                           {exerciseLog.isCompleted && <span className="check-icon">✓</span>}
-                          <span>{exerciseSnapshot.name}</span>
+                          <span>{exerciseSnapshot?.name || 'Exercise'}</span>
                         </div>
                         <div className="exercise-stats">
                           {exerciseLog.actualReps !== undefined && (
