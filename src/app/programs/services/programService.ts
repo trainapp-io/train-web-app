@@ -10,7 +10,7 @@ import {
   WorkoutLogRequest,
   WorkoutLogResponse,
   WeekResponse,
-} from "@seenelm/train-core";
+} from "@trainapp-io/train-core";
 import { SuccessResponse } from "../../../types/api.types";
 
 /**

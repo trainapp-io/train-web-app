@@ -9,7 +9,9 @@ import {
   MeasurementType,
   ProfileAccess,
   WorkoutDifficulty,
-} from "@seenelm/train-core";
+  Measurement,
+  MeasurementUnit,
+} from "@trainapp-io/train-core";
 import { MuscleGroup } from "../views/types";
 
 // ============================================================================
@@ -222,7 +224,10 @@ export const programUtils = {
       targetDistance: 0,
       notes: "",
       order,
-      measurementType: MeasurementType.REPS,
+      measurement: {
+        measurementType: MeasurementType.REPS,
+        measurementUnit: MeasurementUnit.POUND,
+      } as Measurement,
     };
   },
 

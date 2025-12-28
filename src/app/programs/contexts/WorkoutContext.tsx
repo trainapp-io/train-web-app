@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, MeasurementType } from '@seenelm/train-core';
+import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, MeasurementType, Measurement, MeasurementUnit } from '@trainapp-io/train-core';
 import { MuscleGroup } from '../views/types';
 
 // State interface
@@ -340,7 +340,10 @@ export const workoutUtils = {
       targetDistance: 0,
       notes: '',
       order,
-      measurementType: MeasurementType.REPS,
+      measurement: {
+        measurementType: MeasurementType.REPS,
+        measurementUnit: MeasurementUnit.POUND,
+      } as Measurement,
     };
   },
 

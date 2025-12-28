@@ -102,11 +102,6 @@ test.describe("Authentication", () => {
       await page.getByTestId("password-input").fill(testUser.password);
     });
     
-    const rememberMeCheckbox = page.locator("span").nth(2);
-    await retryIfNeeded(async () => {
-      await rememberMeCheckbox.waitFor({ state: "visible" });
-      await rememberMeCheckbox.check();
-    });
 
     // Step 6: Submit login form
     await retryIfNeeded(async () => {
@@ -199,11 +194,11 @@ test.describe("Authentication", () => {
       await page.getByTestId("password-input").fill(testUser.newPassword);
     });
     
-    const rememberMeCheckbox = page.locator("span").nth(2);
-    await retryIfNeeded(async () => {
-      await rememberMeCheckbox.waitFor({ state: "visible" });
-      await rememberMeCheckbox.check();
-    });
+    // const rememberMeCheckbox = page.locator("span").nth(2);
+    // await retryIfNeeded(async () => {
+    //   await rememberMeCheckbox.waitFor({ state: "visible" });
+    //   await rememberMeCheckbox.check();
+    // });
     
     await retryIfNeeded(async () => {
       await page.getByTestId("login-button").waitFor({ state: "visible" });

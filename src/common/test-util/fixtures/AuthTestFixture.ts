@@ -1,5 +1,5 @@
 import { RegistrationModel } from "../../../app/access/components/forms/RegistrationForm";
-import { UserLoginRequest } from "@seenelm/train-core";
+import { UserLoginRequest } from "@trainapp-io/train-core";
 
 export default class AuthTestFixture {
   public static NAME: string = "John Doe";

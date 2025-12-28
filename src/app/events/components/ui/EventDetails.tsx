@@ -1,5 +1,5 @@
 import React from 'react';
-import { EventResponse } from '@seenelm/train-core';
+import { EventResponse } from '@trainapp-io/train-core';
 import './EventManager.css';
 
 interface EventDetailsProps {

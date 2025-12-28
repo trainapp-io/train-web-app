@@ -12,7 +12,7 @@ import {
     RequestPasswordResetRequest,
     ResetPasswordWithCodeRequest,
     UserResponse
-  } from '@seenelm/train-core';
+  } from '@trainapp-io/train-core';
   import { tokenService } from '../../../services/tokenService';
 import { AxiosError } from 'axios';
   

@@ -2,7 +2,7 @@
 // import { userProfileService } from '../../services/userProfileService';
 // import { FaUser, FaSave, FaTimes } from 'react-icons/fa';
 // import './ProfileEditor.css';
-// import { UserProfileResponse } from '@seenelm/train-core';
+// import { UserProfileResponse } from '@trainapp-io/train-core';
 
 // interface ProfileEditorProps {
 //   userId?: string; // Optional: if not provided, edit current user's profile

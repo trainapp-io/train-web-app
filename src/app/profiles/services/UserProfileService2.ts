@@ -1,5 +1,5 @@
 import { BaseApiService } from "../../../services/BaseApiService";
-import { UserProfileResponse, UserProfileRequest } from "@seenelm/train-core";
+import { UserProfileResponse, UserProfileRequest } from "@trainapp-io/train-core";
 import { SuccessResponse } from "../../../types/api.types";
 import { tokenService } from "../../../services/tokenService";
 

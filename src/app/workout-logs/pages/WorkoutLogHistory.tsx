@@ -113,7 +113,7 @@ const WorkoutLogHistory: React.FC = () => {
               </div>
               <div className="metadata-row">
                 <span className="metadata-label">Blocks:</span>
-                <span className="metadata-value">{log.blockLogs.length}</span>
+                <span className="metadata-value">{log.blockLogs?.length || 0}</span>
               </div>
               <div className="metadata-row">
                 <span className="metadata-label">Version:</span>
@@ -125,7 +125,7 @@ const WorkoutLogHistory: React.FC = () => {
               <div className="stat-item">
                 <span className="stat-label">Completed Blocks</span>
                 <span className="stat-value">
-                  {log.blockLogs.filter(b => b.isCompleted).length} / {log.blockLogs.length}
+                  {log.blockLogs?.filter(b => b.isCompleted).length} / {log.blockLogs?.length || 0}
                 </span>
               </div>
             </div>

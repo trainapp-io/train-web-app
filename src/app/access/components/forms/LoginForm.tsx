@@ -9,7 +9,7 @@ import { tokenService } from '../../../../services/tokenService';
 import { AuthErrorTypes } from '../../../../common/enums/authEnum';
 import { AxiosError } from 'axios';
 import { ErrorResponse } from '../../../../mocks/handlers';
-import { UserLoginRequest } from '@seenelm/train-core';
+import { UserLoginRequest } from '@trainapp-io/train-core';
 
 interface LoginFormProps {
   sessionExpired?: boolean;
@@ -28,12 +28,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ sessionExpired = false, redirectU
 
   const handleError = (error: AxiosError<ErrorResponse>) => {
     const errorResponse = error.response?.data as ErrorResponse;
-        console.log('Error response:', errorResponse);
+    console.log('Error response:', errorResponse);
 
-    if (error.response && error.response.status >= 500) {
+    if (errorResponse?.message) {
+      setError(errorResponse.message);
+    } else if (error.response && error.response.status >= 500) {
       setError(AuthErrorTypes.ServerError);
     } else {
-      setError(errorResponse.message);
+      setError(AuthErrorTypes.ServerError);
     }
   }
 
