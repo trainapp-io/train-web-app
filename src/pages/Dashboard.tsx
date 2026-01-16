@@ -66,6 +66,7 @@ const Dashboard: React.FC = () => {
             <Route path="/workout-logs/:logId" element={<WorkoutLogDetail />} />
             <Route path="/workout-logs/:logId/edit" element={<WorkoutLogEdit />} />
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
+            <Route path="/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
           </Routes>
         </ProgramProvider>
         <WorkoutProvider>

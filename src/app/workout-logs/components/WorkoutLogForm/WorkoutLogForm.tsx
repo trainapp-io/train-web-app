@@ -36,9 +36,12 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
 
   // Initialize block logs from workout snapshot
   useEffect(() => {
+    console.log('WorkoutLogForm - workoutSnapshot:', workoutSnapshot);
+    console.log('WorkoutLogForm - blockSnapshot:', workoutSnapshot.blockSnapshot);
+    
     if (initialData?.blockLogs) {
       setBlockLogs(initialData.blockLogs);
-    } else {
+    } else if (workoutSnapshot.blockSnapshot) {
       // Create initial block logs from snapshot
       const initialBlockLogs: BlockLog[] = workoutSnapshot.blockSnapshot.map((blockSnapshot) => ({
         actualRest: blockSnapshot.rest,
@@ -56,7 +59,10 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
         order: blockSnapshot.order,
         isCompleted: false,
       }));
+      console.log('WorkoutLogForm - initialBlockLogs:', initialBlockLogs);
       setBlockLogs(initialBlockLogs);
+    } else {
+      console.log('WorkoutLogForm - No blockSnapshot found!');
     }
   }, [workoutSnapshot, initialData]);
 
@@ -67,7 +73,6 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   };
 
   const handleSubmit = () => {
-
     const workoutLogRequest: WorkoutLogRequest = {
       userId: initialData?.userId || '',
       workoutId: initialData?.workoutId || '',
@@ -75,8 +80,8 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       workoutSnapshot,
       blockLogs,
       actualDuration,
-      actualStartDate,
-      actualEndDate,
+      actualStartDate: actualStartDate.toISOString() as any,
+      actualEndDate: actualEndDate.toISOString() as any,
       isCompleted,
     };
 
@@ -95,7 +100,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       />
 
       <div className="block-logs-container">
-        {workoutSnapshot.blockSnapshot.map((blockSnapshot, index) => (
+        {workoutSnapshot.blockSnapshot?.map((blockSnapshot, index) => (
           <BlockLogSection
             key={index}
             blockSnapshot={blockSnapshot}

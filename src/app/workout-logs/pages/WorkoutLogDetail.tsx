@@ -119,59 +119,63 @@ const WorkoutLogDetail: React.FC = () => {
           </div>
         </div>
 
-        <div className="blocks-section">
-          <h2>Blocks</h2>
-          {workoutLog.blockLogs.map((blockLog, blockIndex) => {
-            const blockSnapshot = workoutLog.workoutSnapshot.blockSnapshot[blockIndex];
-            return (
-              <div key={blockIndex} className={`block-detail ${blockLog.isCompleted ? 'completed' : ''}`}>
-                <div className="block-header">
-                  <h3>{blockSnapshot.name || blockSnapshot.type}</h3>
-                  {blockLog.isCompleted && <span className="check-icon">✓</span>}
-                </div>
-                
-                <div className="block-stats">
-                  <div className="stat">
-                    <span className="stat-label">Sets:</span>
-                    <span className="stat-value">{blockLog.actualSets || 0} / {blockSnapshot.targetSets || 0}</span>
+        {workoutLog.blockLogs && workoutLog.blockLogs.length > 0 && (
+          <div className="blocks-section">
+            <h2>Blocks</h2>
+            {workoutLog.blockLogs.map((blockLog, blockIndex) => {
+              const blockSnapshot = workoutLog.workoutSnapshot.blockSnapshot?.[blockIndex];
+              if (!blockSnapshot) return null;
+              
+              return (
+                <div key={blockIndex} className={`block-detail ${blockLog.isCompleted ? 'completed' : ''}`}>
+                  <div className="block-header">
+                    <h3>{blockSnapshot.name || blockSnapshot.type}</h3>
+                    {blockLog.isCompleted && <span className="check-icon">✓</span>}
                   </div>
-                  <div className="stat">
-                    <span className="stat-label">Rest:</span>
-                    <span className="stat-value">{blockLog.actualRest || 0}s</span>
+                  
+                  <div className="block-stats">
+                    <div className="stat">
+                      <span className="stat-label">Sets:</span>
+                      <span className="stat-value">{blockLog.actualSets || 0} / {blockSnapshot.targetSets || 0}</span>
+                    </div>
+                    <div className="stat">
+                      <span className="stat-label">Rest:</span>
+                      <span className="stat-value">{blockLog.actualRest || 0}s</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="exercises-list">
-                  {blockLog.exerciseLogs.map((exerciseLog, exerciseIndex) => {
-                    const exerciseSnapshot = blockSnapshot.exerciseSnapshot[exerciseIndex];
-                    return (
-                      <div key={exerciseIndex} className={`exercise-detail ${exerciseLog.isCompleted ? 'completed' : ''}`}>
-                        <div className="exercise-name">
-                          {exerciseLog.isCompleted && <span className="check-icon">✓</span>}
-                          <span>{exerciseSnapshot.name}</span>
+                  <div className="exercises-list">
+                    {blockLog.exerciseLogs.map((exerciseLog, exerciseIndex) => {
+                      const exerciseSnapshot = blockSnapshot.exerciseSnapshot[exerciseIndex];
+                      return (
+                        <div key={exerciseIndex} className={`exercise-detail ${exerciseLog.isCompleted ? 'completed' : ''}`}>
+                          <div className="exercise-name">
+                            {exerciseLog.isCompleted && <span className="check-icon">✓</span>}
+                            <span>{exerciseSnapshot.name}</span>
+                          </div>
+                          <div className="exercise-stats">
+                            {exerciseLog.actualReps !== undefined && (
+                              <span>Reps: {exerciseLog.actualReps}</span>
+                            )}
+                            {exerciseLog.actualWeight !== undefined && (
+                              <span>Weight: {exerciseLog.actualWeight}</span>
+                            )}
+                            {exerciseLog.actualDurationSec !== undefined && (
+                              <span>Duration: {exerciseLog.actualDurationSec}s</span>
+                            )}
+                            {exerciseLog.actualDistance !== undefined && (
+                              <span>Distance: {exerciseLog.actualDistance}</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="exercise-stats">
-                          {exerciseLog.actualReps !== undefined && (
-                            <span>Reps: {exerciseLog.actualReps}</span>
-                          )}
-                          {exerciseLog.actualWeight !== undefined && (
-                            <span>Weight: {exerciseLog.actualWeight}</span>
-                          )}
-                          {exerciseLog.actualDurationSec !== undefined && (
-                            <span>Duration: {exerciseLog.actualDurationSec}s</span>
-                          )}
-                          {exerciseLog.actualDistance !== undefined && (
-                            <span>Distance: {exerciseLog.actualDistance}</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

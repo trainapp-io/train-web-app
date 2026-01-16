@@ -346,7 +346,7 @@ export function useDeleteCustomSection() {
 export function useCreateWorkoutLog() {
   return useApiMutation<WorkoutLogRequest, WorkoutLogResponse>(
     'POST',
-    '/api/workout-logs',
+    '/workout-logs',
     {
       onSuccess: () => {
         // Invalidate workout log queries to trigger refetch
@@ -359,11 +359,11 @@ export function useCreateWorkoutLog() {
 /**
  * Hook to fetch workout log history for a user
  */
-export function useWorkoutLogHistory(userId: string, options?: any) {
+export function useWorkoutLogHistory(options?: any) {
   return useApiQuery<WorkoutLogResponse[]>(
-    ['workoutLogs', 'history', userId],
-    '/api/workout-logs',
-    { userId },
+    ['workoutLogs', 'history'],
+    '/workout-logs',
+    undefined,
     options
   );
 }
@@ -374,7 +374,7 @@ export function useWorkoutLogHistory(userId: string, options?: any) {
 export function useWorkoutLog(logId: string, options?: any) {
   return useApiQuery<WorkoutLogResponse>(
     ['workoutLog', logId],
-    `/api/workout-logs/${logId}`,
+    `/workout-logs/${logId}`,
     undefined,
     options
   );
@@ -384,9 +384,9 @@ export function useWorkoutLog(logId: string, options?: any) {
  * Hook to update a workout log
  */
 export function useUpdateWorkoutLog() {
-  return useDynamicApiMutation<string, WorkoutLogRequest, WorkoutLogResponse>(
+  return useDynamicApiMutation<string, WorkoutLogRequest, { success: boolean }>(
     'PUT',
-    (logId) => `/api/workout-logs/${logId}`,
+    (logId) => `/workout-logs/${logId}`,
     {
       onSuccess: () => {
         // Invalidate relevant queries
@@ -401,9 +401,9 @@ export function useUpdateWorkoutLog() {
  * Hook to delete a workout log
  */
 export function useDeleteWorkoutLog() {
-  return useDynamicApiMutation<string, {}, {}>(
+  return useDynamicApiMutation<string, {}, { success: boolean }>(
     'DELETE',
-    (logId) => `/api/workout-logs/${logId}`,
+    (logId) => `/workout-logs/${logId}`,
     {
       onSuccess: () => {
         // Invalidate workout log queries to trigger refetch

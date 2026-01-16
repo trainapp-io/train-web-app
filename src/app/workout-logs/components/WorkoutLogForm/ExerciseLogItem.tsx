@@ -39,7 +39,7 @@ const ExerciseLogItem: React.FC<ExerciseLogItemProps> = ({
       </div>
 
       <div className="exercise-log-inputs">
-        {exerciseSnapshot.measurementType === MeasurementType.REPS && (
+        {exerciseSnapshot.measurement?.measurementType === MeasurementType.REPS && (
           <div className="input-group">
             <label>Reps</label>
             <input
@@ -52,7 +52,7 @@ const ExerciseLogItem: React.FC<ExerciseLogItemProps> = ({
           </div>
         )}
 
-        {exerciseSnapshot.measurementType === MeasurementType.TIME && (
+        {exerciseSnapshot.measurement?.measurementType === MeasurementType.TIME && (
           <div className="input-group">
             <label>Duration (sec)</label>
             <input
@@ -65,7 +65,7 @@ const ExerciseLogItem: React.FC<ExerciseLogItemProps> = ({
           </div>
         )}
 
-        {exerciseSnapshot.measurementType === MeasurementType.DISTANCE && (
+        {exerciseSnapshot.measurement?.measurementType === MeasurementType.DISTANCE && (
           <div className="input-group">
             <label>Distance</label>
             <input

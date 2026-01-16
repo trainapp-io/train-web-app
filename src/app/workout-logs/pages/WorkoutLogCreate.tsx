@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot } from '@trainapp-io/train-core';
 import { useCreateWorkoutLog } from '../../../services/apiHooks';
 import { programService } from '../../programs/services/programService';
+import { workoutService } from '../../workouts/services/workoutService';
 import { tokenService } from '../../../services/tokenService';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
 import './WorkoutLogPages.css';
@@ -19,14 +20,19 @@ const WorkoutLogCreate: React.FC = () => {
 
   useEffect(() => {
     const fetchWorkout = async () => {
-      if (!programId || !weekId || !workoutId) {
-        setError('Missing required parameters');
+      if (!workoutId) {
+        setError('Missing workout ID');
         setLoading(false);
         return;
       }
 
       try {
-        const workout = await programService.getWorkout(programId, weekId, workoutId);
+        // Determine if this is a program workout or standalone workout
+        const isStandaloneWorkout = !programId || !weekId;
+        
+        const workout = isStandaloneWorkout 
+          ? await workoutService.getWorkoutById(workoutId)
+          : await programService.getWorkout(programId, weekId, workoutId);
         
         console.log('Fetched workout:', workout);
         
@@ -52,7 +58,10 @@ const WorkoutLogCreate: React.FC = () => {
               targetDistance: exercise.targetDistance,
               notes: exercise.notes,
               order: exercise.order,
-              measurementType: exercise.measurementType,
+              measurement: {
+                measurementType: exercise.measurement?.measurementType || 'REPS',
+                measurementUnit: exercise.measurement?.measurementUnit || 'COUNT',
+              },
             })),
             order: block.order,
           })) || [],
