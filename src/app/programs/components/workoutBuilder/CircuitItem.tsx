@@ -4,36 +4,37 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import ExerciseItem from './ExerciseItem';
 import TimePicker from './TimePicker';
-import { Block, WorkoutRequest, MeasurementType, Measurement, MeasurementUnit } from '@trainapp-io/train-core';
-import { useProgramContext } from '../../contexts/ProgramContext';
+import { Block, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
+
 
 interface Props {
   block: Block;
   editMode: boolean;
   workout: WorkoutRequest;
+  onUpdateBlock: (updated: Block) => void;
+  onRemoveBlock: () => void;
+  onSetHasUnsavedChanges: (hasChanges: boolean) => void;
+  updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => void;
+  removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
 }
 
 const CircuitItem: React.FC<Props> = ({
   block,
   editMode,
   workout,
+  onUpdateBlock,
+  onRemoveBlock,
+  onSetHasUnsavedChanges,
+  updateExerciseInBlockPartial,
+  removeExerciseFromBlock,
 }) => {
-  const { updateWorkoutRequest, setWorkoutHasUnsavedChanges } = useProgramContext();
 
   const updateBlock = (updated: Block) => {
-    updateWorkoutRequest({
-      ...workout,
-      blocks: workout.blocks?.map((c) => (c.order === updated.order ? updated : c)),
-    });
-    setWorkoutHasUnsavedChanges(true);
+    onUpdateBlock(updated);
   };
 
   const removeBlock = () => {
-    updateWorkoutRequest({
-      ...workout,
-      blocks: workout.blocks?.filter((c) => c.order !== block.order),
-    });
-    setWorkoutHasUnsavedChanges(true);
+    onRemoveBlock();
   };
 
   const handleDragEnd = (event: any) => {
@@ -54,7 +55,7 @@ const CircuitItem: React.FC<Props> = ({
     }));
     
     updateBlock({ ...block, exercises: reorderedWithUpdatedOrder });
-    setWorkoutHasUnsavedChanges(true);
+    onSetHasUnsavedChanges(true);
   };
 
   return (
@@ -123,6 +124,8 @@ const CircuitItem: React.FC<Props> = ({
               editMode={editMode}
               blockIndex={workout.blocks?.findIndex(b => b.order === block.order) ?? 0}
               exerciseIndex={exerciseIndex}
+              updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+              removeExerciseFromBlock={removeExerciseFromBlock}
             />
           ))}
         </SortableContext>
@@ -146,9 +149,11 @@ const CircuitItem: React.FC<Props> = ({
                   measurement: {
                     measurementType: MeasurementType.REPS,
                     measurementUnit: MeasurementUnit.POUND,
-                  } as Measurement,
+                  },
                   notes: '',
                   order: block.exercises.length,
+                  sets: 1,
+                  hasSuperset: false,
                 },
               ],
             })

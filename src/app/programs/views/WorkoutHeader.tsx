@@ -124,7 +124,11 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   };
 
   const handleLogWorkout = () => {
-    if (programId && weekId && workoutId) {
+    if (isStandaloneWorkout && workoutId) {
+      // For standalone workouts, navigate to a standalone workout log route
+      navigate(`/workouts/${workoutId}/log`);
+    } else if (programId && weekId && workoutId) {
+      // For program workouts, use the existing route
       navigate(`/programs/${programId}/weeks/${weekId}/workouts/${workoutId}/log`);
     }
   };

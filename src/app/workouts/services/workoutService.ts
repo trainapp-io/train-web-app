@@ -1,12 +1,8 @@
+import { WorkoutResponse, WorkoutRequest } from "@trainapp-io/train-core";
 import { BaseApiService } from "../../../services/BaseApiService";
-import { WorkoutRequest, WorkoutResponse } from "@trainapp-io/train-core";
 import { SuccessResponse } from "../../../types/api.types";
 
-/**
- * Service for standalone workout management operations
- * Uses /workout endpoint (not /program)
- */
-class WorkoutService extends BaseApiService<
+export class WorkoutService extends BaseApiService<
   WorkoutResponse,
   WorkoutRequest,
   WorkoutRequest
@@ -19,52 +15,29 @@ class WorkoutService extends BaseApiService<
     return this.baseEndpoint;
   }
 
-  /**
-   * Get all workouts for a user
-   * GET /workout/user/:userId
-   */
-  async fetchUserWorkouts(): Promise<WorkoutResponse[]> {
-    return this.get<WorkoutResponse[]>("/workout/");
+  async createWorkout(workoutData: WorkoutRequest): Promise<WorkoutResponse> {
+    return this.create(workoutData);
   }
 
-  /**
-   * Get a specific workout by ID
-   * GET /workout/:workoutId
-   */
+  async getWorkouts(): Promise<WorkoutResponse[]> {
+    return this.get<WorkoutResponse[]>(`${this.getBaseEndpoint()}/`);
+  }
+
   async getWorkoutById(workoutId: string): Promise<WorkoutResponse> {
-    return this.get<WorkoutResponse>(`/workout/${workoutId}`);
+    return this.getById(workoutId);
   }
 
-  /**
-   * Create a new standalone workout
-   * POST /workout
-   */
-  async createWorkout(
-    workoutRequest: WorkoutRequest
-  ): Promise<WorkoutResponse> {
-    return this.create(workoutRequest);
-  }
-
-  /**
-   * Update a workout
-   * PUT /workout/:workoutId
-   */
   async updateWorkout(
     workoutId: string,
-    workoutRequest: WorkoutRequest
-  ): Promise<SuccessResponse> {
-    return this.put(`/workout/${workoutId}`, workoutRequest);
+    workoutData: WorkoutRequest
+  ): Promise<WorkoutResponse> {
+    return this.update(workoutId, workoutData);
   }
 
-  /**
-   * Delete a workout
-   * DELETE /workout/:workoutId
-   */
   async deleteWorkout(workoutId: string): Promise<SuccessResponse> {
     return this.deleteById(workoutId);
   }
 }
 
-// Export singleton instance
 export const workoutService = new WorkoutService();
 export default workoutService;
