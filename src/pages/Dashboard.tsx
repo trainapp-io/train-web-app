@@ -6,6 +6,8 @@ import Home from "./Home";
 import Profile from "../app/profiles/views/Profile";
 
 import Events from "../app/events/views/EventsPage";
+import AvailabilityPage from "../app/events/views/AvailabilityPage";
+import { AvailabilityCalendar } from "../app/events/components/availability";
 import Search from "../app/search/views/Search";
 import Programs from "../app/programs/views/Programs";
 import ProgramBuilder from "../app/programs/views/ProgramBuilder";
@@ -25,7 +27,7 @@ import {
   AiOutlineHome,
   AiOutlineUser,
   // AiOutlineTeam,
-  // AiOutlineCalendar,
+  AiOutlineCalendar,
   AiOutlineSearch,
   AiOutlineSchedule,
   AiOutlineCheckCircle
@@ -40,7 +42,7 @@ const Dashboard: React.FC = () => {
     { id: "workout-logs/history", label: "Workout Logs", icon: <AiOutlineCheckCircle /> },
     { id: "profile", label: "Profile", icon: <AiOutlineUser /> },
     // { id: "groups", label: "Groups", icon: <AiOutlineTeam /> },
-    // { id: "events", label: "Events", icon: <AiOutlineCalendar /> },
+    { id: "events", label: "Events", icon: <AiOutlineCalendar /> },
     { id: "search", label: "Search", icon: <AiOutlineSearch /> },
     ];
 
@@ -54,6 +56,8 @@ const Dashboard: React.FC = () => {
             <Route path="/profile" element={<Profile />} />
 
             <Route path="/events" element={<Events />} />
+            <Route path="/availability" element={<AvailabilityPage />} />
+            <Route path="/availability/:slotId" element={<AvailabilityCalendar />} />
             <Route path="/search" element={<Search />} />
             <Route path="/programs" element={<Programs />} />
             <Route path="/programs/builder" element={<ProgramBuilder />} />

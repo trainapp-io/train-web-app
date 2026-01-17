@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import './Profile.css';
-import { FaPhone, FaEdit, FaTimes, FaEnvelope, FaPlus } from 'react-icons/fa';
+import { FaPhone, FaEdit, FaTimes, FaEnvelope, FaPlus, FaCalendarAlt } from 'react-icons/fa';
 import { UserProfileRequest, UserProfileResponse } from '@trainapp-io/train-core';
 import { userProfileService } from '../services/userProfileService';
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const [profileRequest, setProfileRequest] = useState<UserProfileRequest | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -190,6 +192,19 @@ const Profile: React.FC = () => {
             <FaPhone className="contact-icon" />
             <span className="contact-text">{profileRequest.phoneNumber}</span>
           </div>
+        </div>
+
+        <div className="profile-availability-section">
+          <h3>Availability & Bookings</h3>
+          <p className="availability-description">
+            Manage your availability slots and let others book time with you
+          </p>
+          <button 
+            className="btn-manage-availability"
+            onClick={() => navigate('/availability')}
+          >
+            <FaCalendarAlt /> Manage Availability
+          </button>
         </div>
       </div>
 

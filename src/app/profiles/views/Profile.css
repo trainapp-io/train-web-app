@@ -178,6 +178,53 @@
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
+/* Availability Section */
+.profile-availability-section {
+  padding: 24px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  margin-top: 16px;
+}
+
+.profile-availability-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.availability-description {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.btn-manage-availability {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-manage-availability:hover {
+  background-color: #333;
+}
+
+.btn-manage-availability svg {
+  font-size: 16px;
+}
+
 .contact-icon {
   color: var(--text-secondary);
   font-size: 18px;

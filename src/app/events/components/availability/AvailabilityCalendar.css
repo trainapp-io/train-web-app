@@ -1,0 +1,151 @@
+.availability-calendar {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.calendar-header {
+  margin-bottom: 30px;
+}
+
+.calendar-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.slot-info h3 {
+  margin: 10px 0 5px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.slot-info p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.calendar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.date-group {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.date-header {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.date-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.slots-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.slot-item:hover {
+  border-color: #000;
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slot-item.fully-booked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.slot-item.fully-booked:hover {
+  transform: none;
+  border-color: #e0e0e0;
+  box-shadow: none;
+}
+
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #333;
+  min-width: 150px;
+}
+
+.time-separator {
+  color: #999;
+}
+
+.slot-info-inline {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.slot-title {
+  font-weight: 500;
+  color: #333;
+}
+
+.slot-duration {
+  color: #666;
+  font-size: 14px;
+}
+
+.slot-capacity {
+  color: #666;
+  font-size: 14px;
+  padding: 4px 10px;
+  background-color: #e9ecef;
+  border-radius: 12px;
+}
+
+.fully-booked-badge {
+  background-color: #dc3545;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
