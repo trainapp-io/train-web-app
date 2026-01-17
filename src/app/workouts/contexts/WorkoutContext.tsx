@@ -1,9 +1,27 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, MeasurementType, Measurement, MeasurementUnit } from '@trainapp-io/train-core';
-import { MuscleGroup } from '../views/types';
+import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, 
+  MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
+import { MuscleGroup } from '../../programs/views/types';
+
+function createDefaultWorkoutRequest(): WorkoutRequest {
+  return {
+    name: '',
+    description: '',
+    category: [],
+    difficulty: WorkoutDifficulty.BEGINNER,
+    duration: 0,
+    blocks: [],
+    exercises: [],
+    accessType: ProfileAccess.Public,
+    createdBy: '',
+    startDate: new Date(),
+    endDate: new Date(),
+  };
+}
 
 // State interface
 interface WorkoutState {
+  workouts: WorkoutResponse[];
   workoutRequest: WorkoutRequest;
   loading: boolean;
   saving: boolean;
@@ -15,6 +33,7 @@ interface WorkoutState {
 
 // Action types
 type WorkoutAction =
+  | { type: 'SET_WORKOUTS'; payload: WorkoutResponse[] }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_SAVING'; payload: boolean }
   | { type: 'SET_WORKOUT_REQUEST'; payload: WorkoutRequest }
@@ -27,18 +46,8 @@ type WorkoutAction =
 
 // Initial state
 const initialState: WorkoutState = {
-  workoutRequest: {
-    name: '',
-    description: '',
-    category: [],
-    difficulty: WorkoutDifficulty.BEGINNER,
-    duration: 0,
-    blocks: [],
-    accessType: ProfileAccess.Public,
-    createdBy: '',
-    startDate: new Date(),
-    endDate: new Date(),
-  },
+  workouts: [],
+  workoutRequest: createDefaultWorkoutRequest(),
   loading: false,
   saving: false,
   hasUnsavedChanges: false,
@@ -50,6 +59,8 @@ const initialState: WorkoutState = {
 // Reducer
 function workoutReducer(state: WorkoutState, action: WorkoutAction): WorkoutState {
   switch (action.type) {
+    case 'SET_WORKOUTS':
+      return { ...state, workouts: action.payload };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'SET_SAVING':
@@ -83,6 +94,7 @@ interface WorkoutContextType {
   dispatch: React.Dispatch<WorkoutAction>;
   
   // Convenience methods
+  setWorkouts: (workouts: WorkoutResponse[]) => void;
   updateWorkoutRequest: (updates: Partial<WorkoutRequest>) => void;
   setWorkoutRequest: (workoutRequest: WorkoutRequest) => void;
   setLoading: (loading: boolean) => void;
@@ -94,11 +106,25 @@ interface WorkoutContextType {
   resetState: () => void;
   
   // Exercise-specific methods
-  updateExerciseInBlock: (blockIndex: number, exerciseIndex: number, updatedExercise: Exercise) => void;
-  updateExerciseInBlockPartial: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
+  updateExerciseInBlock: (
+    blockIndex: number,
+    exerciseIndex: number,
+    updatedExercise: Exercise
+  ) => void;
+  updateExerciseInBlockPartial: (
+    blockIndex: number,
+    exerciseIndex: number,
+    updates: Partial<Exercise>
+  ) => void;
   addExerciseToBlock: (blockIndex: number, exercise: Exercise) => void;
   removeExerciseFromBlock: (blockIndex: number, exerciseIndex: number) => void;
-  reorderExercisesInBlock: (blockIndex: number, fromIndex: number, toIndex: number) => void;
+  reorderExercisesInBlock: (
+    blockIndex: number,
+    fromIndex: number,
+    toIndex: number
+  ) => void;
+
+  clearCurrentWorkout: () => void;
 }
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
@@ -112,6 +138,11 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
   const [state, dispatch] = useReducer(workoutReducer, initialState);
 
   // Convenience methods
+
+  const setWorkouts = (workouts: WorkoutResponse[]) => {
+    dispatch({ type: 'SET_WORKOUTS', payload: workouts });
+  };
+
   const updateWorkoutRequest = (updates: Partial<WorkoutRequest>) => {
     dispatch({ type: 'UPDATE_WORKOUT_REQUEST', payload: updates });
   };
@@ -149,7 +180,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
   };
 
   // Exercise-specific methods
-  const updateExerciseInBlock = (blockIndex: number, exerciseIndex: number, updatedExercise: Exercise) => {
+   const updateExerciseInBlock = (blockIndex: number, exerciseIndex: number, updatedExercise: Exercise) => {
     if (!state.workoutRequest?.blocks) return;
     
     const updatedBlocks = state.workoutRequest.blocks.map((block, bIndex) => {
@@ -232,9 +263,14 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
     updateWorkoutRequest({ blocks: updatedBlocks });
   };
 
+  const clearCurrentWorkout = () => {
+    dispatch({ type: 'SET_WORKOUT_REQUEST', payload: createDefaultWorkoutRequest() });
+  };
+
   const contextValue: WorkoutContextType = {
     state,
     dispatch,
+    setWorkouts,
     updateWorkoutRequest,
     setWorkoutRequest,
     setLoading,
@@ -249,6 +285,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({ children }) =>
     addExerciseToBlock,
     removeExerciseFromBlock,
     reorderExercisesInBlock,
+    clearCurrentWorkout,
   };
 
   return (
@@ -278,6 +315,7 @@ export const workoutUtils = {
       difficulty: response.difficulty || WorkoutDifficulty.BEGINNER,
       duration: response.duration || 0,
       blocks: response.blocks || [],
+      exercises: response.exercises || [],
       accessType: response.accessType || ProfileAccess.Public,
       createdBy: userId,
       startDate: response.startDate ? new Date(response.startDate) : new Date(),
@@ -294,6 +332,7 @@ export const workoutUtils = {
       difficulty: WorkoutDifficulty.BEGINNER,
       duration,
       blocks: [],
+      exercises: [],
       accessType: ProfileAccess.Public,
       createdBy: userId,
       startDate: new Date(),
@@ -334,6 +373,7 @@ export const workoutUtils = {
   createDefaultExercise: (order: number = 0): Exercise => {
     return {
       name: 'New Exercise',
+      rest: 0,
       targetReps: 10,
       targetDurationSec: 0,
       targetWeight: 0,
@@ -343,7 +383,9 @@ export const workoutUtils = {
       measurement: {
         measurementType: MeasurementType.REPS,
         measurementUnit: MeasurementUnit.POUND,
-      } as Measurement,
+      },
+      sets: 1,
+      hasSuperset: false,
     };
   },
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutLogRequest, WorkoutSnapshot, BlockLog, ExerciseLog } from '@trainapp-io/train-core';
+import { WorkoutLogRequest, BlockLog, ExerciseLog } from '@trainapp-io/train-core';
+import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
 import WorkoutLogHeader from './WorkoutLogHeader';
 import BlockLogSection from './BlockLogSection';
 import CompletionFooter from './CompletionFooter';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogFormProps {
-  workoutSnapshot: WorkoutSnapshot;
   initialData?: WorkoutLogRequest;
   onSubmit: (workoutLogRequest: WorkoutLogRequest) => void;
   onCancel: () => void;
@@ -14,12 +14,12 @@ interface WorkoutLogFormProps {
 }
 
 const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
-  workoutSnapshot,
   initialData,
   onSubmit,
   onCancel,
   isSaving = false,
 }) => {
+  const { workoutSnapshot, versionId } = useWorkoutLogContext();
   const [actualStartDate, setActualStartDate] = useState<Date>(
     initialData?.actualStartDate || new Date()
   );
@@ -36,9 +36,12 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
 
   // Initialize block logs from workout snapshot
   useEffect(() => {
+    console.log('WorkoutLogForm - workoutSnapshot:', workoutSnapshot);
+    console.log('WorkoutLogForm - blockSnapshot:', workoutSnapshot?.blockSnapshot);
+    
     if (initialData?.blockLogs) {
       setBlockLogs(initialData.blockLogs);
-    } else if (workoutSnapshot.blockSnapshot) {
+    } else if (workoutSnapshot?.blockSnapshot) {
       // Create initial block logs from snapshot
       const initialBlockLogs: BlockLog[] = workoutSnapshot.blockSnapshot.map((blockSnapshot) => ({
         actualRest: blockSnapshot.rest,
@@ -56,9 +59,20 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
         order: blockSnapshot.order,
         isCompleted: false,
       }));
+      console.log('WorkoutLogForm - initialBlockLogs:', initialBlockLogs);
       setBlockLogs(initialBlockLogs);
+    } else {
+      console.log('WorkoutLogForm - No blockSnapshot found!');
     }
   }, [workoutSnapshot, initialData]);
+
+  if (!workoutSnapshot) {
+    return (
+      <div className="workout-log-form">
+        <p>Loading workout data...</p>
+      </div>
+    );
+  }
 
   const handleBlockLogUpdate = (index: number, updatedBlockLog: BlockLog) => {
     const updatedBlockLogs = [...blockLogs];
@@ -67,16 +81,15 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   };
 
   const handleSubmit = () => {
-
     const workoutLogRequest: WorkoutLogRequest = {
       userId: initialData?.userId || '',
       workoutId: initialData?.workoutId || '',
-      versionId: initialData?.versionId || 0,
-      workoutSnapshot,
+      versionId: initialData?.versionId || versionId,
+      workoutSnapshot: workoutSnapshot!,
       blockLogs,
       actualDuration,
-      actualStartDate,
-      actualEndDate,
+      actualStartDate: actualStartDate.toISOString() as any,
+      actualEndDate: actualEndDate.toISOString() as any,
       isCompleted,
     };
 
@@ -95,24 +108,20 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       />
 
       <div className="block-logs-container">
-        {workoutSnapshot.blockSnapshot ? (
-          workoutSnapshot.blockSnapshot.map((blockSnapshot, index) => (
-            <BlockLogSection
-              key={index}
-              blockSnapshot={blockSnapshot}
-              blockLog={blockLogs[index] || {
-                actualRest: 0,
-                actualSets: 0,
-                exerciseLogs: [],
-                order: blockSnapshot.order,
-                isCompleted: false,
-              }}
-              onUpdate={(updated) => handleBlockLogUpdate(index, updated)}
-            />
-          ))
-        ) : (
-          <p>No workout blocks available</p>
-        )}
+        {workoutSnapshot.blockSnapshot?.map((blockSnapshot, index) => (
+          <BlockLogSection
+            key={index}
+            blockSnapshot={blockSnapshot}
+            blockLog={blockLogs[index] || {
+              actualRest: 0,
+              actualSets: 0,
+              exerciseLogs: [],
+              order: blockSnapshot.order,
+              isCompleted: false,
+            }}
+            onUpdate={(updated) => handleBlockLogUpdate(index, updated)}
+          />
+        ))}
       </div>
 
       <CompletionFooter

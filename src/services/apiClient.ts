@@ -32,6 +32,14 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Log workout-logs requests for debugging
+  if (config.url?.includes('workout-logs') && config.method === 'post') {
+    console.log('API Client - Request URL:', config.url);
+    console.log('API Client - Request data:', config.data);
+    console.log('API Client - Request data stringified:', JSON.stringify(config.data, null, 2));
+  }
+  
   return config;
 });
 

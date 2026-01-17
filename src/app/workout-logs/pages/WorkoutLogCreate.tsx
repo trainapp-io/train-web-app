@@ -3,15 +3,16 @@ import { useNavigate, useParams } from 'react-router';
 import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot } from '@trainapp-io/train-core';
 import { useCreateWorkoutLog } from '../../../services/apiHooks';
 import { programService } from '../../programs/services/programService';
+import { workoutService } from '../../workouts/services/workoutService';
 import { tokenService } from '../../../services/tokenService';
+import { useWorkoutLogContext } from '../contexts/WorkoutLogContext';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
 import './WorkoutLogPages.css';
 
 const WorkoutLogCreate: React.FC = () => {
   const navigate = useNavigate();
   const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
-  const [workoutSnapshot, setWorkoutSnapshot] = useState<WorkoutSnapshot | null>(null);
-  const [versionId, setVersionId] = useState<number>(1);
+  const { workoutSnapshot, versionId, setWorkoutSnapshot, setVersionId } = useWorkoutLogContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,14 +20,19 @@ const WorkoutLogCreate: React.FC = () => {
 
   useEffect(() => {
     const fetchWorkout = async () => {
-      if (!programId || !weekId || !workoutId) {
-        setError('Missing required parameters');
+      if (!workoutId) {
+        setError('Missing workout ID');
         setLoading(false);
         return;
       }
 
       try {
-        const workout = await programService.getWorkout(programId, weekId, workoutId);
+        // Determine if this is a program workout or standalone workout
+        const isStandaloneWorkout = !programId || !weekId;
+        
+        const workout = isStandaloneWorkout 
+          ? await workoutService.getWorkoutById(workoutId)
+          : await programService.getWorkout(programId, weekId, workoutId);
         
         console.log('Fetched workout:', workout);
         
@@ -52,7 +58,10 @@ const WorkoutLogCreate: React.FC = () => {
               targetDistance: exercise.targetDistance,
               notes: exercise.notes,
               order: exercise.order,
-              measurement: exercise.measurement,
+              measurement: {
+                measurementType: exercise.measurement?.measurementType || 'REPS',
+                measurementUnit: exercise.measurement?.measurementUnit || 'COUNT',
+              },
             })),
             order: block.order,
           })) || [],
@@ -86,6 +95,14 @@ const WorkoutLogCreate: React.FC = () => {
         workoutId: workoutId!,
         versionId: versionId,
       };
+
+      console.log('Complete request being sent:', completeRequest);
+      console.log('workoutSnapshot in request:', completeRequest.workoutSnapshot);
+      console.log('workoutSnapshot type:', typeof completeRequest.workoutSnapshot);
+      console.log('workoutSnapshot is null?', completeRequest.workoutSnapshot === null);
+      console.log('workoutSnapshot is undefined?', completeRequest.workoutSnapshot === undefined);
+      console.log('workoutSnapshot stringified:', JSON.stringify(completeRequest.workoutSnapshot, null, 2));
+      console.log('Full request stringified:', JSON.stringify(completeRequest, null, 2));
 
       await createWorkoutLogMutation.mutateAsync(completeRequest);
       navigate('/workout-logs/history');
@@ -129,7 +146,6 @@ const WorkoutLogCreate: React.FC = () => {
         <h1>Log Workout</h1>
       </div>
       <WorkoutLogForm
-        workoutSnapshot={workoutSnapshot}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={createWorkoutLogMutation.isPending}

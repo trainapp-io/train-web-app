@@ -1,21 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import './Workouts.css';
-import { WorkoutCard } from '../components/WorkoutCard';
+import {WorkoutCard } from '../../programs/components/WorkoutCard';
 import { tokenService } from '../../../services/tokenService';
+<<<<<<<< HEAD:src/app/programs/views/Workouts.tsx
 import { WorkoutResponse } from '@trainapp-io/train-core';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { workoutService } from '../services/workoutService';
+========
 import ConfirmDialog from '../../programs/components/ConfirmDialog';
 import { workoutService } from '../services/workoutService';
+import { useWorkoutContext } from '../contexts/WorkoutContext';
+>>>>>>>> ng-dev:src/app/workouts/views/Workouts.tsx
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
-  const [workouts, setWorkouts] = useState<WorkoutResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<string>('');
   const [deletingWorkoutName, setDeletingWorkoutName] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const {
+    state,
+    setLoading,
+    setError,
+    setWorkouts,
+    clearCurrentWorkout,
+  } = useWorkoutContext();
+
+  useEffect(() => {
+    return () => {
+      clearCurrentWorkout();
+      setLoading(false);
+      setError(null);
+    };
+  }, []);
 
   useEffect(() => {
     fetchWorkouts();
@@ -31,10 +51,15 @@ const Workouts: React.FC = () => {
         throw new Error("User not logged in");
       }
       
+<<<<<<<< HEAD:src/app/programs/views/Workouts.tsx
       // const userData = JSON.parse(userString);
       
       // Fetch standalone workouts from /workout endpoint
       const workoutsData = await workoutService.fetchUserWorkouts();
+========
+
+      const workoutsData = await workoutService.getWorkouts();
+>>>>>>>> ng-dev:src/app/workouts/views/Workouts.tsx
       
       setWorkouts(workoutsData);
     } catch (err) {
@@ -50,7 +75,7 @@ const Workouts: React.FC = () => {
   };
 
   const handleDeleteWorkout = (workoutId: string) => {
-    const workout = workouts.find(w => w.id === workoutId);
+    const workout = state.workouts.find(w => w.id === workoutId);
     if (workout) {
       setDeletingWorkoutId(workoutId);
       setDeletingWorkoutName(workout.name);
@@ -65,7 +90,7 @@ const Workouts: React.FC = () => {
       setIsDeleting(true);
       await workoutService.deleteWorkout(deletingWorkoutId);
       
-      setWorkouts(workouts.filter(workout => workout.id !== deletingWorkoutId));
+      setWorkouts(state.workouts.filter(workout => workout.id !== deletingWorkoutId));
       setShowDeleteConfirm(false);
       setDeletingWorkoutId('');
       setDeletingWorkoutName('');
@@ -87,12 +112,12 @@ const Workouts: React.FC = () => {
     navigate(`/workouts/${workoutId}/edit`);
   };
 
-  if (loading) {
+  if (state.loading) {
     return <div className="loading-container">Loading workouts...</div>;
   }
 
-  if (error) {
-    return <div className="error-container">{error}</div>;
+  if (state.error) {
+    return <div className="error-container">{state.error}</div>;
   }
 
   return (
@@ -104,7 +129,7 @@ const Workouts: React.FC = () => {
         </button>
       </div>
 
-      {workouts.length === 0 ? (
+      {state.workouts.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-content">
             <h2>No workouts yet</h2>
@@ -116,7 +141,7 @@ const Workouts: React.FC = () => {
         </div>
       ) : (
         <div className="workouts-grid">
-          {workouts.map(workout => (
+          {state.workouts.map(workout => (
             <WorkoutCard
               key={workout.id}
               workout={workout}

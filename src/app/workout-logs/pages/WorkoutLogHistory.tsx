@@ -1,13 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { useWorkoutLogHistory } from '../../../services/apiHooks';
-import { tokenService } from '../../../services/tokenService';
 import './WorkoutLogPages.css';
 
 const WorkoutLogHistory: React.FC = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(tokenService.getUser() || '{}');
-  const { data: workoutLogs, isLoading, error } = useWorkoutLogHistory(user.userId);
+  const { data: workoutLogs, isLoading, error } = useWorkoutLogHistory();
 
   const formatDate = (date: Date): string => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -111,24 +109,28 @@ const WorkoutLogHistory: React.FC = () => {
                 <span className="metadata-label">Duration:</span>
                 <span className="metadata-value">{formatDuration(log.actualDuration)}</span>
               </div>
-              <div className="metadata-row">
-                <span className="metadata-label">Blocks:</span>
-                <span className="metadata-value">{log.blockLogs?.length || 0}</span>
-              </div>
+              {log.blockLogs && (
+                <div className="metadata-row">
+                  <span className="metadata-label">Blocks:</span>
+                  <span className="metadata-value">{log.blockLogs.length}</span>
+                </div>
+              )}
               <div className="metadata-row">
                 <span className="metadata-label">Version:</span>
                 <span className="metadata-value">v{log.versionId}</span>
               </div>
             </div>
 
-            <div className="card-stats">
-              <div className="stat-item">
-                <span className="stat-label">Completed Blocks</span>
-                <span className="stat-value">
-                  {log.blockLogs?.filter(b => b.isCompleted).length} / {log.blockLogs?.length || 0}
-                </span>
+            {log.blockLogs && (
+              <div className="card-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Completed Blocks</span>
+                  <span className="stat-value">
+                    {log.blockLogs.filter(b => b.isCompleted).length} / {log.blockLogs.length}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
