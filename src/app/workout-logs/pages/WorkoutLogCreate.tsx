@@ -5,14 +5,14 @@ import { useCreateWorkoutLog } from '../../../services/apiHooks';
 import { programService } from '../../programs/services/programService';
 import { workoutService } from '../../workouts/services/workoutService';
 import { tokenService } from '../../../services/tokenService';
+import { useWorkoutLogContext } from '../contexts/WorkoutLogContext';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
 import './WorkoutLogPages.css';
 
 const WorkoutLogCreate: React.FC = () => {
   const navigate = useNavigate();
   const { programId, weekId, workoutId } = useParams<{ programId: string; weekId: string; workoutId: string }>();
-  const [workoutSnapshot, setWorkoutSnapshot] = useState<WorkoutSnapshot | null>(null);
-  const [versionId, setVersionId] = useState<number>(1);
+  const { workoutSnapshot, versionId, setWorkoutSnapshot, setVersionId } = useWorkoutLogContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,6 +96,14 @@ const WorkoutLogCreate: React.FC = () => {
         versionId: versionId,
       };
 
+      console.log('Complete request being sent:', completeRequest);
+      console.log('workoutSnapshot in request:', completeRequest.workoutSnapshot);
+      console.log('workoutSnapshot type:', typeof completeRequest.workoutSnapshot);
+      console.log('workoutSnapshot is null?', completeRequest.workoutSnapshot === null);
+      console.log('workoutSnapshot is undefined?', completeRequest.workoutSnapshot === undefined);
+      console.log('workoutSnapshot stringified:', JSON.stringify(completeRequest.workoutSnapshot, null, 2));
+      console.log('Full request stringified:', JSON.stringify(completeRequest, null, 2));
+
       await createWorkoutLogMutation.mutateAsync(completeRequest);
       navigate('/workout-logs/history');
     } catch (err) {
@@ -138,7 +146,6 @@ const WorkoutLogCreate: React.FC = () => {
         <h1>Log Workout</h1>
       </div>
       <WorkoutLogForm
-        workoutSnapshot={workoutSnapshot}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={createWorkoutLogMutation.isPending}

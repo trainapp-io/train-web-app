@@ -35,7 +35,7 @@ const ExerciseItem: React.FC<Props> = ({
     return null;
   }
 
-  const measurementType = exercise.measurementType || MeasurementType.REPS;
+  const measurementType = exercise.measurement?.measurementType || MeasurementType.REPS;
   const isRest = exercise.name?.toLowerCase().includes('rest') || false;
 
   const updateExercise = (blockIdx: number, exerciseIdx: number, updatedExercise: Partial<Exercise>) => {
@@ -47,7 +47,12 @@ const ExerciseItem: React.FC<Props> = ({
     const types = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
     const currentIndex = types.indexOf(measurementType);
     const nextIndex = (currentIndex + 1) % types.length;
-    updateExercise(blockIndex, exerciseIndex, { measurementType: types[nextIndex] });
+    updateExercise(blockIndex, exerciseIndex, { 
+      measurement: { 
+        ...exercise.measurement,
+        measurementType: types[nextIndex] 
+      } 
+    });
   };
 
   const cycleWeightUnit = () => {

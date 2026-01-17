@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { WorkoutLogRequest } from '@trainapp-io/train-core';
 import { useWorkoutLog, useUpdateWorkoutLog } from '../../../services/apiHooks';
+import { useWorkoutLogContext } from '../contexts/WorkoutLogContext';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
 import './WorkoutLogPages.css';
 
@@ -10,6 +11,14 @@ const WorkoutLogEdit: React.FC = () => {
   const { logId } = useParams<{ logId: string }>();
   const { data: workoutLog, isLoading, error } = useWorkoutLog(logId!);
   const updateWorkoutLogMutation = useUpdateWorkoutLog();
+  const { setWorkoutSnapshot, setVersionId } = useWorkoutLogContext();
+
+  useEffect(() => {
+    if (workoutLog) {
+      setWorkoutSnapshot(workoutLog.workoutSnapshot);
+      setVersionId(workoutLog.versionId);
+    }
+  }, [workoutLog, setWorkoutSnapshot, setVersionId]);
 
   const handleSubmit = async (workoutLogRequest: WorkoutLogRequest) => {
     try {
@@ -69,7 +78,6 @@ const WorkoutLogEdit: React.FC = () => {
         <h1>Edit Workout Log</h1>
       </div>
       <WorkoutLogForm
-        workoutSnapshot={workoutLog.workoutSnapshot}
         initialData={initialData}
         onSubmit={handleSubmit}
         onCancel={handleCancel}

@@ -8,6 +8,7 @@ import {
   Exercise,
   Block,
   MeasurementType,
+  MeasurementUnit,
   ProfileAccess,
   WorkoutDifficulty,
 } from "@trainapp-io/train-core";
@@ -223,7 +224,10 @@ export const programUtils = {
       targetDistance: 0,
       notes: "",
       order,
-      measurementType: MeasurementType.REPS,
+      measurement: {
+        measurementType: MeasurementType.REPS,
+        measurementUnit: MeasurementUnit.POUND,
+      },
     };
   },
 
