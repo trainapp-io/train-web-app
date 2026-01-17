@@ -3,15 +3,9 @@ import { useNavigate } from 'react-router';
 import './Workouts.css';
 import {WorkoutCard } from '../../programs/components/WorkoutCard';
 import { tokenService } from '../../../services/tokenService';
-<<<<<<<< HEAD:src/app/programs/views/Workouts.tsx
-import { WorkoutResponse } from '@trainapp-io/train-core';
-import ConfirmDialog from '../components/ConfirmDialog';
-import { workoutService } from '../services/workoutService';
-========
 import ConfirmDialog from '../../programs/components/ConfirmDialog';
 import { workoutService } from '../services/workoutService';
 import { useWorkoutContext } from '../contexts/WorkoutContext';
->>>>>>>> ng-dev:src/app/workouts/views/Workouts.tsx
 
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
@@ -51,15 +45,8 @@ const Workouts: React.FC = () => {
         throw new Error("User not logged in");
       }
       
-<<<<<<<< HEAD:src/app/programs/views/Workouts.tsx
-      // const userData = JSON.parse(userString);
-      
-      // Fetch standalone workouts from /workout endpoint
-      const workoutsData = await workoutService.fetchUserWorkouts();
-========
 
       const workoutsData = await workoutService.getWorkouts();
->>>>>>>> ng-dev:src/app/workouts/views/Workouts.tsx
       
       setWorkouts(workoutsData);
     } catch (err) {
