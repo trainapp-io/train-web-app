@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
+import { FaEdit, FaCalendarAlt } from 'react-icons/fa';
 import { AvailabilitySlotResponse } from '../../types/availability.types';
 import './AvailabilitySlotCard.css';
+import { AvailabilityResponse } from '@trainapp-io/train-core';
 
 interface AvailabilitySlotCardProps {
-  slot: AvailabilitySlotResponse;
+  slot: AvailabilityResponse;
   onEdit: (slot: AvailabilitySlotResponse) => void;
   onDelete: (slotId: string) => void;
-  onToggleActive: (slotId: string, isActive: boolean) => void;
   onShare: (slotId: string) => void;
 }
 
@@ -14,9 +16,27 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
   slot,
   onEdit,
   onDelete,
-  onToggleActive,
-  onShare,
 }) => {
+  const [shareSuccess, setShareSuccess] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleString('en-US', {
       month: 'short',
@@ -27,97 +47,121 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
     });
   };
 
-  const formatRecurrence = () => {
-    if (!slot.isRecurring || !slot.recurrencePattern) return null;
-
-    const { frequency, interval, daysOfWeek } = slot.recurrencePattern;
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-    let text = `Every ${interval > 1 ? interval : ''} ${frequency}`;
-    
-    if (frequency === 'weekly' && daysOfWeek && daysOfWeek.length > 0) {
-      const days = daysOfWeek.map(d => dayNames[d]).join(', ');
-      text += ` on ${days}`;
-    }
-
-    return text;
+  const formatTime = (date: Date | string) => {
+    return new Date(date).toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
   };
 
-  const bookingProgress = slot.maxBookings 
-    ? `${slot.currentBookings || 0} / ${slot.maxBookings} booked`
-    : `${slot.currentBookings || 0} bookings`;
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    // Convert AvailabilityResponse to AvailabilitySlotResponse for editing
+    const editSlot: AvailabilitySlotResponse = {
+      id: slot.id,
+      host: slot.host,
+      attendee: slot.attendee,
+      slotDuration: slot.slotDuration,
+      slotStatus: slot.slotStatus as any, // Type conversion for local types
+      startDate: new Date(slot.startDate).toISOString(),
+      startTime: new Date(slot.startTime).toISOString(),
+      title: slot.title,
+      location: slot.location,
+      description: slot.description,
+      tags: slot.tags,
+    };
+    onEdit(editSlot);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    
+    try {
+      const shareUrl = `${window.location.origin}/events/availability/${slot.id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setShareSuccess(true);
+      
+      setTimeout(() => {
+        setShareSuccess(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy link to clipboard');
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    onDelete(slot.id);
+  };
 
   return (
-    <div className={`availability-slot-card ${!slot.isActive ? 'inactive' : ''}`}>
-      <div className="card-header">
-        <div className="card-title">
-          <h3>{slot.title}</h3>
-          <span className={`status-badge ${slot.isActive ? 'active' : 'inactive'}`}>
-            {slot.isActive ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-        <div className="card-actions">
-          <button
-            className="btn-icon"
-            onClick={() => onShare(slot.id!)}
-            title="Share"
-          >
-            🔗
-          </button>
-          <button
-            className="btn-icon"
-            onClick={() => onEdit(slot)}
-            title="Edit"
-          >
-            ✏️
-          </button>
-          <button
-            className="btn-icon"
-            onClick={() => onDelete(slot.id!)}
-            title="Delete"
-          >
-            🗑️
-          </button>
-        </div>
+    <div className="availability-slot-card">
+      <div className="availability-card-icon">
+        <FaCalendarAlt />
       </div>
-
-      {slot.description && (
-        <p className="card-description">{slot.description}</p>
-      )}
-
-      <div className="card-details">
-        <div className="detail-item">
-          <span className="detail-label">Duration:</span>
-          <span className="detail-value">{slot.duration} minutes</span>
-        </div>
-
-        <div className="detail-item">
-          <span className="detail-label">Time:</span>
-          <span className="detail-value">
-            {formatDate(slot.startTime)} - {formatDate(slot.endTime)}
-          </span>
-        </div>
-
-        {slot.isRecurring && (
-          <div className="detail-item">
-            <span className="detail-label">Recurrence:</span>
-            <span className="detail-value">{formatRecurrence()}</span>
+      <div className="availability-card-content">
+        <div className="availability-card-header">
+          <div className="availability-card-title-section">
+            <h3>{slot.title}</h3>
           </div>
+          <div className="availability-card-actions" ref={menuRef}>
+            <button 
+              className="menu-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              aria-label="Open menu"
+            >
+              <IoEllipsisVertical />
+            </button>
+            {isMenuOpen && (
+              <div className="availability-menu-dropdown">
+                <button
+                  className="menu-item"
+                  onClick={handleEdit}
+                >
+                  <FaEdit /> Edit
+                </button>
+                <button
+                  className="menu-item"
+                  onClick={handleShare}
+                >
+                  <IoShareOutline /> {shareSuccess ? 'Copied!' : 'Share'}
+                </button>
+                <button
+                  className="menu-item delete"
+                  onClick={handleDelete}
+                >
+                  <IoTrashOutline /> Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {slot.description && (
+          <p className="availability-card-description">{slot.description}</p>
         )}
 
-        <div className="detail-item">
-          <span className="detail-label">Bookings:</span>
-          <span className="detail-value">{bookingProgress}</span>
+        <div className="availability-card-meta">
+          <span className="availability-duration">{slot.slotDuration} min</span>
+          {slot.location && (
+            <span className="availability-location">{slot.location}</span>
+          )}
+          {slot.attendee && (
+            <span className="availability-attendee">With attendee</span>
+          )}
         </div>
-      </div>
 
-      <div className="card-footer">
-        <button
-          className={`btn-toggle ${slot.isActive ? 'btn-deactivate' : 'btn-activate'}`}
-          onClick={() => onToggleActive(slot.id!, slot.isActive)}
-        >
-          {slot.isActive ? 'Deactivate' : 'Activate'}
-        </button>
+        <div className="availability-card-time">
+          <div><strong>Start:</strong> {formatDate(slot.startDate)}</div>
+          <div><strong>Time:</strong> {formatTime(slot.startTime)}</div>
+        </div>
       </div>
     </div>
   );

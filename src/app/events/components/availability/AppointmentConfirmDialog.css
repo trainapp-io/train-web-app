@@ -1,0 +1,166 @@
+.appointment-confirm-dialog {
+  background-color: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dialog-content {
+  padding: 2rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.appointment-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.appointment-detail:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6c757d);
+  min-width: 100px;
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary, #212529);
+  text-align: right;
+  flex: 1;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--bg-primary, #f8f9fa);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 16px;
+  font-size: 0.813rem;
+  font-weight: 500;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.btn-cancel {
+  background-color: transparent;
+  color: var(--text-secondary, #6c757d);
+  border: 2px solid var(--border-color, #e0e0e0);
+}
+
+.btn-cancel:hover {
+  background-color: var(--bg-primary, #f8f9fa);
+  border-color: var(--text-secondary, #6c757d);
+}
+
+.btn-confirm {
+  background-color: var(--accent-color, #007bff);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.btn-confirm:hover {
+  background-color: var(--accent-hover, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-confirm:active {
+  transform: translateY(0);
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .appointment-confirm-dialog {
+    max-width: 100%;
+    margin: 0 1rem;
+  }
+
+  .dialog-header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .dialog-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .dialog-content {
+    padding: 1.5rem;
+  }
+
+  .appointment-detail {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem 0;
+  }
+
+  .detail-label {
+    min-width: auto;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+
+  .tags-container {
+    justify-content: flex-start;
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .btn-cancel,
+  .btn-confirm {
+    width: 100%;
+  }
+}
+

@@ -1,0 +1,21 @@
+.time-slot-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  text-align: center;
+}
+
+.time-slot-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.time-slot-time {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}

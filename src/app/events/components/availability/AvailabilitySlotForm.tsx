@@ -6,17 +6,46 @@ import './AvailabilitySlotForm.css';
 
 interface AvailabilitySlotFormProps {
   slot?: AvailabilitySlotResponse | null;
+  selectedDate?: Date;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-const AvailabilitySlotForm: React.FC<AvailabilitySlotFormProps> = ({ slot, onSuccess, onCancel }) => {
+const AvailabilitySlotForm: React.FC<AvailabilitySlotFormProps> = ({ slot, selectedDate, onSuccess, onCancel }) => {
+  // Format the selected date or use today's date
+  const getDefaultDate = () => {
+    if (slot?.startDate) {
+      return slot.startDate;
+    }
+    if (selectedDate) {
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return new Date().toISOString().slice(0, 10);
+  };
+
+  // Format time to HH:MM format (without date)
+  const getDefaultTime = () => {
+    if (slot?.startTime) {
+      const date = new Date(slot.startTime);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   const [formData, setFormData] = useState({
     title: slot?.title || '',
     description: slot?.description || '',
     location: slot?.location || '',
-    startDate: slot?.startDate || new Date().toISOString().slice(0, 10),
-    startTime: slot?.startTime || new Date().toISOString().slice(0, 16),
+    startDate: getDefaultDate(),
+    startTime: getDefaultTime(),
     slotDuration: slot?.slotDuration || 30,
     tags: slot?.tags?.join(', ') || '',
   });
@@ -51,7 +80,7 @@ const AvailabilitySlotForm: React.FC<AvailabilitySlotFormProps> = ({ slot, onSuc
         description: formData.description || undefined,
         location: formData.location || undefined,
         startDate: formData.startDate,
-        startTime: formData.startTime,
+        startTime: `${formData.startDate}T${formData.startTime}:00.000Z`, // Combine date and time
         slotDuration: formData.slotDuration,
         slotStatus: 'available',
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : undefined,
@@ -136,7 +165,7 @@ const AvailabilitySlotForm: React.FC<AvailabilitySlotFormProps> = ({ slot, onSuc
           <div className="form-group">
             <label htmlFor="startTime">Start Time *</label>
             <input
-              type="datetime-local"
+              type="time"
               id="startTime"
               name="startTime"
               value={formData.startTime}
