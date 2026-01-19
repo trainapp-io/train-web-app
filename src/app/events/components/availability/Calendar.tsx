@@ -50,9 +50,19 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const getCurrentWeekDates = () => {
+    // Get the week that contains a day from the current displayed month
     const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
+    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    
+    // Check if today is in the current displayed month
+    const isCurrentMonth = today.getMonth() === currentMonth.getMonth() && 
+                          today.getFullYear() === currentMonth.getFullYear();
+    
+    // Use today if it's in the current month, otherwise use the first day of the month
+    const referenceDate = isCurrentMonth ? today : firstDayOfMonth;
+    
+    const startOfWeek = new Date(referenceDate);
+    startOfWeek.setDate(referenceDate.getDate() - referenceDate.getDay());
     
     const weekDates = [];
     for (let i = 0; i < 7; i++) {
@@ -164,12 +174,16 @@ export const Calendar: React.FC<CalendarProps> = ({
         </div>
       </div>
       <div className="calendar-grid">
-        {dayNames.map(day => (
-          <div key={day} className="calendar-day-name">
-            {day}
-          </div>
-        ))}
-        {isExpanded ? renderFullMonth() : renderCurrentWeek()}
+        <div className="calendar-days-header">
+          {dayNames.map(day => (
+            <div key={day} className="calendar-day-name">
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="calendar-days-body">
+          {isExpanded ? renderFullMonth() : renderCurrentWeek()}
+        </div>
       </div>
       {!isExpanded && (
         <div className="calendar-expand-btn" onClick={() => setIsExpanded(true)}>
