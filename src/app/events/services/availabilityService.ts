@@ -38,6 +38,13 @@ class AvailabilityService {
     return response.data;
   }
 
+  async getPublicUserAvailability(userId: string): Promise<AvailabilityResponse[]> {
+    const response = await api.get<AvailabilityResponse[]>(
+      `${this.baseUrl}/public/${userId}`
+    );
+    return response.data;
+  }
+
   async getAvailabilitySlot(slotId: string): Promise<AvailabilitySlotResponse> {
     const response = await api.get<AvailabilitySlotResponse>(
       `${this.baseUrl}/${slotId}`

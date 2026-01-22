@@ -1,67 +1,47 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { availabilityService } from '../../services/availabilityService';
-import { AvailabilitySlotResponse } from '../../types/availability.types';
-import { tokenService } from '../../../../services/tokenService';
-import AvailabilitySlotForm from './AvailabilitySlotForm';
-import { Calendar } from './Calendar';
-import { TimeSlotCard } from './TimeSlotCard';
-import { AppointmentConfirmDialog } from './AppointmentConfirmDialog';
-import './AvailabilityManager.css';
+import { useParams } from 'react-router';
+import { availabilityService } from '../services/availabilityService';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
+import { Calendar } from '../components/availability/Calendar';
+import { TimeSlotCard } from '../components/availability/TimeSlotCard';
+import { AppointmentConfirmDialog } from '../components/availability/AppointmentConfirmDialog';
+import './PublicAvailabilityView.css';
 
-const AvailabilityManager: React.FC = () => {
+const PublicAvailabilityView: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
   const [slots, setSlots] = useState<AvailabilityResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingSlot, setEditingSlot] = useState<AvailabilitySlotResponse | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityResponse | null>(null);
   const [showAppointmentConfirm, setShowAppointmentConfirm] = useState(false);
   const [trainerName, setTrainerName] = useState<string>('');
-  const [userId, setUserId] = useState<string>('');
-  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
   useEffect(() => {
-    fetchMySlots();
-  }, []);
+    if (userId) {
+      fetchPublicAvailability();
+    }
+  }, [userId]);
 
-  const fetchMySlots = async () => {
+  const fetchPublicAvailability = async () => {
     try {
       setLoading(true);
-      const userStr = tokenService.getUser();
-      if (!userStr) {
-        throw new Error('User not authenticated');
-      }
-      const user = JSON.parse(userStr);
-      setTrainerName(user.name || user.email || 'Trainer');
-      setUserId(user.userId);
-      const data = await availabilityService.getUserAvailability(user.userId);
+      const data = await availabilityService.getUserAvailability(userId!);
       setSlots(data);
+      
+      // Extract trainer name from first slot if available
+      if (data.length > 0) {
+        setTrainerName('Trainer'); // You can enhance this to fetch user profile
+      }
+      
       setError(null);
     } catch (err) {
-      setError('Failed to load availability slots');
-      console.error('Error fetching slots:', err);
+      setError('Failed to load availability');
+      console.error('Error fetching public availability:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCreateSlot = () => {
-    setEditingSlot(null);
-    setShowForm(true);
-  };
-
-  const handleFormSuccess = async () => {
-    setShowForm(false);
-    setEditingSlot(null);
-    await fetchMySlots();
-  };
-
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setEditingSlot(null);
   };
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -87,11 +67,12 @@ const AvailabilityManager: React.FC = () => {
     if (!selectedSlot) return;
     
     try {
-      // TODO: Implement booking logic here
+      // TODO: Implement public booking logic here
       console.log('Confirming appointment for slot:', selectedSlot.id);
-      alert('Appointment confirmed!');
+      alert('Appointment confirmed! You will receive a confirmation email.');
       setShowAppointmentConfirm(false);
       setSelectedSlot(null);
+      await fetchPublicAvailability();
     } catch (err) {
       console.error('Error confirming appointment:', err);
       setError('Failed to confirm appointment. Please try again.');
@@ -103,25 +84,10 @@ const AvailabilityManager: React.FC = () => {
     setSelectedSlot(null);
   };
 
-  const handleShareAvailability = async () => {
-    const shareUrl = `${window.location.origin}/share/availability/${userId}`;
-    
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setShowCopiedMessage(true);
-      setTimeout(() => setShowCopiedMessage(false), 3000);
-    } catch (err) {
-      console.error('Failed to copy link:', err);
-      // Fallback: show the link in an alert
-      alert(`Share this link:\n${shareUrl}`);
-    }
-  };
-
   // Get availability dates for calendar
   const availabilityDates = useMemo(() => {
     const dates = new Set<string>();
     slots.forEach(slot => {
-      // Use UTC date to avoid timezone issues
       const date = new Date(slot.startDate);
       const year = date.getUTCFullYear();
       const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -135,7 +101,6 @@ const AvailabilityManager: React.FC = () => {
   const slotsForSelectedDate = useMemo(() => {
     return slots.filter(slot => {
       const slotDate = new Date(slot.startDate);
-      // Compare using UTC dates to avoid timezone issues
       const slotYear = slotDate.getUTCFullYear();
       const slotMonth = slotDate.getUTCMonth();
       const slotDay = slotDate.getUTCDate();
@@ -157,48 +122,31 @@ const AvailabilityManager: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="availability-manager">
-        <p>Loading availability slots...</p>
+      <div className="public-availability-view">
+        <div className="loading-container">
+          <p>Loading availability...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="public-availability-view">
+        <div className="error-container">
+          <h2>Unable to Load Availability</h2>
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="availability-manager">
-      <div className="availability-header">
-        <div className="header-actions">
-          <button 
-            className="btn-share-availability" 
-            onClick={handleShareAvailability}
-            title="Copy shareable link"
-          >
-            {showCopiedMessage ? '✓ Link Copied!' : '🔗 Share Availability'}
-          </button>
-        </div>
-        <button 
-          className="btn-create-availability" 
-          onClick={handleCreateSlot}
-        >
-          + Create Availability
-        </button>
+    <div className="public-availability-view">
+      <div className="public-header">
+        <h1>Book a Session</h1>
+        <p>Select a date and time that works for you</p>
       </div>
-
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
-      {showForm && (
-        <div className="form-overlay">
-          <AvailabilitySlotForm
-            slot={editingSlot}
-            selectedDate={selectedDate}
-            onSuccess={handleFormSuccess}
-            onCancel={handleFormCancel}
-          />
-        </div>
-      )}
 
       {showAppointmentConfirm && selectedSlot && (
         <div className="form-overlay">
@@ -225,6 +173,7 @@ const AvailabilityManager: React.FC = () => {
         {slotsForSelectedDate.length === 0 ? (
           <div className="empty-day-state">
             <p>No availability for this day</p>
+            <p className="empty-hint">Please select another date</p>
           </div>
         ) : (
           <div className="time-slots-grid">
@@ -242,4 +191,4 @@ const AvailabilityManager: React.FC = () => {
   );
 };
 
-export default AvailabilityManager;
+export default PublicAvailabilityView;

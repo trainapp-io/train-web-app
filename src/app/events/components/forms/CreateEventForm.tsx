@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { eventService } from '../../services/EventService2';
-import { authService } from '../../../access/services/authService';
 import { EventRequest } from '@trainapp-io/train-core';
 import '../../components/ui/EventManager.css';
 import Form from '../../../../components/ui/Form';
@@ -15,7 +14,6 @@ export default function CreateEventForm({ onCreated, onCancel }: CreateEventForm
   const [ev, setEv] = useState<EventRequest>({} as EventRequest);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState('');
-  const user = authService.getCurrentUser();
 
   const handleChange = (field: keyof EventRequest, value: string) => {
     if (field === 'startTime' || field === 'endTime') {
@@ -35,7 +33,6 @@ export default function CreateEventForm({ onCreated, onCancel }: CreateEventForm
         ...ev,
         startTime: ev.startTime,
         endTime: ev.endTime || ev.startTime,
-        admin: [user?.userId],
       };
 
       const created = await eventService.createEvent(payload);

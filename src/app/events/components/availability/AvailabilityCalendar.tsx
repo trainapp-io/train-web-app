@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { availabilityService } from '../../services/availabilityService';
-import { AvailabilitySlotResponse } from '../../types/availability.types';
-import BookingModal from './BookingModal';
+import { AvailabilityResponse } from '@trainapp-io/train-core';
+import BookingModal from './BookingModal.tsx';
 import './AvailabilityCalendar.css';
 
 interface AvailabilityCalendarProps {
@@ -13,12 +13,11 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
   const { userId: paramUserId, slotId } = useParams<{ userId?: string; slotId?: string }>();
   const userId = propUserId || paramUserId;
 
-  const [slots, setSlots] = useState<AvailabilitySlotResponse[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlotResponse | null>(null);
+  const [slots, setSlots] = useState<AvailabilityResponse[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   useEffect(() => {
     fetchAvailability();
@@ -31,12 +30,12 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
       if (slotId) {
         // Fetch specific slot
         const slot = await availabilityService.getAvailabilitySlot(slotId);
-        setSlots([slot]);
-        setSelectedSlot(slot);
+        setSlots([slot as any]);
+        setSelectedSlot(slot as any);
       } else if (userId) {
         // Fetch all slots for user
-        const data = await availabilityService.getUserAvailabilitySlots(userId);
-        setSlots(data.filter(slot => slot.isActive));
+        const data = await availabilityService.getUserAvailability(userId);
+        setSlots(data);
       }
       
       setError(null);
@@ -48,7 +47,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
     }
   };
 
-  const handleSlotClick = (slot: AvailabilitySlotResponse) => {
+  const handleSlotClick = (slot: AvailabilityResponse) => {
     setSelectedSlot(slot);
     setShowBookingModal(true);
   };
@@ -81,7 +80,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
   };
 
   const groupSlotsByDate = () => {
-    const grouped: { [key: string]: AvailabilitySlotResponse[] } = {};
+    const grouped: { [key: string]: AvailabilityResponse[] } = {};
     
     slots.forEach(slot => {
       const dateKey = new Date(slot.startTime).toDateString();
@@ -96,9 +95,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
     );
   };
 
-  const isSlotAvailable = (slot: AvailabilitySlotResponse) => {
-    if (!slot.maxBookings) return true;
-    return (slot.currentBookings || 0) < slot.maxBookings;
+  const isSlotAvailable = () => {
+    // All slots are available for now
+    return true;
   };
 
   if (loading) {
@@ -144,7 +143,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
               </div>
               <div className="slots-list">
                 {dateSlots.map(slot => {
-                  const available = isSlotAvailable(slot);
+                  const available = isSlotAvailable();
                   return (
                     <div
                       key={slot.id}
@@ -154,17 +153,12 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
                       <div className="slot-time">
                         <span className="time-start">{formatTime(slot.startTime)}</span>
                         <span className="time-separator">-</span>
-                        <span className="time-end">{formatTime(slot.endTime)}</span>
+                        <span className="time-end">{formatTime(new Date(new Date(slot.startTime).getTime() + slot.slotDuration * 60000))}</span>
                       </div>
                       <div className="slot-info-inline">
                         {!slotId && <span className="slot-title">{slot.title}</span>}
-                        <span className="slot-duration">{slot.duration} min</span>
+                        <span className="slot-duration">{slot.slotDuration} min</span>
                       </div>
-                      {slot.maxBookings && (
-                        <div className="slot-capacity">
-                          {slot.currentBookings || 0} / {slot.maxBookings}
-                        </div>
-                      )}
                       {!available && (
                         <div className="fully-booked-badge">Fully Booked</div>
                       )}

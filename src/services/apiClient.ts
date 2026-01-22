@@ -28,9 +28,14 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 api.interceptors.request.use((config) => {
-  const token = tokenService.getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Skip authentication for public endpoints
+  const isPublicEndpoint = config.url?.includes('/availability/public/');
+  
+  if (!isPublicEndpoint) {
+    const token = tokenService.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   
   // Log workout-logs requests for debugging
@@ -47,6 +52,12 @@ api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config;
+    
+    // Skip token refresh for public endpoints
+    const isPublicEndpoint = originalRequest.url?.includes('/availability/public/');
+    if (isPublicEndpoint) {
+      return Promise.reject(err);
+    }
 
     if (err.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

@@ -8,10 +8,42 @@
 
 .availability-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
   width: 100%;
+  gap: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-share-availability {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-share-availability:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-share-availability:active {
+  transform: translateY(0);
 }
 
 .header-spacer {
@@ -164,6 +196,17 @@
   
   .availability-header {
     margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    width: 100%;
+  }
+  
+  .btn-share-availability {
+    width: 100%;
+    justify-content: center;
   }
   
   .btn-create-availability {

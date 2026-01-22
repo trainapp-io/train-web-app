@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { availabilityService } from '../../services/availabilityService';
-import { AvailabilitySlotResponse, BookingRequest } from '../../types/availability.types';
+import { BookingRequest } from '../../types/availability.types';
+import { AvailabilityResponse } from '@trainapp-io/train-core';
 import './BookingModal.css';
 
 interface BookingModalProps {
-  slot: AvailabilitySlotResponse;
+  slot: AvailabilityResponse;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -31,10 +32,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ slot, onSuccess, onCancel }
     setError(null);
 
     try {
+      const endTime = new Date(new Date(slot.startTime).getTime() + slot.slotDuration * 60000).toISOString();
+      
       const bookingRequest: BookingRequest = {
         availabilitySlotId: slot.id!,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
+        startTime: typeof slot.startTime === 'string' ? slot.startTime : slot.startTime.toString(),
+        endTime: endTime,
         notes: notes.trim() || undefined,
       };
 
@@ -68,17 +71,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ slot, onSuccess, onCancel }
 
             <div className="detail-row">
               <span className="detail-label">Duration:</span>
-              <span className="detail-value">{slot.duration} minutes</span>
+              <span className="detail-value">{slot.slotDuration} minutes</span>
             </div>
-
-            {slot.maxBookings && (
-              <div className="detail-row">
-                <span className="detail-label">Availability:</span>
-                <span className="detail-value">
-                  {(slot.maxBookings - (slot.currentBookings || 0))} spot(s) remaining
-                </span>
-              </div>
-            )}
           </div>
 
           {error && (

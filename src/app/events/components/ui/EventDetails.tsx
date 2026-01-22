@@ -59,17 +59,6 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event, onBack }) => {
             <p>{event.description}</p>
           </div>
         )}
-        
-        {event.admin && event.admin.length > 0 && (
-          <div className="event-details-section">
-            <h3>Organizers</h3>
-            <ul>
-              {event.admin.map((admin, index) => (
-                <li key={index}>{admin}</li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
     </div>
   );

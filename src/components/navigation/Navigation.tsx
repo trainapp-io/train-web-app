@@ -5,6 +5,7 @@ import AuthPage from "../../app/access/views/AuthPage";
 import PrivacyPolicy from "../../pages/PrivacyPolicy";
 import TermsOfService from "../../pages/TermsOfService";
 import Dashboard from "../../pages/Dashboard";
+import PublicAvailabilityView from "../../app/events/views/PublicAvailabilityView";
 
 interface NavigationProps {
   // You can add props here if needed in the future
@@ -81,6 +82,7 @@ const Navigation: React.FC<NavigationProps> = () => {
     {/* Public pages */}
     <Route path="/privacy" element={<PrivacyPolicy />} />
     <Route path="/terms-of-service" element={<TermsOfService />} />
+    <Route path="/share/availability/:userId" element={<PublicAvailabilityView />} />
   </Routes>
 
   );
