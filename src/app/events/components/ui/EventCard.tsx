@@ -10,8 +10,11 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete, onClick }) => {
-  const startDate = new Date(event.startTime as unknown as string);
+  const startDate = event.startTime ? new Date(event.startTime as unknown as string) : null;
   const endDate = event.endTime ? new Date(event.endTime as unknown as string) : null;
+  const isValidDate = (date: Date | null) => !!date && !isNaN(date.getTime());
+  const hasStartDate = isValidDate(startDate);
+  const hasEndDate = isValidDate(endDate);
   
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -46,18 +49,24 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete, onClick 
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       <div className="event-card-content">
-        <div className="calendar-icon">
-          <span className="calendar-icon-month">{startDate.toLocaleDateString('en-US', { month: 'short' })}</span>
-          <span className="calendar-icon-day">{startDate.getDate()}</span>
-        </div>
+        {hasStartDate && (
+          <div className="calendar-icon">
+            <span className="calendar-icon-month">
+              {startDate!.toLocaleDateString('en-US', { month: 'short' })}
+            </span>
+            <span className="calendar-icon-day">{startDate!.getDate()}</span>
+          </div>
+        )}
         <div className="event-info">
           <h3 className="event-title">{event.title}</h3>
-          <div className="event-dates">
-            <span>
-              {formatDate(startDate)} • {formatTime(startDate)}
-              {endDate && ` - ${formatTime(endDate)}`}
-            </span>
-          </div>
+          {hasStartDate && (
+            <div className="event-dates">
+              <span>
+                {formatDate(startDate!)} • {formatTime(startDate!)}
+                {hasEndDate && ` - ${formatTime(endDate!)}`}
+              </span>
+            </div>
+          )}
           {event.location && (
             <div className="event-location">
               <span>{event.location}</span>

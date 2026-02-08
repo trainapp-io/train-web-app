@@ -64,7 +64,6 @@ class EventService extends BaseApiService<
   }
 
   async getEvents(
-    userId: string,
     limit: number = 10,
     cursor?: string
   ): Promise<EventResponse[]> {
@@ -73,10 +72,7 @@ class EventService extends BaseApiService<
       ...(cursor && { cursor }),
     };
 
-    const response = await this.get<
-      CursorPaginationResponse<UserEventResponse>
-    >(`/event/user/${userId}`, params);
-    return response.data.map((item) => item.event) || [];
+    return this.get<EventResponse[]>(`/event/user/events`, params);
   }
 
   /**

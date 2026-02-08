@@ -4,7 +4,6 @@ import { EventResponse } from '@trainapp-io/train-core';
 import CreateEventForm from '../forms/CreateEventForm';
 import EventCard from './EventCard';
 import EventDetails from './EventDetails';
-import { authService } from '../../../access/services/authService';
 
 export default function EventManager() {
   const [events, setEvents] = useState<EventResponse[]>([]);
@@ -12,14 +11,16 @@ export default function EventManager() {
   const [err, setErr] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventResponse | null>(null);
-  const user = authService.getCurrentUser();
 
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        const events = await eventService.getEvents(user?.userId);
-        setEvents(events);
+        const events = await eventService.getEvents();
+        const normalizedEvents: EventResponse[] = events.map((item) =>
+          'event' in item ? (item as any).event : (item as EventResponse)
+        );
+        setEvents(normalizedEvents);
       } catch {
         setErr('Could not load events.');
       } finally {
@@ -100,9 +101,9 @@ export default function EventManager() {
             + Create New Event
           </button>
           <div className="events-list">
-            {events.map(event => (
+            {events.map((event, index) => (
               <EventCard 
-                key={event.id} 
+                key={event.id || `event-${index}`} 
                 event={event} 
                 onClick={handleSelectEvent}
                 onDelete={handleDeleteEvent}
