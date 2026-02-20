@@ -15,6 +15,7 @@ import { ErrorResponse } from '../../../../mocks/handlers';
 export interface RegistrationModel {
   name: string;
   email: string;
+  phoneNumber: string;
   password: string;
   confirmPassword: string;
   agreeToTerms: boolean;
@@ -26,6 +27,7 @@ const RegistrationForm: React.FC = () => {
     const [registrationForm, setRegistrationForm] = useState<RegistrationModel>({
       name: '',
       email: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
       agreeToTerms: false,
@@ -76,6 +78,7 @@ const RegistrationForm: React.FC = () => {
       const userRequest: UserRequest = {
         name: registrationForm.name,
         email: registrationForm.email,
+        phoneNumber: registrationForm.phoneNumber,
         password: registrationForm.password,
         deviceId: tokenService.getDeviceId(),
         agreeToTerms: registrationForm.agreeToTerms
@@ -147,6 +150,19 @@ const RegistrationForm: React.FC = () => {
           required
           disabled={isLoading}
           autoComplete="email"
+        />
+        
+        <TextInput
+          id="phoneNumber"
+          testId="phone-input"
+          type="text"
+          label="Phone Number"
+          value={registrationForm.phoneNumber}
+          onChange={(e) => handleChange('phoneNumber', e.target.value)}
+          placeholder="(555) 123-4567"
+          required
+          disabled={isLoading}
+          autoComplete="tel"
         />
         
         <TextInput

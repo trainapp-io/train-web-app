@@ -71,6 +71,7 @@ describe('authService', () => {
       const mockUserRequest = {
         username: 'testuser',
         email: 'test@example.com',
+        phoneNumber: '555-123-4567',
         password: 'password123',
         name: 'Test User',
         deviceId: 'mock-device-id',
@@ -109,6 +110,7 @@ describe('authService', () => {
       const mockUserRequest = {
         username: 'testuser',
         email: 'test@example.com',
+        phoneNumber: '555-123-4567',
         password: 'password123',
         name: 'Test User',
         deviceId: 'mock-device-id',

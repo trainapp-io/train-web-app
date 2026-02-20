@@ -33,12 +33,14 @@ describe('RegistrationForm', () => {
     const fillForm = async (model: RegistrationModel) => {
         const nameInput = screen.getByTestId('name-input');
         const emailInput = screen.getByTestId('email-input');
+        const phoneInput = screen.getByTestId('phone-input');
         const passwordInput = screen.getByTestId('password-input');
         const confirmPasswordInput = screen.getByTestId('confirm-password-input');
         const termsCheckbox = screen.getByTestId('terms-checkbox');
     
         fireEvent.change(nameInput, { target: { value: model.name } });
         fireEvent.change(emailInput, { target: { value: model.email } });
+        fireEvent.change(phoneInput, { target: { value: model.phoneNumber } });
         fireEvent.change(passwordInput, { target: { value: model.password } });
         fireEvent.change(confirmPasswordInput, { target: { value: model.confirmPassword } });
 
@@ -53,6 +55,7 @@ describe('RegistrationForm', () => {
         // Check for all form elements using testId attributes
         expect(screen.getByTestId('name-input')).toBeInTheDocument();
         expect(screen.getByTestId('email-input')).toBeInTheDocument();
+        expect(screen.getByTestId('phone-input')).toBeInTheDocument();
         expect(screen.getByTestId('password-input')).toBeInTheDocument();
         expect(screen.getByTestId('confirm-password-input')).toBeInTheDocument();
         expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();

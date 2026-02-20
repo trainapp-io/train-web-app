@@ -4,6 +4,7 @@ import { UserLoginRequest } from "@trainapp-io/train-core";
 export default class AuthTestFixture {
   public static NAME: string = "John Doe";
   public static EMAIL: string = "john.doe@example.com";
+  public static PHONE_NUMBER: string = "(555) 123-4567";
   public static PASSWORD: string = "Password123!";
   public static CONFIRM_PASSWORD: string = "Password123!";
   public static AGREE_TO_TERMS: boolean = true;
@@ -14,6 +15,7 @@ export default class AuthTestFixture {
     return {
       name: AuthTestFixture.NAME,
       email: AuthTestFixture.EMAIL,
+      phoneNumber: AuthTestFixture.PHONE_NUMBER,
       password: AuthTestFixture.PASSWORD,
       confirmPassword: AuthTestFixture.CONFIRM_PASSWORD,
       agreeToTerms: AuthTestFixture.AGREE_TO_TERMS,

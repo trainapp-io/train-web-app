@@ -4,7 +4,6 @@ import { EventRequest } from '@trainapp-io/train-core';
 import '../../components/ui/EventManager.css';
 import Form from '../../../../components/ui/Form';
 import TextInput from '../../../../components/ui/TextInput';
-import { authService } from '../../../access/services/authService';
 
 interface CreateEventFormProps {
   onCreated?: (e: any) => void;
@@ -12,10 +11,7 @@ interface CreateEventFormProps {
 }
 
 export default function CreateEventForm({ onCreated, onCancel }: CreateEventFormProps) {
-  const currentUser = authService.getCurrentUser();
-  const [ev, setEv] = useState<Partial<EventRequest>>({
-    host: currentUser?.userId,
-  });
+  const [ev, setEv] = useState<Partial<EventRequest>>({});
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState('');
   const [attendeeInput, setAttendeeInput] = useState('');
@@ -77,12 +73,11 @@ export default function CreateEventForm({ onCreated, onCancel }: CreateEventForm
 
       const payload: EventRequest = {
         ...(ev as EventRequest),
-        host: ev.host || currentUser?.userId || '',
         title: ev.title || '',
         description: ev.description || '',
         location: ev.location,
-        startTime: ev.startTime ? new Date(ev.startTime).toISOString() : undefined,
-        endTime: ev.endTime ? new Date(ev.endTime).toISOString() : undefined,
+        startTime: ev.startTime ? new Date(ev.startTime) : new Date(),
+        endTime: ev.endTime ? new Date(ev.endTime) : undefined,
         attendees: attendees.length ? attendees : undefined,
         publicAttendees: sanitizedPublicAttendees.length ? sanitizedPublicAttendees : undefined,
         tags: tags.length ? tags : undefined,
@@ -90,7 +85,7 @@ export default function CreateEventForm({ onCreated, onCancel }: CreateEventForm
 
       const created = await eventService.createEvent(payload);
       onCreated?.(created);
-      setEv({ host: currentUser?.userId });
+      setEv({});
       setAttendeeInput('');
       setPublicAttendees([{ name: '', phoneNumber: '' }]);
       setTagsInput('');
