@@ -125,6 +125,24 @@ test.describe("Authentication", () => {
       resetCode: "123456",
     };
 
+    // Mock the password reset request API
+    await page.route("**/user/request-password-reset", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Password reset email sent" }),
+      });
+    });
+
+    // Mock the reset password with code API
+    await page.route("**/user/reset-password-with-code", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Password reset successful" }),
+      });
+    });
+
     // Take a screenshot at the beginning
     await page.screenshot({ path: 'test-results/reset-before-navigation.png' });
 

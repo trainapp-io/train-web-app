@@ -19,9 +19,11 @@ const ForgotPasswordForm: React.FC = () => {
     try {
       await authService.requestPasswordReset({ email });
       navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Password reset request error:', err);
-      setError('Failed to request password reset. Please try again.');
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to request password reset. Please try again.';
+      console.error('Error details:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
