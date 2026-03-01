@@ -171,9 +171,10 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ userId: pro
         </div>
       )}
 
-      {showBookingModal && selectedSlot && (
+      {showBookingModal && selectedSlot && userId && (
         <BookingModal
           slot={selectedSlot}
+          hostId={userId}
           onSuccess={handleBookingSuccess}
           onCancel={handleBookingCancel}
         />

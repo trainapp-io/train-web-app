@@ -60,13 +60,13 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
     // Convert AvailabilityResponse to AvailabilitySlotResponse for editing
     const editSlot: AvailabilitySlotResponse = {
       id: slot.id,
-      host: '', // AvailabilityResponse doesn't have host, use empty string
+      host: (slot as any).host,
       attendee: slot.attendee,
       slotDuration: slot.slotDuration,
       slotStatus: slot.slotStatus as any, // Type conversion for local types
       startDate: new Date(slot.startDate).toISOString(),
       startTime: new Date(slot.startTime).toISOString(),
-      title: slot.title || 'Untitled',
+      title: slot.title || '',
       location: slot.location,
       description: slot.description,
       tags: slot.tags,

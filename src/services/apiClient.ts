@@ -104,6 +104,9 @@ api.interceptors.response.use(
         tokenService.setAccessToken(accessToken);
         tokenService.setRefreshToken(newRefreshToken);
 
+        // Reset refreshing flag before processing queue
+        isRefreshing = false;
+
         // Process queued requests
         processQueue(null, accessToken);
 
@@ -111,20 +114,19 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axios(originalRequest);
       } catch (refreshError: any) {
+        // Reset refreshing flag immediately on error
+        isRefreshing = false;
+        
+        // Reject all queued requests
         processQueue(refreshError, null);
 
-        if (
-          refreshError.response?.status === 403 ||
-          refreshError.response?.status === 401
-        ) {
-          // Refresh token is invalid or expired
-          tokenService.clearTokens();
-          window.location.href = "/login?expired=true";
-        }
+        // Clear tokens and force logout for any refresh error
+        tokenService.clearTokens();
+        
+        // Redirect to login page
+        window.location.href = "/login?expired=true";
 
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 

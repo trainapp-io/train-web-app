@@ -60,13 +60,17 @@ export default function EventManager() {
     try {
       const eventToDelete = events.find(event => event.id === eventId);
       if (eventToDelete) {
-        await eventService.deleteEvent(eventId);
+        const response = await eventService.deleteEvent(eventId);
+        console.log('Delete event response:', response);
       }
       
+      // Update UI to remove the deleted event
       setEvents(prev => prev.filter(event => event.id !== eventId));
-    } catch (error) {
-      setErr('Failed to delete event.');
+      setErr(''); // Clear any previous errors
+    } catch (error: any) {
       console.error('Error deleting event:', error);
+      console.error('Error response:', error.response);
+      setErr('Failed to delete event.');
     }
   };
 

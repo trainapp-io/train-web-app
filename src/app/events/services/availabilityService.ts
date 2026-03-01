@@ -80,7 +80,18 @@ class AvailabilityService {
 
   // Booking Management
   async createBooking(request: BookingRequest): Promise<BookingResponse> {
-    const response = await api.post<BookingResponse>("/bookings", request);
+    // Transform the request to match the new API structure
+    const appointmentRequest = {
+      hostId: request.hostId,
+      availabilityId: request.availabilitySlotId,
+      requestedAt: request.startTime,
+      ...(request.requesterId && { requesterId: request.requesterId }),
+      ...(request.guestName && { guestName: request.guestName }),
+      ...(request.guestPhone && { guestPhone: request.guestPhone }),
+      ...(request.notes && { notes: request.notes })
+    };
+    
+    const response = await api.post<BookingResponse>("/appointment/book", appointmentRequest);
     return response.data;
   }
 

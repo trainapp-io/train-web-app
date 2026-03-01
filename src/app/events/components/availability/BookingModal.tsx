@@ -1,19 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { availabilityService } from '../../services/availabilityService';
 import { BookingRequest } from '../../types/availability.types';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
+import { tokenService } from '../../../../services/tokenService';
 import './BookingModal.css';
 
 interface BookingModalProps {
   slot: AvailabilityResponse;
+  hostId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ slot, onSuccess, onCancel }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ slot, hostId, onSuccess, onCancel }) => {
   const [notes, setNotes] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = tokenService.getAccessToken();
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const getRequesterId = (): string | undefined => {
+    const userString = tokenService.getUser();
+    if (!userString) return undefined;
+    
+    try {
+      const user = JSON.parse(userString);
+      return user.userId;
+    } catch {
+      return undefined;
+    }
+  };
 
   const formatDateTime = (date: Date | string) => {
     return new Date(date).toLocaleString('en-US', {
@@ -31,15 +53,39 @@ const BookingModal: React.FC<BookingModalProps> = ({ slot, onSuccess, onCancel }
     setLoading(true);
     setError(null);
 
+    // Validate guest fields if not logged in
+    if (!isLoggedIn) {
+      if (!guestName.trim()) {
+        setError('Please enter your name');
+        setLoading(false);
+        return;
+      }
+      if (!guestPhone.trim()) {
+        setError('Please enter your phone number');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const endTime = new Date(new Date(slot.startTime).getTime() + slot.slotDuration * 60000).toISOString();
       
+      const requesterId = getRequesterId();
+      
       const bookingRequest: BookingRequest = {
         availabilitySlotId: slot.id!,
+        hostId: hostId,
+        requesterId: requesterId,
         startTime: typeof slot.startTime === 'string' ? slot.startTime : slot.startTime.toString(),
         endTime: endTime,
         notes: notes.trim() || undefined,
       };
+
+      // Add guest information if not logged in
+      if (!isLoggedIn) {
+        bookingRequest.guestName = guestName.trim();
+        bookingRequest.guestPhone = guestPhone.trim();
+      }
 
       await availabilityService.createBooking(bookingRequest);
       onSuccess();
@@ -80,6 +126,32 @@ const BookingModal: React.FC<BookingModalProps> = ({ slot, onSuccess, onCancel }
           )}
 
           <form onSubmit={handleSubmit}>
+            {!isLoggedIn && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="guestName">Your Name *</label>
+                  <input
+                    type="text"
+                    id="guestName"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="guestPhone">Phone Number *</label>
+                  <input
+                    type="tel"
+                    id="guestPhone"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+              </>
+            )}
             <div className="form-group">
               <label htmlFor="notes">Notes (Optional)</label>
               <textarea

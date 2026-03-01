@@ -57,9 +57,13 @@ export interface Booking {
 
 export interface BookingRequest {
   availabilitySlotId: string;
+  hostId: string;
+  requesterId?: string;
   startTime: string;
   endTime: string;
   notes?: string;
+  guestName?: string;
+  guestPhone?: string;
 }
 
 export interface BookingResponse extends Booking {

@@ -14,8 +14,6 @@ import { tokenService } from '../../../services/tokenService';
 import { IoClose } from 'react-icons/io5';
 import logo from '../../../assets/logo.svg';
 
-import { faro, LogLevel} from "@grafana/faro-react";
-
 interface ProgramPhase {
   id: string;
   name: string;
@@ -108,14 +106,6 @@ const ProgramBuilder: React.FC = () => {
       
       // Call the API to create the program
       const response = await programService.createProgram(programRequest);
-
-      faro.api.pushLog(["Program created successfully"], {
-        level: LogLevel.INFO,
-        context: {
-          programId: response.id,
-          userId: userId
-        }
-      })
       
       console.log("Program created successfully:", response);
       // Navigate back to the programs page

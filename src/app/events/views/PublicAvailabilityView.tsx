@@ -4,7 +4,7 @@ import { availabilityService } from '../services/availabilityService';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
 import { Calendar } from '../components/availability/Calendar';
 import { TimeSlotCard } from '../components/availability/TimeSlotCard';
-import { AppointmentConfirmDialog } from '../components/availability/AppointmentConfirmDialog';
+import BookingModal from '../components/availability/BookingModal.tsx';
 import './PublicAvailabilityView.css';
 
 const PublicAvailabilityView: React.FC = () => {
@@ -16,7 +16,6 @@ const PublicAvailabilityView: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityResponse | null>(null);
   const [showAppointmentConfirm, setShowAppointmentConfirm] = useState(false);
-  const [trainerName, setTrainerName] = useState<string>('');
 
   useEffect(() => {
     if (userId) {
@@ -29,12 +28,6 @@ const PublicAvailabilityView: React.FC = () => {
       setLoading(true);
       const data = await availabilityService.getUserAvailability(userId!);
       setSlots(data);
-      
-      // Extract trainer name from first slot if available
-      if (data.length > 0) {
-        setTrainerName('Trainer'); // You can enhance this to fetch user profile
-      }
-      
       setError(null);
     } catch (err) {
       setError('Failed to load availability');
@@ -63,23 +56,13 @@ const PublicAvailabilityView: React.FC = () => {
     setShowAppointmentConfirm(true);
   };
 
-  const handleConfirmAppointment = async () => {
-    if (!selectedSlot) return;
-    
-    try {
-      // TODO: Implement public booking logic here
-      console.log('Confirming appointment for slot:', selectedSlot.id);
-      alert('Appointment confirmed! You will receive a confirmation email.');
-      setShowAppointmentConfirm(false);
-      setSelectedSlot(null);
-      await fetchPublicAvailability();
-    } catch (err) {
-      console.error('Error confirming appointment:', err);
-      setError('Failed to confirm appointment. Please try again.');
-    }
+  const handleBookingSuccess = async () => {
+    setShowAppointmentConfirm(false);
+    setSelectedSlot(null);
+    await fetchPublicAvailability();
   };
 
-  const handleCancelAppointment = () => {
+  const handleBookingCancel = () => {
     setShowAppointmentConfirm(false);
     setSelectedSlot(null);
   };
@@ -149,14 +132,12 @@ const PublicAvailabilityView: React.FC = () => {
       </div>
 
       {showAppointmentConfirm && selectedSlot && (
-        <div className="form-overlay">
-          <AppointmentConfirmDialog
-            slot={selectedSlot}
-            trainerName={trainerName}
-            onConfirm={handleConfirmAppointment}
-            onCancel={handleCancelAppointment}
-          />
-        </div>
+        <BookingModal
+          slot={selectedSlot}
+          hostId={userId!}
+          onSuccess={handleBookingSuccess}
+          onCancel={handleBookingCancel}
+        />
       )}
 
       <Calendar
