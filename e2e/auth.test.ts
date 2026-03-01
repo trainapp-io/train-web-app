@@ -28,6 +28,45 @@ test.describe("Authentication", () => {
       name: "New User",
     };
 
+    // Mock the registration API
+    await page.route("**/api/user/register", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
+          userId: "mock-user-id",
+          username: testUser.email,
+          name: testUser.name,
+        }),
+      });
+    });
+
+    // Mock the login API
+    await page.route("**/api/user/login", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
+          userId: "mock-user-id",
+          username: testUser.email,
+          name: testUser.name,
+        }),
+      });
+    });
+
+    // Mock the logout API
+    await page.route("**/api/user/logout", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Logged out successfully" }),
+      });
+    });
+
     // Take a screenshot at the beginning
     await page.screenshot({ path: 'test-results/before-navigation.png' });
 
@@ -48,6 +87,9 @@ test.describe("Authentication", () => {
       
       await page.getByTestId("email-input").waitFor({ state: "visible" });
       await page.getByTestId("email-input").fill(testUser.email);
+      
+      await page.getByTestId("phone-input").waitFor({ state: "visible" });
+      await page.getByTestId("phone-input").fill("+1234567890");
       
       await page.getByTestId("password-input").waitFor({ state: "visible" });
       await page.getByTestId("password-input").fill(testUser.password);
@@ -126,7 +168,7 @@ test.describe("Authentication", () => {
     };
 
     // Mock the password reset request API
-    await page.route("**/user/request-password-reset", async (route) => {
+    await page.route("**/api/user/request-password-reset", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -135,11 +177,26 @@ test.describe("Authentication", () => {
     });
 
     // Mock the reset password with code API
-    await page.route("**/user/reset-password-with-code", async (route) => {
+    await page.route("**/api/user/reset-password-with-code", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ message: "Password reset successful" }),
+      });
+    });
+
+    // Mock the login API for the final login step
+    await page.route("**/api/user/login", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
+          userId: "mock-user-id",
+          username: testUser.email,
+          name: "Test User",
+        }),
       });
     });
 
