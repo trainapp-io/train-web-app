@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaTimes, FaUpload } from 'react-icons/fa';
+import { LuX, LuUpload } from 'react-icons/lu';
 import { ProgramRequest, ProfileAccess } from '@trainapp-io/train-core';
 import './EditProgramDialog.css';
 
@@ -79,7 +79,7 @@ const EditProgramDialog: React.FC<EditProgramDialogProps> = ({
         <div className="edit-program-dialog-header">
           <h2>Edit Program</h2>
           <button className="close-button" onClick={handleClose} aria-label="Close">
-            <FaTimes />
+            <LuX />
           </button>
         </div>
 
@@ -179,12 +179,12 @@ const EditProgramDialog: React.FC<EditProgramDialogProps> = ({
                       onClick={handleRemoveImage}
                       aria-label="Remove image"
                     >
-                      <FaTimes />
+                      <LuX />
                     </button>
                   </div>
                 ) : (
                   <div className="image-upload-placeholder" onClick={() => fileInputRef.current?.click()}>
-                    <FaUpload />
+                    <LuUpload />
                     <p>Click to upload image</p>
                   </div>
                 )}

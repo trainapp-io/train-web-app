@@ -5,40 +5,51 @@
 }
 
 .form-error {
-  background-color: #fdecea;
-  border-left: 4px solid #e74c3c;
-  color: #c0392b;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  background: rgba(231, 76, 60, 0.08);
+  border-left: 3px solid #e74c3c;
+  color: #e74c3c;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--input-border-radius);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .form-success {
-  background-color: #e8f5e9;
-  border-left: 4px solid #4caf50;
-  color: #2e7d32;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  background: rgba(39, 174, 96, 0.08);
+  border-left: 3px solid #27ae60;
+  color: #27ae60;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--input-border-radius);
+  font-size: 0.875rem;
 }
 
 .form-options {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .forgot-password {
-  color: #4a90e2;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
   text-decoration: none;
+  transition: color var(--transition-speed);
 }
 
 .forgot-password:hover {
-  text-decoration: underline;
+  color: var(--accent-color);
+}
+
+/* Form description text */
+.form-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 /* Form Row - For side-by-side form fields */
@@ -63,20 +74,21 @@
 .form-separator {
   display: flex;
   align-items: center;
-  text-align: center;
   margin: 1.5rem 0;
-  color: #777;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .form-separator::before,
 .form-separator::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .form-separator span {
-  padding: 0 10px;
-  font-size: 0.9rem;
-  text-transform: uppercase;
+  padding: 0 0.75rem;
 }

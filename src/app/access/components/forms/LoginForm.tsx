@@ -130,14 +130,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ sessionExpired = false, redirectU
       </Form>
       
       <div className="social-login">
-        <p>Or sign in with</p>
+        <div className="form-separator"><span>or</span></div>
         <SocialButton
           provider="google"
           testId="google-button"
           onClick={() => handleSignIn('google')}
           disabled={isLoading}
           isLoading={isLoading && error?.includes('Google')}
-        />
+        >
+          Continue with Google
+        </SocialButton>
       </div>
     </>
   );

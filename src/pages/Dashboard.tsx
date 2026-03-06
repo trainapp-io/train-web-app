@@ -22,27 +22,17 @@ import WorkoutLogHistory from "../app/workout-logs/pages/WorkoutLogHistory";
 import { WorkoutProvider } from "../app/workouts/contexts/WorkoutContext";
 import WorkoutView from "../app/workouts/views/WorkoutView";
 
-import {
-  AiOutlineHome,
-  AiOutlineUser,
-  // AiOutlineTeam,
-  AiOutlineCalendar,
-  AiOutlineSearch,
-  AiOutlineSchedule,
-  AiOutlineCheckCircle
-} from "react-icons/ai";
-import { FaDumbbell } from "react-icons/fa";
+import { LuHouse, LuCalendarDays, LuDumbbell, LuClipboardList, LuUser, LuCalendar, LuSearch } from "react-icons/lu";
 
 const Dashboard: React.FC = () => {
   const tabs = [
-    { id: "", label: "Home", icon: <AiOutlineHome /> }, // id "" so route = "/"
-    { id: "programs", label: "Programs", icon: <AiOutlineSchedule /> },
-    { id: "workouts", label: "Workouts", icon: <FaDumbbell /> },
-    { id: "workout-logs/history", label: "Workout Logs", icon: <AiOutlineCheckCircle /> },
-    { id: "profile", label: "Profile", icon: <AiOutlineUser /> },
-    // { id: "groups", label: "Groups", icon: <AiOutlineTeam /> },
-    { id: "events", label: "Events", icon: <AiOutlineCalendar /> },
-    { id: "search", label: "Search", icon: <AiOutlineSearch /> },
+    { id: "", label: "Home", icon: <LuHouse /> },
+    { id: "programs", label: "Programs", icon: <LuCalendarDays /> },
+    { id: "workouts", label: "Workouts", icon: <LuDumbbell /> },
+    { id: "workout-logs/history", label: "Workout Logs", icon: <LuClipboardList /> },
+    { id: "profile", label: "Profile", icon: <LuUser /> },
+    { id: "events", label: "Events", icon: <LuCalendar /> },
+    { id: "search", label: "Search", icon: <LuSearch /> },
     ];
 
   return (

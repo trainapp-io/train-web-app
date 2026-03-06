@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import { GiWeightLiftingUp } from 'react-icons/gi';
+import { LuDumbbell } from 'react-icons/lu';
 import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
 
 
@@ -146,7 +146,7 @@ const ExerciseItem: React.FC<Props> = ({
           {(exercise as any).gifUrl ? (
             <img src={(exercise as any).gifUrl} alt={exercise.name} />
           ) : (
-            <GiWeightLiftingUp className="exercise-icon-placeholder" />
+            <LuDumbbell className="exercise-icon-placeholder" />
           )}
         </div>
         <div className="exercise-header-info">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Profile.css';
-import { FaPhone, FaEdit, FaTimes, FaEnvelope, FaPlus } from 'react-icons/fa';
+import { LuPhone, LuPencil, LuX, LuMail, LuPlus } from 'react-icons/lu';
 import { UserProfileRequest, UserProfileResponse } from '@trainapp-io/train-core';
 import { userProfileService } from '../services/userProfileService';
 
@@ -146,7 +146,7 @@ const Profile: React.FC = () => {
             setRolesInput(profileRequest.role ? profileRequest.role.join(', ') : '');
             setIsEditDialogOpen(true);
           }} className="edit-profile-btn">
-            <FaEdit /> Edit 
+            <LuPencil /> Edit 
           </button>
         </div>
         
@@ -183,11 +183,11 @@ const Profile: React.FC = () => {
         
         <div className="profile-contact">
         <div className="contact-item">
-            <FaEnvelope className="contact-icon" />
+            <LuMail className="contact-icon" />
             <span className="contact-text">{email}</span>
           </div>
           <div className="contact-item">
-            <FaPhone className="contact-icon" />
+            <LuPhone className="contact-icon" />
             <span className="contact-text">{profileRequest.phoneNumber}</span>
           </div>
         </div>
@@ -204,7 +204,7 @@ const Profile: React.FC = () => {
                 onClick={() => setIsEditDialogOpen(false)}
                 aria-label="Close dialog"
               >
-                <FaTimes />
+                <LuX />
               </button>
             </div>
             
@@ -299,7 +299,7 @@ const Profile: React.FC = () => {
                     }}
                     aria-label="Add role"
                   >
-                    <FaPlus />
+                    <LuPlus />
                   </button>
                 </div>
                 {profileRequest.role && profileRequest.role.length > 0 && (
@@ -318,7 +318,7 @@ const Profile: React.FC = () => {
                           }}
                           aria-label={`Remove ${roleItem}`}
                         >
-                          <FaTimes />
+                          <LuX />
                         </button>
                       </span>
                     ))}

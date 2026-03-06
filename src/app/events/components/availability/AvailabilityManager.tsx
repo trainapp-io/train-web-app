@@ -85,9 +85,7 @@ const AvailabilityManager: React.FC = () => {
 
   const handleConfirmAppointment = async () => {
     if (!selectedSlot) return;
-    
     try {
-      // TODO: Implement booking logic here
       console.log('Confirming appointment for slot:', selectedSlot.id);
       alert('Appointment confirmed!');
       setShowAppointmentConfirm(false);
@@ -105,23 +103,19 @@ const AvailabilityManager: React.FC = () => {
 
   const handleShareAvailability = async () => {
     const shareUrl = `${window.location.origin}/share/availability/${userId}`;
-    
     try {
       await navigator.clipboard.writeText(shareUrl);
       setShowCopiedMessage(true);
       setTimeout(() => setShowCopiedMessage(false), 3000);
     } catch (err) {
       console.error('Failed to copy link:', err);
-      // Fallback: show the link in an alert
       alert(`Share this link:\n${shareUrl}`);
     }
   };
 
-  // Get availability dates for calendar
   const availabilityDates = useMemo(() => {
     const dates = new Set<string>();
     slots.forEach(slot => {
-      // Use UTC date to avoid timezone issues
       const date = new Date(slot.startDate);
       const year = date.getUTCFullYear();
       const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -131,63 +125,50 @@ const AvailabilityManager: React.FC = () => {
     return dates;
   }, [slots]);
 
-  // Get slots for selected date
   const slotsForSelectedDate = useMemo(() => {
     return slots.filter(slot => {
       const slotDate = new Date(slot.startDate);
-      // Compare using UTC dates to avoid timezone issues
       const slotYear = slotDate.getUTCFullYear();
       const slotMonth = slotDate.getUTCMonth();
       const slotDay = slotDate.getUTCDate();
-      
       return slotDay === selectedDate.getDate() &&
              slotMonth === selectedDate.getMonth() &&
              slotYear === selectedDate.getFullYear();
-    }).sort((a, b) => {
-      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-    });
+    }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   }, [slots, selectedDate]);
 
   const formatSelectedDate = () => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    
-    return `${days[selectedDate.getDay()]} ${months[selectedDate.getMonth()]} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`;
+    return selectedDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
   };
 
   if (loading) {
     return (
       <div className="availability-manager">
-        <p>Loading availability slots...</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading availability...</p>
       </div>
     );
   }
 
   return (
     <div className="availability-manager">
-      <div className="availability-header">
-        <div className="header-actions">
-          <button 
-            className="btn-share-availability" 
-            onClick={handleShareAvailability}
-            title="Copy shareable link"
-          >
-            {showCopiedMessage ? '✓ Link Copied!' : '🔗 Share Availability'}
-          </button>
-        </div>
-        <button 
-          className="btn-create-availability" 
-          onClick={handleCreateSlot}
+      <div className="availability-manager-header">
+        <button
+          className={`btn-share-availability ${showCopiedMessage ? 'copied' : ''}`}
+          onClick={handleShareAvailability}
+          title="Copy shareable link"
         >
-          + Create Availability
+          {showCopiedMessage ? '✓ Link copied' : '↗ Share link'}
+        </button>
+        <button className="btn-create-availability" onClick={handleCreateSlot}>
+          + New slot
         </button>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {showForm && (
         <div className="form-overlay">
@@ -211,32 +192,35 @@ const AvailabilityManager: React.FC = () => {
         </div>
       )}
 
-      <Calendar
-        currentMonth={currentMonth}
-        selectedDate={selectedDate}
-        availabilityDates={availabilityDates}
-        onDateSelect={handleDateSelect}
-        onMonthChange={handleMonthChange}
-      />
+      <div className="availability-content">
+        <Calendar
+          currentMonth={currentMonth}
+          selectedDate={selectedDate}
+          availabilityDates={availabilityDates}
+          onDateSelect={handleDateSelect}
+          onMonthChange={handleMonthChange}
+        />
 
-      <div className="selected-date-section">
-        <h3 className="selected-date-title">{formatSelectedDate()}</h3>
-        
-        {slotsForSelectedDate.length === 0 ? (
-          <div className="empty-day-state">
-            <p>No availability for this day</p>
+        <div className="availability-sidebar">
+          <div>
+            <div className="selected-date-heading">Selected day</div>
+            <div className="selected-date-label">{formatSelectedDate()}</div>
           </div>
-        ) : (
-          <div className="time-slots-grid">
-            {slotsForSelectedDate.map(slot => (
-              <TimeSlotCard
-                key={slot.id}
-                slot={slot}
-                onClick={() => handleTimeSlotClick(slot)}
-              />
-            ))}
-          </div>
-        )}
+
+          {slotsForSelectedDate.length === 0 ? (
+            <div className="empty-day-state">No slots on this day</div>
+          ) : (
+            <div className="time-slots-list">
+              {slotsForSelectedDate.map(slot => (
+                <TimeSlotCard
+                  key={slot.id}
+                  slot={slot}
+                  onClick={() => handleTimeSlotClick(slot)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

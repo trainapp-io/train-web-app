@@ -423,21 +423,21 @@
   gap: 24px;
 }
 
-.form-group {
+.profile-container .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.form-group label {
+.profile-container .form-group label {
   color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.profile-container .form-group input,
+.profile-container .form-group textarea,
+.profile-container .form-group select {
   padding: 12px 16px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -448,23 +448,23 @@
   transition: all var(--transition-speed);
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.profile-container .form-group input:focus,
+.profile-container .form-group textarea:focus,
+.profile-container .form-group select:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
+  .profile-container .form-group input:focus,
+  .profile-container .form-group textarea:focus,
+  .profile-container .form-group select:focus {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
   }
 }
 
-.form-group textarea {
+.profile-container .form-group textarea {
   resize: vertical;
   min-height: 100px;
 }
@@ -646,9 +646,9 @@
     padding: 14px 24px;
   }
 
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
+  .profile-container .form-group input,
+  .profile-container .form-group textarea,
+  .profile-container .form-group select {
     font-size: 16px; /* Prevents zoom on iOS */
   }
 

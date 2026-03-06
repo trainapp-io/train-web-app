@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { FaEdit, FaDumbbell } from 'react-icons/fa';
+import { LuShare2, LuTrash2, LuEllipsisVertical, LuPencil, LuDumbbell } from 'react-icons/lu';
 import { WorkoutResponse } from '@trainapp-io/train-core';
 
 interface WorkoutCardProps {
@@ -82,7 +81,7 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onDelete, onE
   return (
     <div className="workout-card" onClick={handleWorkoutClick}>
       <div className="workout-card-icon">
-        <FaDumbbell />
+        <LuDumbbell />
       </div>
       <div className="workout-card-content">
         <div className="workout-card-header">
@@ -96,7 +95,7 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onDelete, onE
               }}
               aria-label="Open menu"
             >
-              <IoEllipsisVertical />
+              <LuEllipsisVertical />
             </button>
             {isMenuOpen && (
               <div className="workout-menu-dropdown">
@@ -104,19 +103,19 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onDelete, onE
                   className="menu-item"
                   onClick={handleEdit}
                 >
-                  <FaEdit /> Edit
+                  <LuPencil /> Edit
                 </button>
                 <button
                   className="menu-item"
                   onClick={handleShare}
                 >
-                  <IoShareOutline /> {shareSuccess ? 'Copied!' : 'Share'}
+                  <LuShare2 /> {shareSuccess ? 'Copied!' : 'Share'}
                 </button>
                 <button
                   className="menu-item delete"
                   onClick={handleDelete}
                 >
-                  <IoTrashOutline /> Delete
+                  <LuTrash2 /> Delete
                 </button>
               </div>
             )}

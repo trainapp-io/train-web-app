@@ -79,6 +79,24 @@
   color: var(--accent-color);
 }
 
+.sidebar-shortcut-hint {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-speed);
+}
+
+.sidebar-toggle:hover .sidebar-shortcut-hint {
+  opacity: 1;
+}
+
 /* Sidebar logo */
 .sidebar-logo {
   display: flex;
@@ -285,11 +303,17 @@
   font-weight: 500;
   margin-left: 10px;
   white-space: nowrap;
+  overflow: hidden;
+  max-width: 160px;
+  opacity: 1;
+  transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
 }
 
 /* Collapsed sidebar adjustments */
 .sidebar.collapsed .tab-label {
-  display: none;
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
 }
 
 .sidebar.collapsed .sidebar-tab,

@@ -1,6 +1,5 @@
 .search-page {
-  padding: 20px;
-  margin: 0 auto;
+  padding: 1rem;
 }
 
 .search-page h1 {
@@ -21,7 +20,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .search-page {
-    padding: 16px;
+    padding: 1rem;
   }
   
   .search-page h1 {

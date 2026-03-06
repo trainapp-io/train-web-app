@@ -30,23 +30,8 @@ const TextInput: React.FC<TextInputProps> = ({
   name,
   testId,
 }) => {
-  console.log('TextInput render:', { testId, error });
-  // Determine the appropriate class based on input type
-  const getInputTypeClass = () => {
-    switch (type) {
-      case 'email':
-        return 'email-input';
-      case 'password':
-        return 'password-input';
-      case 'text':
-        return id.toLowerCase().includes('name') ? 'name-input' : '';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <div className={`form-group ${getInputTypeClass()}`}>
+    <div className="form-group">
       <label htmlFor={id}>{label}{required && <span className="required">*</span>}</label>
       <div className="input-wrapper">
         <input

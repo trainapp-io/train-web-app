@@ -220,14 +220,16 @@ const RegistrationForm: React.FC = () => {
       </Form>
       
       <div className="social-login">
-        <p>Or sign up with</p>
+        <div className="form-separator"><span>or</span></div>
         <SocialButton
           provider="google"
           testId="google-button"
           onClick={handleSignUpWithGoogle}
           disabled={isLoading}
           isLoading={isLoading && error?.includes('Google')}
-        />
+        >
+          Continue with Google
+        </SocialButton>
       </div>
     </>
   );

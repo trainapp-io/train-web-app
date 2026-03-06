@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTimes, FaExclamationTriangle } from 'react-icons/fa';
+import { LuX, LuTriangleAlert } from 'react-icons/lu';
 import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
@@ -31,12 +31,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <div className="confirm-dialog-overlay" onClick={onCancel}>
       <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
         <button className="confirm-close-button" onClick={onCancel} aria-label="Close">
-          <FaTimes />
+          <LuX />
         </button>
 
         <div className="confirm-dialog-content">
           <div className={`confirm-icon ${isDestructive ? 'destructive' : ''}`}>
-            <FaExclamationTriangle />
+            <LuTriangleAlert />
           </div>
           
           <h2 className="confirm-title">{title}</h2>

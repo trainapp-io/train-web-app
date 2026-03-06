@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router';
 import './ProgramView.css';
 import { programService } from '../services/programService';
-import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { FaEdit } from 'react-icons/fa';
+import { LuShare2, LuTrash2, LuEllipsisVertical, LuPencil } from 'react-icons/lu';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 import { ProgramResponse, WeekRequest, WeekResponse } from '@trainapp-io/train-core';
 import EditWeekDialog from '../components/EditWeekDialog';
@@ -267,14 +266,14 @@ const ProgramView: React.FC = () => {
               onClick={handleShare}
               aria-label="Share program"
             >
-              <IoShareOutline /> {shareSuccess ? 'Copied!' : 'Share'}
+              <LuShare2 /> {shareSuccess ? 'Copied!' : 'Share'}
             </button>
             <button 
               className="program-delete-button"
               onClick={handleDelete}
               aria-label="Delete program"
             >
-              <IoTrashOutline /> Delete
+              <LuTrash2 /> Delete
             </button>
           </div>
         </div>
@@ -327,7 +326,7 @@ const ProgramView: React.FC = () => {
                           }}
                           aria-label="Open menu"
                         >
-                          <IoEllipsisVertical />
+                          <LuEllipsisVertical />
                         </button>
                         {openMenuWeekId === week.id && (
                           <div className="week-menu-dropdown">
@@ -335,14 +334,14 @@ const ProgramView: React.FC = () => {
                               className="menu-item"
                               onClick={(e) => handleEditWeek(week.index, week.id, e)}
                             >
-                              <FaEdit /> Edit
+                              <LuPencil /> Edit
                             </button>
                             <button
                               className="menu-item delete"
                               onClick={(e) => handleDeleteWeek(week.id, week.index, e)}
                               disabled={isDeletingWeek}
                             >
-                              <IoTrashOutline /> {isDeletingWeek ? 'Deleting...' : 'Delete'}
+                              <LuTrash2 /> {isDeletingWeek ? 'Deleting...' : 'Delete'}
                             </button>
                           </div>
                         )}

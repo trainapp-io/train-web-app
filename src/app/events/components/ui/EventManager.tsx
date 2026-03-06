@@ -92,28 +92,38 @@ export default function EventManager() {
       {err && <p className="error">{err}</p>}
       
       {showCreateForm ? (
-        <CreateEventForm 
-          onCreated={handleCreateEvent} 
+        <CreateEventForm
+          onCreated={handleCreateEvent}
           onCancel={() => handleToggleForm(false)}
         />
       ) : (
         <>
-          <button 
-            className="create-event-button" 
-            onClick={() => handleToggleForm(true)}
-          >
-            + Create New Event
-          </button>
-          <div className="events-list">
-            {events.map((event, index) => (
-              <EventCard 
-                key={event.id || `event-${index}`} 
-                event={event} 
-                onClick={handleSelectEvent}
-                onDelete={handleDeleteEvent}
-              />
-            ))}
+          <div className="event-manager-header">
+            <button
+              className="create-event-button"
+              onClick={() => handleToggleForm(true)}
+            >
+              + New Event
+            </button>
           </div>
+
+          {events.length === 0 ? (
+            <div className="no-events">
+              <p className="no-events-title">No events yet</p>
+              <p className="no-events-hint">Create your first event to get started</p>
+            </div>
+          ) : (
+            <div className="events-list">
+              {events.map((event, index) => (
+                <EventCard
+                  key={event.id || `event-${index}`}
+                  event={event}
+                  onClick={handleSelectEvent}
+                  onDelete={handleDeleteEvent}
+                />
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

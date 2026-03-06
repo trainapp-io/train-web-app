@@ -1,8 +1,5 @@
 .workout-log-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
+  padding: 1rem;
 }
 
 /* Page Header */
@@ -12,7 +9,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .workout-log-page-header h1 {
@@ -33,39 +30,46 @@
 .btn-delete,
 .btn-primary {
   padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--button-border-radius);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-speed);
 }
 
 .btn-back {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
 }
 
 .btn-back:hover {
-  background: #e0e0e0;
+  background: var(--bg-secondary);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .btn-edit {
-  background: #1976d2;
-  color: white;
+  background: var(--accent-color);
+  color: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .btn-edit:hover {
-  background: #1565c0;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .btn-delete {
-  background: #f44336;
-  color: white;
+  background: var(--bg-primary);
+  color: #dc3545;
+  border-color: var(--border-color);
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: #d32f2f;
+  background: #dc3545;
+  color: var(--bg-secondary);
+  border-color: #dc3545;
 }
 
 .btn-delete:disabled {
@@ -74,14 +78,16 @@
 }
 
 .btn-primary {
-  background: #1976d2;
-  color: white;
+  background: var(--accent-color);
+  color: var(--bg-secondary);
+  border-color: var(--accent-color);
   padding: 12px 24px;
   font-size: 16px;
 }
 
 .btn-primary:hover {
-  background: #1565c0;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 /* Loading & Error States */
@@ -96,21 +102,22 @@
 }
 
 .error-container h2 {
-  color: #f44336;
+  color: #dc3545;
   margin-bottom: 12px;
 }
 
 .error-container p {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 24px;
 }
 
 /* Workout Log Detail */
 .workout-log-detail {
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--card-border-radius);
   padding: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
 }
 
 .detail-header {
@@ -122,7 +129,7 @@
 
 .detail-header h1 {
   margin: 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 28px;
   font-weight: 600;
 }
@@ -135,12 +142,13 @@
 }
 
 .status-badge.completed {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .workout-description {
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 24px;
 }
@@ -151,8 +159,9 @@
   gap: 16px;
   margin-bottom: 32px;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  background: var(--bg-primary);
+  border-radius: var(--input-border-radius);
+  border: 1px solid var(--border-color);
 }
 
 .metadata-item {
@@ -163,14 +172,14 @@
 
 .metadata-item .label {
   font-size: 12px;
-  color: #888;
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 500;
 }
 
 .metadata-item .value {
   font-size: 16px;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -181,23 +190,22 @@
 
 .blocks-section h2 {
   margin: 0 0 20px 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 24px;
   font-weight: 600;
 }
 
 .block-detail {
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
-  border-left: 4px solid #1976d2;
-  border-radius: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-border-radius);
   padding: 20px;
   margin-bottom: 16px;
 }
 
 .block-detail.completed {
-  border-left-color: #4caf50;
-  background: #f1f8f4;
+  border-color: var(--border-color);
+  background: var(--bg-primary);
 }
 
 .block-header {
@@ -209,13 +217,13 @@
 
 .block-header h3 {
   margin: 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 20px;
   font-weight: 600;
 }
 
 .check-icon {
-  color: #4caf50;
+  color: var(--text-secondary);
   font-size: 20px;
   font-weight: bold;
 }
@@ -233,12 +241,12 @@
 }
 
 .stat-label {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .stat-value {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 14px;
 }
@@ -252,15 +260,15 @@
 }
 
 .exercise-detail {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-border-radius);
   padding: 12px 16px;
 }
 
 .exercise-detail.completed {
-  background: #f1f8f4;
-  border-color: #4caf50;
+  background: var(--bg-primary);
+  border-color: var(--border-color);
 }
 
 .exercise-name {
@@ -269,7 +277,7 @@
   gap: 8px;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .exercise-stats {
@@ -277,13 +285,14 @@
   gap: 16px;
   flex-wrap: wrap;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .exercise-stats span {
   padding: 4px 12px;
-  background: #f5f5f5;
+  background: var(--bg-primary);
   border-radius: 4px;
+  border: 1px solid var(--border-color);
 }
 
 /* Workout Log History */
@@ -294,18 +303,19 @@
 }
 
 .workout-log-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-border-radius);
   padding: 20px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-speed);
+  box-shadow: var(--card-shadow);
 }
 
 .workout-log-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
   transform: translateY(-2px);
+  border-color: var(--accent-color);
 }
 
 .card-header {
@@ -317,13 +327,13 @@
 
 .card-header h3 {
   margin: 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 18px;
   font-weight: 600;
 }
 
 .card-description {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 16px;
@@ -340,8 +350,9 @@
   gap: 8px;
   margin-bottom: 16px;
   padding: 12px;
-  background: #f9f9f9;
-  border-radius: 6px;
+  background: var(--bg-primary);
+  border-radius: var(--input-border-radius);
+  border: 1px solid var(--border-color);
 }
 
 .metadata-row {
@@ -351,17 +362,17 @@
 }
 
 .metadata-label {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .metadata-value {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .card-stats {
   padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
 }
 
 .stat-item {
@@ -371,12 +382,12 @@
 }
 
 .stat-item .stat-label {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .stat-item .stat-value {
-  color: #1976d2;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 14px;
 }
@@ -398,13 +409,13 @@
 
 .empty-state h2 {
   margin: 0 0 12px 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 24px;
   font-weight: 600;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 32px;
   max-width: 400px;
   line-height: 1.6;
@@ -413,7 +424,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .workout-log-page {
-    padding: 12px;
+    padding: 1rem;
   }
 
   .workout-log-page-header {

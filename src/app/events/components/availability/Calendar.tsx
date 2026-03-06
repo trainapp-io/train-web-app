@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './Calendar.css';
 
 interface CalendarProps {
@@ -16,25 +16,12 @@ export const Calendar: React.FC<CalendarProps> = ({
   onDateSelect,
   onMonthChange,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
   const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    return { daysInMonth, startingDayOfWeek };
-  };
 
   const isToday = (date: Date) => {
     const today = new Date();
@@ -49,106 +36,41 @@ export const Calendar: React.FC<CalendarProps> = ({
            date.getFullYear() === selectedDate.getFullYear();
   };
 
-  const getCurrentWeekDates = () => {
-    // Get the week that contains a day from the current displayed month
-    const today = new Date();
-    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    
-    // Check if today is in the current displayed month
-    const isCurrentMonth = today.getMonth() === currentMonth.getMonth() && 
-                          today.getFullYear() === currentMonth.getFullYear();
-    
-    // Use today if it's in the current month, otherwise use the first day of the month
-    const referenceDate = isCurrentMonth ? today : firstDayOfMonth;
-    
-    const startOfWeek = new Date(referenceDate);
-    startOfWeek.setDate(referenceDate.getDate() - referenceDate.getDay());
-    
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      weekDates.push(date);
-    }
-    return weekDates;
-  };
-
-  const isCurrentWeek = (date: Date) => {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    return date >= startOfWeek && date <= endOfWeek;
-  };
-
   const dateToString = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   };
 
-  const hasAvailability = (date: Date) => {
-    return availabilityDates.has(dateToString(date));
-  };
+  const hasAvailability = (date: Date) => availabilityDates.has(dateToString(date));
 
-  const renderCurrentWeek = () => {
-    const weekDates = getCurrentWeekDates();
-    
-    return weekDates.map((date, index) => {
-      const isCurrentDay = isToday(date);
-      const isSelected = isSelectedDate(date);
-      const hasSlots = hasAvailability(date);
-
-      const classNames = [
-        'calendar-day',
-        isCurrentDay ? 'today' : '',
-        isSelected ? 'selected' : '',
-        !hasSlots ? 'no-availability' : 'has-availability'
-      ].filter(Boolean).join(' ');
-
-      return (
-        <div
-          key={index}
-          className={classNames}
-          onClick={() => onDateSelect(date)}
-        >
-          {date.getDate()}
-        </div>
-      );
-    });
-  };
-
-  const renderFullMonth = () => {
-    const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+  const renderMonth = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     const days = [];
 
-    // Empty cells for days before the month starts
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="calendar-day empty" />);
     }
 
-    // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-      const isCurrentDay = isToday(date);
-      const isSelected = isSelectedDate(date);
-      const inCurrentWeek = isCurrentWeek(date);
+      const date = new Date(year, month, day);
+      const today = isToday(date);
+      const selected = isSelectedDate(date);
       const hasSlots = hasAvailability(date);
 
-      const classNames = [
+      const className = [
         'calendar-day',
-        isCurrentDay ? 'today' : '',
-        isSelected ? 'selected' : '',
-        inCurrentWeek ? 'current-week' : '',
-        !hasSlots ? 'no-availability' : 'has-availability'
+        today ? 'today' : '',
+        selected ? 'selected' : '',
+        hasSlots ? 'has-availability' : 'no-availability',
       ].filter(Boolean).join(' ');
 
       days.push(
-        <div
-          key={day}
-          className={classNames}
-          onClick={() => onDateSelect(date)}
-        >
+        <div key={day} className={className} onClick={() => onDateSelect(date)}>
           {day}
         </div>
       );
@@ -160,36 +82,24 @@ export const Calendar: React.FC<CalendarProps> = ({
   return (
     <div className="calendar-container">
       <div className="calendar-header">
-        <div className="calendar-month-selector" onClick={() => setIsExpanded(!isExpanded)}>
-          <h2>{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</h2>
-          <span className={`dropdown-arrow ${isExpanded ? 'expanded' : ''}`}>▼</span>
-        </div>
+        <h2>{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</h2>
         <div className="calendar-nav">
-          <button onClick={() => onMonthChange('prev')} className="nav-btn">
-            ‹
-          </button>
-          <button onClick={() => onMonthChange('next')} className="nav-btn">
-            ›
-          </button>
+          <button className="nav-btn" onClick={() => onMonthChange('prev')}>‹</button>
+          <button className="nav-btn" onClick={() => onMonthChange('next')}>›</button>
         </div>
       </div>
-      <div className="calendar-grid">
-        <div className="calendar-days-header">
-          {dayNames.map(day => (
-            <div key={day} className="calendar-day-name">
-              {day}
-            </div>
-          ))}
-        </div>
-        <div className="calendar-days-body">
-          {isExpanded ? renderFullMonth() : renderCurrentWeek()}
-        </div>
+
+      <div className="calendar-days-header">
+        {dayNames.map(day => (
+          <div key={day} className="calendar-day-name">{day}</div>
+        ))}
       </div>
-      {!isExpanded && (
-        <div className="calendar-expand-btn" onClick={() => setIsExpanded(true)}>
-          <span>▼</span>
-        </div>
-      )}
+      <div
+        className="calendar-days-body"
+        key={`${currentMonth.getFullYear()}-${currentMonth.getMonth()}`}
+      >
+        {renderMonth()}
+      </div>
     </div>
   );
 };

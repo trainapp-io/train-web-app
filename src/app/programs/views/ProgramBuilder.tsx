@@ -11,7 +11,7 @@ import { programService } from "../services/programService";
 import { ProgramRequest, ProfileAccess } from "@trainapp-io/train-core";
 import { tokenService } from '../../../services/tokenService';
 
-import { IoClose } from 'react-icons/io5';
+import { LuX } from 'react-icons/lu';
 import logo from '../../../assets/logo.svg';
 
 interface ProgramPhase {
@@ -127,7 +127,7 @@ const ProgramBuilder: React.FC = () => {
         onClick={() => navigate('/programs')}
         aria-label="Close builder"
       >
-        <IoClose />
+        <LuX />
       </button>
       <div className="program-builder-container">
       

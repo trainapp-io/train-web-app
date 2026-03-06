@@ -1,71 +1,36 @@
 .availability-page {
-  min-height: 100vh;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  padding: 1rem;
 }
 
-.availability-page-header {
-  background: white;
-  padding: 30px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: center;
-}
-
-.availability-page-header h1 {
-  margin: 0 0 10px 0;
-  font-size: 32px;
-  font-weight: 600;
-  color: #333;
-}
-
-.availability-page-description {
-  margin: 0;
-  color: #666;
-  font-size: 16px;
-}
-
-.tabs-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.tabs {
+.availability-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-  border-bottom: 2px solid var(--border-color);
+  gap: 4px;
+  padding: 4px;
   background: var(--bg-secondary);
-  padding: 0 20px;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--button-border-radius);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  width: fit-content;
 }
 
-.tab {
-  background: none;
+.availability-tab {
+  padding: 8px 20px;
   border: none;
-  padding: 15px 25px;
-  font-size: 16px;
-  font-weight: 500;
+  background: transparent;
   color: var(--text-secondary);
+  border-radius: var(--input-border-radius);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s;
-  margin-bottom: -2px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all var(--transition-speed);
+  white-space: nowrap;
 }
 
-.tab:hover {
+.availability-tab.active {
+  background: var(--bg-primary);
   color: var(--text-primary);
 }
 
-.tab.active {
+.availability-tab:hover:not(.active) {
   color: var(--text-primary);
-  border-bottom-color: var(--accent-color);
-}
-
-.tab-content {
-  background: var(--bg-secondary);
-  border-radius: 0;
-  min-height: 400px;
-  border: none;
-  padding: 1rem 0;
 }

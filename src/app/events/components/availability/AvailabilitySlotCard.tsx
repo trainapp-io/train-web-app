@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { FaEdit, FaCalendarAlt } from 'react-icons/fa';
+import { LuShare2, LuTrash2, LuEllipsisVertical, LuPencil, LuCalendar } from 'react-icons/lu';
 import { AvailabilitySlotResponse } from '../../types/availability.types';
 import './AvailabilitySlotCard.css';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
@@ -101,7 +100,7 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
   return (
     <div className="availability-slot-card">
       <div className="availability-card-icon">
-        <FaCalendarAlt />
+        <LuCalendar />
       </div>
       <div className="availability-card-content">
         <div className="availability-card-header">
@@ -117,7 +116,7 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
               }}
               aria-label="Open menu"
             >
-              <IoEllipsisVertical />
+              <LuEllipsisVertical />
             </button>
             {isMenuOpen && (
               <div className="availability-menu-dropdown">
@@ -125,19 +124,19 @@ const AvailabilitySlotCard: React.FC<AvailabilitySlotCardProps> = ({
                   className="menu-item"
                   onClick={handleEdit}
                 >
-                  <FaEdit /> Edit
+                  <LuPencil /> Edit
                 </button>
                 <button
                   className="menu-item"
                   onClick={handleShare}
                 >
-                  <IoShareOutline /> {shareSuccess ? 'Copied!' : 'Share'}
+                  <LuShare2 /> {shareSuccess ? 'Copied!' : 'Share'}
                 </button>
                 <button
                   className="menu-item delete"
                   onClick={handleDelete}
                 >
-                  <IoTrashOutline /> Delete
+                  <LuTrash2 /> Delete
                 </button>
               </div>
             )}

@@ -94,11 +94,11 @@
   text-align: right;
 }
 
-.form-group {
+.booking-modal .form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.booking-modal .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
@@ -106,26 +106,28 @@
   font-size: 14px;
 }
 
-.form-group input,
-.form-group textarea {
+.booking-modal .form-group input,
+.booking-modal .form-group textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-border-radius);
   font-size: 14px;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-speed);
   box-sizing: border-box;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
-.form-group textarea {
+.booking-modal .form-group textarea {
   resize: vertical;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.booking-modal .form-group input:focus,
+.booking-modal .form-group textarea:focus {
   outline: none;
-  border-color: #000;
+  border-color: var(--accent-color);
 }
 
 .modal-actions {

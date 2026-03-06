@@ -4,7 +4,7 @@ import './WeekView.css';
 import { programService } from '../services/programService';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 import { tokenService } from '../../../services/tokenService';
-import { IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
+import { LuTrash2, LuEllipsisVertical } from 'react-icons/lu';
 import { WeekResponse } from '@trainapp-io/train-core';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -605,7 +605,7 @@ const WeekView: React.FC = () => {
                           onClick={(e) => toggleColorMenu(workout.id, e)}
                           aria-label="Workout options"
                         >
-                          <IoEllipsisVertical />
+                          <LuEllipsisVertical />
                         </button>
                         
                         {showColorMenu === workout.id && (
@@ -630,7 +630,7 @@ const WeekView: React.FC = () => {
                               onClick={(e) => handleDeleteWorkout(workout.id, e)}
                               disabled={isDeleting}
                             >
-                              <IoTrashOutline />
+                              <LuTrash2 />
                               {isDeleting ? 'Deleting...' : 'Delete Workout'}
                             </button>
                           </div>
@@ -674,7 +674,7 @@ const WeekView: React.FC = () => {
                           onClick={(e) => toggleColorMenu(workout.id, e)}
                           aria-label="Workout options"
                         >
-                          <IoEllipsisVertical />
+                          <LuEllipsisVertical />
                         </button>
                         {showColorMenu === workout.id && (
                           <div className="color-menu" ref={colorMenuRef}>
@@ -698,7 +698,7 @@ const WeekView: React.FC = () => {
                               onClick={(e) => handleDeleteWorkout(workout.id, e)}
                               disabled={isDeleting}
                             >
-                              <IoTrashOutline />
+                              <LuTrash2 />
                               {isDeleting ? 'Deleting...' : 'Delete Workout'}
                             </button>
                           </div>

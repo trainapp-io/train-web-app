@@ -1,7 +1,5 @@
 .workout-log-form {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 1rem;
 }
 
 /* Header Styles */
@@ -531,7 +529,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .workout-log-form {
-    padding: 12px;
+    padding: 1rem;
   }
 
   .block-log-section,

@@ -168,17 +168,15 @@
 }
 
 .event-manager {
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
 }
 
 .event-manager-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  margin-bottom: 1.5rem;
+  gap: 0.75rem;
 }
 
 .event-manager-header h2 {
@@ -276,20 +274,21 @@
 .create-event-button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 16px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  background: var(--accent-color);
+  color: var(--bg-secondary);
+  border: 1px solid var(--accent-color);
+  border-radius: var(--button-border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all var(--transition-speed);
 }
 
 .create-event-button:hover {
-  background-color: var(--border-color);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .event-manager-error {
@@ -322,7 +321,7 @@
   gap: 16px;
 }
 
-.form-group {
+.event-form .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -337,31 +336,31 @@
   flex: 1;
 }
 
-.form-group label {
+.event-form .form-group label {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary);
 }
 
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="datetime-local"],
-.form-group textarea {
+.event-form .form-group input[type="text"],
+.event-form .form-group input[type="number"],
+.event-form .form-group input[type="datetime-local"],
+.event-form .form-group textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: var(--input-border-radius);
   font-size: 16px;
   transition: border-color 0.2s;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
 
-.form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus,
-.form-group input[type="datetime-local"]:focus,
-.form-group textarea:focus {
-  border-color: var(--border-color);
+.event-form .form-group input[type="text"]:focus,
+.event-form .form-group input[type="number"]:focus,
+.event-form .form-group input[type="datetime-local"]:focus,
+.event-form .form-group textarea:focus {
+  border-color: var(--accent-color);
   outline: none;
 }
 
@@ -480,30 +479,28 @@
 }
 
 .no-events {
-  text-align: center;
-  padding: 40px;
-  background-color: var(--bg-primary);
-  border-radius: 8px;
-  color: var(--text-secondary);
-}
-
-.create-first-event {
-  margin-top: 16px;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--card-border-radius);
 }
 
-.create-first-event:hover {
-  background-color: var(--border-color);
+.no-events-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.no-events-hint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .event-card.event-ongoing {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
-import { AiOutlineLogout, AiOutlineMenu, AiOutlineClose, AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
+import { LuLogOut, LuMenu, LuX, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import logo from "@/assets/logo.svg";
 import logoWhite from "@/assets/logo-white.svg";
 import { authService } from "../app/access/services/authService";
@@ -72,6 +72,18 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
     }
   }, [navigate]);
 
+  // Cmd+K shortcut to toggle sidebar (desktop only)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey) && !isMobile) {
+        e.preventDefault();
+        setCollapsed(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobile]);
+
   const handleSignOut = async () => {
     const logoutRequest: LogoutRequest = {
       deviceId: tokenService.getDeviceId(),
@@ -101,9 +113,9 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
   const SignoutButton = () => (
     <div className={`sidebar-signout ${isSmallScreen ? 'top-position' : ''}`} onClick={handleSignOut} title="Sign Out">
       <span className="tab-icon">
-        <AiOutlineLogout />
+        <LuLogOut />
       </span>
-      {(!collapsed || isMobile) && <span className="tab-label">Sign Out</span>}
+      <span className="tab-label">Sign Out</span>
     </div>
   );
 
@@ -115,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
         onClick={toggleSidebar}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
       >
-        {mobileOpen ? <AiOutlineClose /> : <AiOutlineMenu />}
+        {mobileOpen ? <LuX /> : <LuMenu />}
       </button>
 
       <div className={sidebarClasses}>
@@ -125,12 +137,13 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
             <div className="sidebar-logo">
               <img src={isDarkMode ? logoWhite : logo} alt="Train Logo" />
             </div>
-            <button 
-              className="sidebar-toggle" 
+            <button
+              className="sidebar-toggle"
               onClick={toggleSidebar}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {collapsed ? <AiOutlineArrowRight /> : <AiOutlineArrowLeft />}
+              {collapsed ? <LuChevronRight /> : <LuChevronLeft />}
+              {!collapsed && <span className="sidebar-shortcut-hint">⌘K</span>}
             </button>
           </div>
         )}
@@ -150,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
                 onClick={() => isMobile && setMobileOpen(false)}
               >
                 <span className="tab-icon">{tab.icon}</span>
-                {(!collapsed || isMobile) && <span className="tab-label">{tab.label}</span>}
+                <span className="tab-label">{tab.label}</span>
               </NavLink>
             ))}
           </div>

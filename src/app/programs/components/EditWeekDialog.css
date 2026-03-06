@@ -61,11 +61,11 @@
   padding: 24px;
 }
 
-.form-group {
+.edit-week-dialog .form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.edit-week-dialog .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
@@ -73,28 +73,27 @@
   font-size: 0.95rem;
 }
 
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="date"],
-.form-group textarea {
+.edit-week-dialog .form-group input[type="text"],
+.edit-week-dialog .form-group input[type="number"],
+.edit-week-dialog .form-group input[type="date"],
+.edit-week-dialog .form-group textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--input-border-radius);
   font-size: 1rem;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color var(--transition-speed);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.edit-week-dialog .form-group input:focus,
+.edit-week-dialog .form-group textarea:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
-.form-group textarea {
+.edit-week-dialog .form-group textarea {
   resize: vertical;
   min-height: 100px;
   font-family: inherit;

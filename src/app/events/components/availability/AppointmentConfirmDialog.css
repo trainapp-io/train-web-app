@@ -1,10 +1,11 @@
 .appointment-confirm-dialog {
-  background-color: var(--bg-secondary, #ffffff);
-  border-radius: 12px;
+  background-color: var(--bg-secondary);
+  border-radius: var(--card-border-radius);
+  border: 1px solid var(--border-color);
   max-width: 480px;
   width: 100%;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--card-shadow);
 }
 
 .dialog-header {
@@ -101,19 +102,14 @@
 }
 
 .btn-confirm {
-  background-color: var(--accent-color, #007bff);
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  background-color: var(--accent-color);
+  color: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .btn-confirm:hover {
-  background-color: var(--accent-hover, #0056b3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-}
-
-.btn-confirm:active {
-  transform: translateY(0);
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 /* Mobile responsive */

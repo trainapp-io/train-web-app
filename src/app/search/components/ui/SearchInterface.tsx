@@ -4,7 +4,7 @@ import {
   CertificationResponse, 
   SearchProfilesResponse,
 } from '@trainapp-io/train-core';
-import { FaSearch, FaUser, FaUsers, FaCertificate, FaTimes, FaChevronRight } from 'react-icons/fa';
+import { LuSearch, LuUser, LuUsers, LuAward, LuX, LuChevronRight } from 'react-icons/lu';
 import './SearchInterface.css';
 
 interface SearchInterfaceProps {
@@ -138,7 +138,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
     <div className="search-interface">
       <div className="search-header">
         <div className="search-input-container">
-          <FaSearch className="search-icon" />
+          <LuSearch className="search-icon" />
           <input
             type="text"
             value={searchQuery}
@@ -148,7 +148,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
           />
           {searchQuery && (
             <button className="clear-search-button" onClick={handleClearSearch}>
-              <FaTimes />
+              <LuX />
             </button>
           )}
         </div>
@@ -200,7 +200,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                       onClick={() => handleResultSelect(profile, 'profile')}
                     >
                       <div className="result-icon">
-                        <FaUser />
+                        <LuUser />
                       </div>
                       <div className="result-content">
                         <h4 className="result-title">{profile.name}</h4>
@@ -212,7 +212,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                         )}
                       </div>
                       <div className="result-action">
-                        <FaChevronRight />
+                        <LuChevronRight />
                       </div>
                     </div>
                   ))}
@@ -225,7 +225,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                       onClick={() => handleResultSelect(group, 'group')}
                     >
                       <div className="result-icon">
-                        <FaUsers />
+                        <LuUsers />
                       </div>
                       <div className="result-content">
                         <h4 className="result-title">
@@ -247,7 +247,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                         )}
                       </div>
                       <div className="result-action">
-                        <FaChevronRight />
+                        <LuChevronRight />
                       </div>
                     </div>
                   ))}
@@ -266,7 +266,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                       onClick={() => handleResultSelect(result, 'certification')}
                     >
                       <div className="result-icon">
-                        <FaCertificate />
+                        <LuAward />
                       </div>
                       <div className="result-content">
                         <h4 className="result-title">{result.name}</h4>
@@ -285,7 +285,7 @@ const SearchInterface: React.FC<SearchInterfaceProps> = ({
                         )}
                       </div>
                       <div className="result-action">
-                        <FaChevronRight />
+                        <LuChevronRight />
                       </div>
                     </div>
                   ))}

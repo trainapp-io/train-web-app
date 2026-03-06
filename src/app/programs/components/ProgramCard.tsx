@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { IoShareOutline, IoTrashOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { FaEdit } from 'react-icons/fa';
+import { LuShare2, LuTrash2, LuEllipsisVertical, LuPencil } from 'react-icons/lu';
 import { programService } from '../services/programService';
 import { ProgramResponse } from '@trainapp-io/train-core';
 
@@ -122,7 +121,7 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onDelete, onE
               }}
               aria-label="Open menu"
             >
-              <IoEllipsisVertical />
+              <LuEllipsisVertical />
             </button>
             {isMenuOpen && (
               <div className="program-menu-dropdown">
@@ -130,20 +129,20 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onDelete, onE
                   className="menu-item"
                   onClick={handleEdit}
                 >
-                  <FaEdit /> Edit
+                  <LuPencil /> Edit
                 </button>
                 <button
                   className="menu-item"
                   onClick={handleShare}
                 >
-                  <IoShareOutline /> {shareSuccess ? 'Copied!' : 'Share'}
+                  <LuShare2 /> {shareSuccess ? 'Copied!' : 'Share'}
                 </button>
                 <button
                   className="menu-item delete"
                   onClick={handleDelete}
                   disabled={isDeleting}
                 >
-                  <IoTrashOutline /> {isDeleting ? 'Deleting...' : 'Delete'}
+                  <LuTrash2 /> {isDeleting ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             )}

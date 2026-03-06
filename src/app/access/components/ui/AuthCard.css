@@ -1,26 +1,163 @@
 /* AuthCard Component Styles */
 
+/* ── Split layout ─────────────────────────────── */
+.auth-layout {
+  display: flex;
+  flex-direction: row;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+/* ── Left image panel ─────────────────────────── */
+.auth-image-panel {
+  flex: 1;
+  position: relative;
+  background: #0f0c14;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem;
+  overflow: hidden;
+}
+
+/* Background images — lowest layer */
+.auth-slide-images {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.auth-slide-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.auth-slide-image.active {
+  opacity: 0.45;
+}
+
+/* Dark gradient overlay — above images, below text */
+.auth-image-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(160deg, rgba(26, 5, 51, 0.7) 0%, rgba(15, 12, 20, 0.6) 50%, rgba(15, 12, 20, 0.85) 100%),
+    radial-gradient(ellipse 80% 60% at 30% 20%, rgba(167, 139, 250, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Text content — above overlay */
+.auth-slides {
+  position: relative;
+  z-index: 2;
+  min-height: 160px;
+  margin-bottom: 2rem;
+}
+
+.auth-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+}
+
+.auth-slide.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.auth-slide-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(167, 139, 250, 0.8);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  margin-bottom: 1rem;
+}
+
+.auth-slide-headline {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #f0eeff;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.875rem;
+}
+
+.auth-slide-sub {
+  font-size: 0.9375rem;
+  color: rgba(240, 238, 255, 0.55);
+  line-height: 1.65;
+  max-width: 380px;
+}
+
+.auth-slide-dots {
+  display: flex;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-slide-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-speed), width var(--transition-speed);
+}
+
+.auth-slide-dot.active {
+  width: 20px;
+  border-radius: 3px;
+  background: rgba(167, 139, 250, 0.85);
+}
+
+/* ── Right form panel ─────────────────────────── */
+.auth-form-panel {
+  width: 460px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+}
+
 .auth-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem;
-  min-height: 100vh;
-  justify-content: space-between;
+  max-width: 360px;
+  padding: 3rem 2rem;
 }
 
 .auth-logo-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
   width: 100%;
 }
 
 .auth-logo {
-  max-width: 35px;
+  max-width: 32px;
   height: auto;
 }
 
@@ -32,34 +169,41 @@
 
 .auth-title {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
-  margin-bottom: 0;
+  line-height: 1.5;
 }
 
 .auth-content {
   width: 100%;
-  margin-bottom: auto;
-  flex-grow: 1;
 }
 
 .auth-footer {
   width: 100%;
   text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8125rem;
   color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.auth-footer p + p {
+  margin-top: 0.375rem;
 }
 
 .auth-footer a {
   color: var(--accent-color);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .auth-footer a:hover {
@@ -76,109 +220,29 @@
 .auth-link {
   color: var(--accent-color);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .auth-link:hover {
   text-decoration: underline;
 }
 
-/* Form options spacing */
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-/* Social login spacing */
-.social-login {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.social-login p {
-  margin-bottom: 1rem;
-  color: var(--text-secondary);
-}
-
-/* SVG Fill Color */
-.svg-fill {
-  fill: var(--text-primary);
-}
-
-/* Ensure the SVG fill works on all devices */
-@media (prefers-color-scheme: light) {
-  .svg-fill {
-    fill: #fff;
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 768px) {
+  .auth-image-panel {
+    display: none;
   }
-}
 
-@media (prefers-color-scheme: dark) {
-  .svg-fill {
-    fill: #fff;
-  }
-}
-
-/* Mobile-specific styles */
-@media (prefers-color-scheme: dark) {
-  .auth-container {
-    padding: 1.5rem 1.5rem 5rem 1.5rem;
-  }
-  
-  .auth-footer {
-    margin-top: 3rem;
-    padding-bottom: 2rem;
-  }
-}
-
-/* Add specific mobile styles regardless of color scheme */
-@media (max-width: 480px) {
-  .auth-container {
-    min-height: 100vh;
-    justify-content: flex-start;
-    padding-bottom: 2rem;
-    overflow-y: auto;
-  }
-  
-  .auth-content {
-    flex-grow: 0;
-    margin-bottom: 2rem;
-    min-height: 200px; /* Ensure minimum height for shorter forms */
-  }
-  
-  .auth-footer {
-    position: static;
+  .auth-form-panel {
     width: 100%;
-    margin-top: auto;
-    padding: 1rem 0;
-    background-color: transparent;
-    z-index: 10;
-  }
-  
-  .auth-footer a {
-    font-weight: 500;
-    font-size: 1rem;
-    text-decoration: underline;
-    color: var(--accent-color);
+    border-left: none;
+    align-items: flex-start;
+    min-height: 100dvh;
   }
 
-  /* Specific adjustment for forgot-password page */
-  [class*="forgot-password"] .auth-container,
-  [class*="reset-password"] .auth-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  [class*="forgot-password"] .auth-content,
-  [class*="reset-password"] .auth-content {
-    flex: 1 0 auto;
-  }
-  
-  [class*="forgot-password"] .auth-footer,
-  [class*="reset-password"] .auth-footer {
-    margin-top: auto;
-    flex-shrink: 0;
+  .auth-container {
+    max-width: 100%;
+    padding: 2.5rem 1.5rem 3rem;
   }
 }

@@ -10,27 +10,23 @@ const AvailabilityPage: React.FC = () => {
 
   return (
     <div className="availability-page">
-      <div className="tabs-container">
-        <div className="tabs">
-          <button
-            className={`tab ${activeTab === 'my-availability' ? 'active' : ''}`}
-            onClick={() => setActiveTab('my-availability')}
-          >
-            My Availability
-          </button>
-          <button
-            className={`tab ${activeTab === 'bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bookings')}
-          >
-            Bookings
-          </button>
-        </div>
-
-        <div className="tab-content">
-          {activeTab === 'my-availability' && <AvailabilityManager />}
-          {activeTab === 'bookings' && <BookingsManager />}
-        </div>
+      <div className="availability-tabs">
+        <button
+          className={`availability-tab ${activeTab === 'my-availability' ? 'active' : ''}`}
+          onClick={() => setActiveTab('my-availability')}
+        >
+          My Availability
+        </button>
+        <button
+          className={`availability-tab ${activeTab === 'bookings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('bookings')}
+        >
+          Bookings
+        </button>
       </div>
+
+      {activeTab === 'my-availability' && <AvailabilityManager />}
+      {activeTab === 'bookings' && <BookingsManager />}
     </div>
   );
 };

@@ -58,12 +58,8 @@ const WorkoutLogHistory: React.FC = () => {
   if (!workoutLogs || workoutLogs.length === 0) {
     return (
       <div className="workout-log-page">
-        <div className="workout-log-page-header">
-          <h1>Workout History</h1>
-        </div>
-        <div className="empty-state">
-          <div className="empty-icon">📋</div>
-          <h2>No workouts logged yet</h2>
+          <div className="empty-state">
+<h2>No workouts logged yet</h2>
           <p>Start tracking your fitness journey by logging your first workout!</p>
           <button onClick={handleLogWorkout} className="btn-primary">
             Log Your First Workout
@@ -76,7 +72,6 @@ const WorkoutLogHistory: React.FC = () => {
   return (
     <div className="workout-log-page">
       <div className="workout-log-page-header">
-        <h1>Workout History</h1>
         <button onClick={handleLogWorkout} className="btn-primary">
           Log Another Workout
         </button>
