@@ -70,8 +70,45 @@ describe('Button', () => {
   it('applies testId correctly', () => {
     const testId = 'submit-button';
     render(<Button {...defaultProps} testId={testId} />);
-    
+
     expect(screen.getByTestId(testId)).toBeInTheDocument();
     expect(screen.getByTestId(testId)).toBe(screen.getByRole('button'));
+  });
+
+  it('renders danger variant', () => {
+    render(<Button {...defaultProps} variant="danger" />);
+    expect(screen.getByRole('button')).toHaveClass('button-danger');
+  });
+
+  it('renders block variant with full-width class', () => {
+    render(<Button {...defaultProps} block />);
+    expect(screen.getByRole('button')).toHaveClass('button-block');
+  });
+
+  it('does not apply block class by default', () => {
+    render(<Button {...defaultProps} />);
+    expect(screen.getByRole('button')).not.toHaveClass('button-block');
+  });
+
+  it('renders small size', () => {
+    render(<Button {...defaultProps} size="sm" />);
+    expect(screen.getByRole('button')).toHaveClass('button-sm');
+  });
+
+  it('renders large size', () => {
+    render(<Button {...defaultProps} size="lg" />);
+    expect(screen.getByRole('button')).toHaveClass('button-lg');
+  });
+
+  it('does not add size class for default md size', () => {
+    render(<Button {...defaultProps} size="md" />);
+    expect(screen.getByRole('button')).not.toHaveClass('button-md');
+  });
+
+  it('does not call onClick when disabled', () => {
+    const onClick = vi.fn();
+    render(<Button {...defaultProps} onClick={onClick} disabled />);
+    fireEvent.click(screen.getByRole('button'));
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

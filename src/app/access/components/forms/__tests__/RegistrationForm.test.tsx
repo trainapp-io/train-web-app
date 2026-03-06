@@ -65,7 +65,7 @@ describe('RegistrationForm', () => {
         // Check for text elements
         expect(screen.getByText(/Terms of Service/i)).toBeInTheDocument();
         expect(screen.getByText(/Privacy Policy/i)).toBeInTheDocument();
-        expect(screen.getByText(/Or sign up with/i)).toBeInTheDocument();
+        expect(screen.getByText('or')).toBeInTheDocument();
     });
 
     describe('Error Cases', () => {
