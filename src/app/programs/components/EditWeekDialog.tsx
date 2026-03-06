@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LuX, LuUpload } from 'react-icons/lu';
 import { WeekRequest } from '@trainapp-io/train-core';
+import Button from '../../../components/ui/Button';
 import './EditWeekDialog.css';
 
 interface EditWeekDialogProps {
@@ -205,12 +206,12 @@ const EditWeekDialog: React.FC<EditWeekDialogProps> = ({
             </div>
 
             <div className="edit-week-dialog-actions">
-              <button type="button" className="btn-secondary" onClick={handleClose}>
+              <Button type="button" variant="secondary" onClick={handleClose}>
                 Cancel
-              </button>
-              <button type="submit" className="btn-primary" disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </button>
+              </Button>
+              <Button type="submit" isLoading={isSaving} disabled={isSaving}>
+                Save Changes
+              </Button>
             </div>
           </form>
         </div>

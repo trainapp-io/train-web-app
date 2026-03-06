@@ -8,7 +8,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   className?: string;
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'link';
+  variant?: 'primary' | 'secondary' | 'outline' | 'link' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  block?: boolean;
   testId?: string;
 }
 
@@ -20,12 +22,16 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   children,
   variant = 'primary',
+  size = 'md',
+  block = false,
   testId
 }) => {
   const baseClass = 'button';
   const variantClass = `button-${variant}`;
+  const sizeClass = size !== 'md' ? `button-${size}` : '';
+  const blockClass = block ? 'button-block' : '';
   const loadingClass = isLoading ? 'button-loading' : '';
-  const buttonClasses = `${baseClass} ${variantClass} ${loadingClass} ${className}`.trim();
+  const buttonClasses = [baseClass, variantClass, sizeClass, blockClass, loadingClass, className].filter(Boolean).join(' ');
 
   return (
     <button

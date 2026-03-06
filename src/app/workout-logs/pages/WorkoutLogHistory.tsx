@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { useWorkoutLogHistory } from '../../../services/apiHooks';
+import Button from '../../../components/ui/Button';
 import './WorkoutLogPages.css';
 
 const WorkoutLogHistory: React.FC = () => {
@@ -61,9 +62,9 @@ const WorkoutLogHistory: React.FC = () => {
           <div className="empty-state">
 <h2>No workouts logged yet</h2>
           <p>Start tracking your fitness journey by logging your first workout!</p>
-          <button onClick={handleLogWorkout} className="btn-primary">
+          <Button onClick={handleLogWorkout}>
             Log Your First Workout
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -72,9 +73,9 @@ const WorkoutLogHistory: React.FC = () => {
   return (
     <div className="workout-log-page">
       <div className="workout-log-page-header">
-        <button onClick={handleLogWorkout} className="btn-primary">
+        <Button onClick={handleLogWorkout}>
           Log Another Workout
-        </button>
+        </Button>
       </div>
 
       <div className="workout-log-list">

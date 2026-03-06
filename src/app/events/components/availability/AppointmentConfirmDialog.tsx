@@ -1,5 +1,6 @@
 import React from 'react';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
+import Button from '../../../../components/ui/Button';
 import './AppointmentConfirmDialog.css';
 
 interface AppointmentConfirmDialogProps {
@@ -90,12 +91,12 @@ export const AppointmentConfirmDialog: React.FC<AppointmentConfirmDialogProps> =
       </div>
 
       <div className="dialog-actions">
-        <button className="btn-cancel" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
-        <button className="btn-confirm" onClick={onConfirm}>
+        </Button>
+        <Button onClick={onConfirm}>
           Confirm Appointment
-        </button>
+        </Button>
       </div>
     </div>
   );

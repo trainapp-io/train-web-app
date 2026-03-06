@@ -3,6 +3,7 @@ import { availabilityService } from '../../services/availabilityService';
 import { BookingRequest } from '../../types/availability.types';
 import { AvailabilityResponse } from '@trainapp-io/train-core';
 import { tokenService } from '../../../../services/tokenService';
+import Button from '../../../../components/ui/Button';
 import './BookingModal.css';
 
 interface BookingModalProps {
@@ -164,12 +165,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ slot, hostId, onSuccess, on
             </div>
 
             <div className="modal-actions">
-              <button type="button" className="btn-secondary" onClick={onCancel}>
+              <Button type="button" variant="secondary" onClick={onCancel}>
                 Cancel
-              </button>
-              <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? 'Booking...' : 'Confirm Booking'}
-              </button>
+              </Button>
+              <Button type="submit" isLoading={loading} disabled={loading}>
+                Confirm Booking
+              </Button>
             </div>
           </form>
         </div>

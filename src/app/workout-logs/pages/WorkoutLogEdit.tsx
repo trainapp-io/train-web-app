@@ -4,6 +4,7 @@ import { WorkoutLogRequest } from '@trainapp-io/train-core';
 import { useWorkoutLog, useUpdateWorkoutLog } from '../../../services/apiHooks';
 import { useWorkoutLogContext } from '../contexts/WorkoutLogContext';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
+import Button from '../../../components/ui/Button';
 import './WorkoutLogPages.css';
 
 const WorkoutLogEdit: React.FC = () => {
@@ -52,9 +53,9 @@ const WorkoutLogEdit: React.FC = () => {
         <div className="error-container">
           <h2>Error</h2>
           <p>Failed to load workout log</p>
-          <button onClick={() => navigate('/workout-logs/history')} className="btn-back">
+          <Button variant="secondary" onClick={() => navigate('/workout-logs/history')}>
             Back to History
-          </button>
+          </Button>
         </div>
       </div>
     );

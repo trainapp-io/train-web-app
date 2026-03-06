@@ -1,5 +1,6 @@
 import React from 'react';
 import { LuX, LuTriangleAlert } from 'react-icons/lu';
+import Button from '../../../components/ui/Button';
 import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
@@ -44,22 +45,23 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
 
         <div className="confirm-dialog-actions">
-          <button 
-            type="button" 
-            className="confirm-btn-cancel" 
+          <Button
+            type="button"
+            variant="secondary"
             onClick={onCancel}
             disabled={isLoading}
           >
             {cancelText}
-          </button>
-          <button 
-            type="button" 
-            className={`confirm-btn-confirm ${isDestructive ? 'destructive' : ''}`}
+          </Button>
+          <Button
+            type="button"
+            variant={isDestructive ? 'danger' : 'primary'}
             onClick={onConfirm}
             disabled={isLoading}
+            isLoading={isLoading}
           >
-            {isLoading ? 'Processing...' : confirmText}
-          </button>
+            {confirmText}
+          </Button>
         </div>
       </div>
     </div>

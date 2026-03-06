@@ -109,45 +109,6 @@
   border-top: 1px solid var(--border-color);
 }
 
-.btn-secondary {
-  padding: 10px 20px;
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--button-border-radius);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-speed);
-}
-
-.btn-secondary:hover {
-  border-color: var(--text-primary);
-  color: var(--text-primary);
-}
-
-.btn-primary {
-  padding: 10px 20px;
-  background: var(--accent-color);
-  color: var(--bg-secondary);
-  border: 1px solid var(--accent-color);
-  border-radius: var(--button-border-radius);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-speed);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 @media (max-width: 600px) {
   .availability-slot-form {
     padding: 1.5rem;
@@ -159,11 +120,5 @@
 
   .form-actions {
     flex-direction: column;
-  }
-
-  .btn-secondary,
-  .btn-primary {
-    width: 100%;
-    text-align: center;
   }
 }

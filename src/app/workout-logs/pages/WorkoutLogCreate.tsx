@@ -7,6 +7,7 @@ import { workoutService } from '../../workouts/services/workoutService';
 import { tokenService } from '../../../services/tokenService';
 import { useWorkoutLogContext } from '../contexts/WorkoutLogContext';
 import WorkoutLogForm from '../components/WorkoutLogForm/WorkoutLogForm';
+import Button from '../../../components/ui/Button';
 import './WorkoutLogPages.css';
 
 const WorkoutLogCreate: React.FC = () => {
@@ -132,9 +133,9 @@ const WorkoutLogCreate: React.FC = () => {
         <div className="error-container">
           <h2>Error</h2>
           <p>{error || 'Failed to load workout'}</p>
-          <button onClick={() => navigate(-1)} className="btn-back">
+          <Button variant="secondary" onClick={() => navigate(-1)}>
             Go Back
-          </button>
+          </Button>
         </div>
       </div>
     );

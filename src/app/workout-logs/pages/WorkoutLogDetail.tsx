@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useWorkoutLog, useDeleteWorkoutLog } from '../../../services/apiHooks';
+import Button from '../../../components/ui/Button';
 import './WorkoutLogPages.css';
 
 const WorkoutLogDetail: React.FC = () => {
@@ -64,9 +65,9 @@ const WorkoutLogDetail: React.FC = () => {
         <div className="error-container">
           <h2>Error</h2>
           <p>Failed to load workout log</p>
-          <button onClick={() => navigate('/workout-logs/history')} className="btn-back">
+          <Button variant="secondary" onClick={() => navigate('/workout-logs/history')}>
             Back to History
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -75,16 +76,16 @@ const WorkoutLogDetail: React.FC = () => {
   return (
     <div className="workout-log-page">
       <div className="workout-log-page-header">
-        <button onClick={() => navigate('/workout-logs/history')} className="btn-back">
+        <Button variant="secondary" onClick={() => navigate('/workout-logs/history')}>
           ← Back to History
-        </button>
+        </Button>
         <div className="header-actions">
-          <button onClick={handleEdit} className="btn-edit">
+          <Button onClick={handleEdit}>
             Edit
-          </button>
-          <button onClick={handleDelete} className="btn-delete" disabled={deleteWorkoutLogMutation.isPending}>
-            {deleteWorkoutLogMutation.isPending ? 'Deleting...' : 'Delete'}
-          </button>
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleteWorkoutLogMutation.isPending} isLoading={deleteWorkoutLogMutation.isPending}>
+            Delete
+          </Button>
         </div>
       </div>
 

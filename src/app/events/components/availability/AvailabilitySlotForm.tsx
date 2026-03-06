@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { availabilityService } from '../../services/availabilityService';
 import { CreateAvailabilityRequest, AvailabilitySlotResponse } from '../../types/availability.types';
 import { tokenService } from '../../../../services/tokenService';
+import Button from '../../../../components/ui/Button';
 import './AvailabilitySlotForm.css';
 
 interface AvailabilitySlotFormProps {
@@ -202,12 +203,12 @@ const AvailabilitySlotForm: React.FC<AvailabilitySlotFormProps> = ({ slot, selec
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : slot ? 'Update Slot' : 'Create Slot'}
-          </button>
+          </Button>
+          <Button type="submit" isLoading={loading} disabled={loading}>
+            {slot ? 'Update Slot' : 'Create Slot'}
+          </Button>
         </div>
       </form>
     </div>
