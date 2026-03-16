@@ -1,14 +1,14 @@
-// WorkoutView/components/CircuitItem.tsx
 import React from 'react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { LuX, LuPlus } from 'react-icons/lu';
 import ExerciseItem from './ExerciseItem';
 import TimePicker from './TimePicker';
 import { Block, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 
-
 interface Props {
   block: Block;
+  blockNumber: number;
   editMode: boolean;
   workout: WorkoutRequest;
   onUpdateBlock: (updated: Block) => void;
@@ -20,6 +20,7 @@ interface Props {
 
 const CircuitItem: React.FC<Props> = ({
   block,
+  blockNumber,
   editMode,
   workout,
   onUpdateBlock,
@@ -28,138 +29,122 @@ const CircuitItem: React.FC<Props> = ({
   updateExerciseInBlockPartial,
   removeExerciseFromBlock,
 }) => {
-
-  const updateBlock = (updated: Block) => {
-    onUpdateBlock(updated);
-  };
-
-  const removeBlock = () => {
-    onRemoveBlock();
-  };
-
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
     const oldIndex = block.exercises.findIndex((e) => e.order === active.id);
     const newIndex = block.exercises.findIndex((e) => e.order === over.id);
-    
     if (oldIndex === -1 || newIndex === -1) return;
-    
-    const reordered = arrayMove(block.exercises, oldIndex, newIndex);
-    
-    // Update order property for all exercises after reordering
-    const reorderedWithUpdatedOrder = reordered.map((exercise, index) => ({
-      ...exercise,
-      order: index
-    }));
-    
-    updateBlock({ ...block, exercises: reorderedWithUpdatedOrder });
+    const reordered = arrayMove(block.exercises, oldIndex, newIndex).map((ex, i) => ({ ...ex, order: i }));
+    onUpdateBlock({ ...block, exercises: reordered });
     onSetHasUnsavedChanges(true);
   };
 
+  const addExercise = () => {
+    onUpdateBlock({
+      ...block,
+      exercises: [
+        ...block.exercises,
+        {
+          name: '',
+          rest: 0,
+          targetReps: 10,
+          targetDurationSec: 0,
+          targetWeight: 0,
+          targetDistance: 0,
+          measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
+          notes: '',
+          order: block.exercises.length,
+          sets: 3,
+          hasSuperset: false,
+        },
+      ],
+    });
+  };
+
+  const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
+  const restSeconds = (block as any).rest || 0;
+
   return (
-    <div className="circuit-block">
-      <div className="circuit-header">
+    <div className="block-card">
+      {/* ── Block header ── */}
+      <div className={`block-card__header ${editMode ? 'block-card__header--edit' : ''}`}>
         {editMode ? (
           <>
-            <div className="circuit-header-right">
-              <div className="circuit-sets">
-                <label>Sets:</label>
+            <span className="block-card__num">#{blockNumber}</span>
+            <input
+              className="block-card__name-input"
+              type="text"
+              value={block.name}
+              onChange={(e) => onUpdateBlock({ ...block, name: e.target.value })}
+              placeholder="Block name"
+              aria-label="Block name"
+            />
+            <div className="block-card__controls">
+              <div className="block-ctrl">
+                <span className="block-ctrl__label">Sets</span>
                 <input
+                  className="block-ctrl__input"
                   type="number"
+                  min={1}
                   value={block.targetSets}
-                  onChange={(e) => updateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
-                  min="1"
-                  className="sets-input"
+                  onChange={(e) => onUpdateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
+                  aria-label="Target sets"
                 />
               </div>
-              <div className="circuit-rest">
-                <label>Rest:</label>
+              <div className="block-ctrl">
+                <span className="block-ctrl__label">Rest</span>
                 <TimePicker
-                  value={(block as any).rest || 0}
-                  onChange={(seconds) => updateBlock({ ...block, rest: seconds } as any)}
-                  placeholder="Rest"
+                  value={restSeconds}
+                  onChange={(s) => onUpdateBlock({ ...block, rest: s } as any)}
+                  placeholder="0"
                 />
               </div>
-              <button
-                className="remove-circuit-btn"
-                onClick={removeBlock}
-                title="Remove circuit"
-              >
-                ✕
+              <button className="block-card__remove" onClick={onRemoveBlock} aria-label="Remove block">
+                <LuX />
               </button>
-            </div>
-            <div className="circuit-header-left">
-              <input
-                type="text"
-                value={block.name}
-                onChange={(e) => updateBlock({ ...block, name: e.target.value })}
-                className="circuit-name-input"
-                placeholder="Circuit name"
-              />
             </div>
           </>
         ) : (
           <>
-            <div className="circuit-sets">
-              <span className="sets-label">{block.targetSets} sets</span>
+            <span className="block-card__num">#{blockNumber}</span>
+            <h3 className="block-card__name">{block.name}</h3>
+            <div className="block-card__pills">
+              <span className="block-pill block-pill--sets">{block.targetSets} sets</span>
+              {restSeconds > 0 && (
+                <span className="block-pill block-pill--rest">{restSeconds}s rest</span>
+              )}
             </div>
-            {block.rest != null && block.rest > 0 && (
-              <div className="circuit-rest">
-                <span className="rest-label">{block.rest}s rest</span>
-              </div>
-            )}
-            <h3>{block.name}</h3>
           </>
         )}
       </div>
 
+      {/* ── Exercises ── */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={block.exercises.map((e) => e.order)} strategy={verticalListSortingStrategy}>
-          {block.exercises.map((exercise, exerciseIndex) => (
-            <ExerciseItem
-              key={exercise.order}
-              exercise={exercise}
-              editMode={editMode}
-              blockIndex={workout.blocks?.findIndex(b => b.order === block.order) ?? 0}
-              exerciseIndex={exerciseIndex}
-              updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-              removeExerciseFromBlock={removeExerciseFromBlock}
-            />
-          ))}
+          <div className="block-card__exercises">
+            {block.exercises.length === 0 && editMode && (
+              <p className="block-card__empty">No exercises yet — add one below.</p>
+            )}
+            {block.exercises.map((exercise, exerciseIndex) => (
+              <ExerciseItem
+                key={exercise.order}
+                exercise={exercise}
+                editMode={editMode}
+                blockIndex={blockIndex}
+                exerciseIndex={exerciseIndex}
+                updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                removeExerciseFromBlock={removeExerciseFromBlock}
+              />
+            ))}
+          </div>
         </SortableContext>
       </DndContext>
 
+      {/* ── Add exercise ── */}
       {editMode && (
-        <button
-          className="add-exercise-btn"
-          onClick={() =>
-            updateBlock({
-              ...block,
-              exercises: [
-                ...block.exercises,
-                {
-                  name: '',
-                  rest: 0,
-                  targetReps: 10,
-                  targetDurationSec: 0,
-                  targetWeight: 0,
-                  targetDistance: 0,
-                  measurement: {
-                    measurementType: MeasurementType.REPS,
-                    measurementUnit: MeasurementUnit.POUND,
-                  },
-                  notes: '',
-                  order: block.exercises.length,
-                  sets: 1,
-                  hasSuperset: false,
-                },
-              ],
-            })
-          }
-        >
-          + Add Exercise
+        <button className="block-card__add-ex" onClick={addExercise}>
+          <LuPlus aria-hidden="true" /> Add Exercise
         </button>
       )}
     </div>

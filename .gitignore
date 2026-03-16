@@ -32,3 +32,10 @@ test-results
 # Local Netlify folder
 .netlify
 playwright-report/
+
+.clarify/
+.specify/
+.claude/
+CLAUDE.md
+docs/
+specs/

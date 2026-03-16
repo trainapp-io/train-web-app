@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-import { LuDumbbell } from 'react-icons/lu';
+import { LuGripVertical, LuX, LuRefreshCw } from 'react-icons/lu';
 import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
-
 
 interface Props {
   exercise: Exercise;
@@ -15,256 +13,210 @@ interface Props {
   removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
 }
 
-const ExerciseItem: React.FC<Props> = ({ 
-  exercise, 
-  editMode, 
-  blockIndex, 
+const AVATAR_COLORS = [
+  { bg: '#ede9fe', color: '#6d28d9' },
+  { bg: '#dbeafe', color: '#1d4ed8' },
+  { bg: '#dcfce7', color: '#15803d' },
+  { bg: '#fce7f3', color: '#9d174d' },
+  { bg: '#fef3c7', color: '#92400e' },
+  { bg: '#e0f2fe', color: '#075985' },
+  { bg: '#fee2e2', color: '#991b1b' },
+];
+
+function getAvatarStyle(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
+  [MeasurementType.REPS]: 'Reps',
+  [MeasurementType.TIME]: 'Time (s)',
+  [MeasurementType.DISTANCE]: 'Dist',
+};
+
+const ExerciseItem: React.FC<Props> = ({
+  exercise,
+  editMode,
+  blockIndex,
   exerciseIndex,
   updateExerciseInBlockPartial,
-  removeExerciseFromBlock 
+  removeExerciseFromBlock,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.order });
   const style = { transform: CSS.Transform.toString(transform), transition };
-  const [exerciseSuggestions, setExerciseSuggestions] = useState<any[]>([]);
+
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-  
-  if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) {
-    console.error('ExerciseItem: Missing required context methods');
-    return null;
-  }
+
+  if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) return null;
 
   const measurementType = exercise.measurement?.measurementType || MeasurementType.REPS;
-  const isRest = exercise.name?.toLowerCase().includes('rest') || false;
+  const weightUnit = (exercise as any).weightUnit === Unit.KILOGRAM ? 'kg' : 'lbs';
+  const sets = (exercise as any).sets || 1;
 
-  const updateExercise = (blockIdx: number, exerciseIdx: number, updatedExercise: Partial<Exercise>) => {
-    updateExerciseInBlockPartial(blockIdx, exerciseIdx, updatedExercise );
-    
-  };
+  const update = (updates: Partial<Exercise>) =>
+    updateExerciseInBlockPartial(blockIndex, exerciseIndex, updates);
 
-  const cycleMeasurementType = () => {
+  const cycleMeasurement = () => {
     const types = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
-    const currentIndex = types.indexOf(measurementType);
-    const nextIndex = (currentIndex + 1) % types.length;
-    updateExercise(blockIndex, exerciseIndex, { 
-      measurement: { 
-        ...exercise.measurement,
-        measurementType: types[nextIndex] 
-      } 
-    });
+    const next = types[(types.indexOf(measurementType) + 1) % types.length];
+    update({ measurement: { ...exercise.measurement, measurementType: next } });
   };
 
-  const cycleWeightUnit = () => {
-    // Cycle through weight units: lb -> kg -> lb
-    const currentUnit = (exercise as any).weightUnit || Unit.POUND;
-    const nextUnit = currentUnit === Unit.POUND ? Unit.KILOGRAM : Unit.POUND;
-    updateExercise(blockIndex, exerciseIndex, { weightUnit: nextUnit } as any);
-  };
-
-  const getWeightUnitLabel = () => {
-    const unit = (exercise as any).weightUnit || Unit.POUND;
-    return unit === Unit.KILOGRAM ? 'kg' : 'lb';
-  };
-
-  const searchExercises = async (query: string) => {
-    if (!query || query.length < 2) {
-      setExerciseSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    const apiKey = import.meta.env.VITE_RAPIDAPI_KEY;
-    
-    // Skip API call if no key is configured
-    if (!apiKey) {
-      return;
-    }
-
-    setIsLoadingSuggestions(true);
-    try {
-      const response = await fetch(`https://exercisedb.p.rapidapi.com/exercises/name/${query}?limit=10`, {
-        headers: {
-          'X-RapidAPI-Key': apiKey,
-          'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setExerciseSuggestions(data);
-        setShowSuggestions(true);
-      } else {
-        // Silently fail for 401, 429, etc.
-        console.warn(`Exercise API returned ${response.status}`);
-        setExerciseSuggestions([]);
-        setShowSuggestions(false);
-      }
-    } catch (error) {
-      console.error('Error fetching exercises:', error);
-      // Don't show suggestions on error
-      setExerciseSuggestions([]);
-      setShowSuggestions(false);
-    } finally {
-      setIsLoadingSuggestions(false);
-    }
+  const cycleWeight = () => {
+    const next = (exercise as any).weightUnit === Unit.KILOGRAM ? Unit.POUND : Unit.KILOGRAM;
+    update({ weightUnit: next } as any);
   };
 
   const handleNameChange = (value: string) => {
-    updateExercise(blockIndex, exerciseIndex, { name: value });
-    
-    // Debounce API call
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    
-    debounceTimer.current = setTimeout(() => {
-      searchExercises(value);
+    update({ name: value });
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      if (!value || value.length < 2) return setSuggestions([]);
+      const apiKey = import.meta.env.VITE_RAPIDAPI_KEY;
+      if (!apiKey) return;
+      try {
+        const res = await fetch(
+          `https://exercisedb.p.rapidapi.com/exercises/name/${value}?limit=8`,
+          { headers: { 'X-RapidAPI-Key': apiKey, 'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com' } }
+        );
+        if (res.ok) {
+          setSuggestions(await res.json());
+          setShowSuggestions(true);
+        }
+      } catch { setSuggestions([]); }
     }, 300);
   };
 
-  const selectExercise = (exerciseName: string) => {
-    updateExercise(blockIndex, exerciseIndex, { name: exerciseName });
-    setShowSuggestions(false);
-    setExerciseSuggestions([]);
-  };
+  useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
+  // Build view-mode summary string
+  const metricLabel = MEASUREMENT_LABELS[measurementType];
+  const metricValue = exercise.targetReps || 0;
+  const weightValue = exercise.targetWeight || 0;
+  const restValue = exercise.rest || 0;
+  const avatar = getAvatarStyle(exercise.name || 'X');
+  const initial = (exercise.name || '?').charAt(0).toUpperCase();
+
+  const summaryParts: string[] = [];
+  if (metricValue) summaryParts.push(`${metricValue} ${metricLabel.toLowerCase()}`);
+  if (weightValue) summaryParts.push(`${weightValue} ${weightUnit}`);
+  if (restValue) summaryParts.push(`${restValue}s rest`);
+
+  // ── View mode ────────────────────────────────────────────────────────────────
+
+  if (!editMode) {
+    return (
+      <div ref={setNodeRef} style={style} className="ex-row" {...attributes}>
+        <div className="ex-row__avatar" style={{ background: avatar.bg, color: avatar.color }}>
+          {initial}
+        </div>
+        <div className="ex-row__info">
+          <span className="ex-row__name">{exercise.name || 'Untitled'}</span>
+          {summaryParts.length > 0 && (
+            <span className="ex-row__meta">
+              {sets} × {summaryParts.join(' · ')}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Edit mode ─────────────────────────────────────────────────────────────
 
   return (
-    <div ref={setNodeRef} style={style} className={`exercise-item ${isRest ? 'rest-item' : ''}`} {...attributes}>
-      {/* Exercise Header - Same for both modes */}
-      <div className="exercise-header">
-        {editMode && <span className="drag-handle" {...listeners}>☰</span>}
-        <div className="exercise-icon">
-          {(exercise as any).gifUrl ? (
-            <img src={(exercise as any).gifUrl} alt={exercise.name} />
-          ) : (
-            <LuDumbbell className="exercise-icon-placeholder" />
+    <div ref={setNodeRef} style={style} className="ex-card" {...attributes}>
+      {/* Name row */}
+      <div className="ex-card__top">
+        <span className="ex-card__drag" {...listeners} aria-label="Drag to reorder">
+          <LuGripVertical />
+        </span>
+        <div className="ex-card__name-wrap">
+          <input
+            className="ex-card__name-input"
+            type="text"
+            value={exercise.name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            placeholder="Exercise name…"
+            aria-label="Exercise name"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="ex-suggestions">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  className="ex-suggestion"
+                  onMouseDown={() => { update({ name: s.name }); setShowSuggestions(false); }}
+                >
+                  <span className="ex-suggestion__name">{s.name}</span>
+                  <span className="ex-suggestion__tag">{s.target}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
-        <div className="exercise-header-info">
-          {editMode ? (
-            <input
-              type="text"
-              value={exercise.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              className="exercise-name-input-inline"
-              placeholder={isRest ? "Rest" : "Exercise name"}
-            />
-          ) : (
-            <span className="exercise-name">{exercise.name}</span>
-          )}
-          {editMode ? (
-            <input
-              type="number"
-              value={(exercise as any).sets || 1}
-              min={1}
-              onChange={(e) => updateExercise(blockIndex, exerciseIndex, { sets: parseInt(e.target.value) || 1 } as any)}
-              className="exercise-set-count-input"
-              placeholder="Sets"
-            />
-          ) : (
-            <span className="exercise-set-count">{(exercise as any).sets || 1} Set{((exercise as any).sets || 1) > 1 ? 's' : ''}</span>
-          )}
-        </div>
-        {editMode && (
-          <button
-            className="remove-exercise-btn-header"
-            onClick={() => removeExerciseFromBlock(blockIndex, exerciseIndex)}
-            title="Remove exercise"
-          >
-            ✕
-          </button>
-        )}
+        <button className="ex-card__remove" onClick={() => removeExerciseFromBlock(blockIndex, exerciseIndex)} aria-label="Remove exercise">
+          <LuX />
+        </button>
       </div>
 
-      {/* Exercise suggestions dropdown */}
-      {editMode && showSuggestions && exerciseSuggestions.length > 0 && (
-        <div className="exercise-suggestions">
-          {isLoadingSuggestions && <div className="suggestion-loading">Loading...</div>}
-          {exerciseSuggestions.map((ex, idx) => (
-            <div
-              key={idx}
-              className="exercise-suggestion-item"
-              onClick={() => selectExercise(ex.name)}
-            >
-              <span className="suggestion-name">{ex.name}</span>
-              <span className="suggestion-target">{ex.target}</span>
-            </div>
-          ))}
+      {/* Metrics row */}
+      <div className="ex-card__metrics">
+        <div className="ex-metric">
+          <span className="ex-metric__label">Sets</span>
+          <input
+            className="ex-metric__input"
+            type="number"
+            min={1}
+            value={sets}
+            onChange={(e) => update({ sets: parseInt(e.target.value) || 1 } as any)}
+            aria-label="Number of sets"
+          />
         </div>
-      )}
-
-      {/* Sets Table - Same layout for both modes */}
-      <div className="exercise-sets-container">
-        <div className="exercise-sets-header">
-          <span>Set</span>
-          <span>Rest</span>
-          <span 
-            className={editMode ? 'clickable-header' : ''}
-            onClick={editMode ? cycleMeasurementType : undefined}
-            title={editMode ? 'Click to change measurement type' : ''}
-          >
-            {measurementType === MeasurementType.TIME ? 'Time' : 
-             measurementType === MeasurementType.DISTANCE ? 'Distance' : 'Reps'}
-          </span>
-          <span 
-            className={editMode ? 'clickable-header' : ''}
-            onClick={editMode ? cycleWeightUnit : undefined}
-            title={editMode ? 'Click to change weight unit' : ''}
-          >
-            {getWeightUnitLabel()}
-          </span>
+        <div className="ex-metric">
+          <button className="ex-metric__label ex-metric__label--btn" onClick={cycleMeasurement} title="Click to change">
+            {MEASUREMENT_LABELS[measurementType]} <LuRefreshCw size={10} />
+          </button>
+          <input
+            className="ex-metric__input"
+            type="number"
+            min={0}
+            value={metricValue || ''}
+            onChange={(e) => update({ targetReps: parseInt(e.target.value) || 0 })}
+            placeholder="0"
+            aria-label={MEASUREMENT_LABELS[measurementType]}
+          />
         </div>
-        {Array.from({ length: (exercise as any).sets || 1 }).map((_, setIndex) => (
-          <div key={setIndex} className="exercise-set-row">
-            <span className="exercise-set-value">{setIndex + 1}</span>
-            {editMode ? (
-              <>
-                <input
-                  type="number"
-                  value={exercise.rest || ''}
-                  onChange={(e) => updateExercise(blockIndex, exerciseIndex, { rest: parseInt(e.target.value) || 0 })}
-                  className="exercise-set-input"
-                  placeholder="0"
-                />
-                <input
-                  type="number"
-                  value={exercise.targetReps || ''}
-                  min={1}
-                  onChange={(e) => updateExercise(blockIndex, exerciseIndex, { targetReps: parseInt(e.target.value) || 0 })}
-                  className="exercise-set-input"
-                  placeholder="0"
-                />
-                <input
-                  type="number"
-                  value={exercise.targetWeight || ''}
-                  onChange={(e) => updateExercise(blockIndex, exerciseIndex, { targetWeight: parseInt(e.target.value) || 0 })}
-                  className="exercise-set-input"
-                  placeholder="0"
-                />
-              </>
-            ) : (
-              <>
-                <span className="exercise-set-value">{exercise.rest ? `${exercise.rest}s` : '-'}</span>
-                <span className="exercise-set-value">
-                  {measurementType === MeasurementType.TIME 
-                    ? `${exercise.targetReps || 0}s` 
-                    : exercise.targetReps || 0}
-                </span>
-                <span className="exercise-set-value">{exercise.targetWeight || 0}</span>
-              </>
-            )}
-          </div>
-        ))}
+        <div className="ex-metric">
+          <button className="ex-metric__label ex-metric__label--btn" onClick={cycleWeight} title="Click to change unit">
+            {weightUnit} <LuRefreshCw size={10} />
+          </button>
+          <input
+            className="ex-metric__input"
+            type="number"
+            min={0}
+            value={weightValue || ''}
+            onChange={(e) => update({ targetWeight: parseInt(e.target.value) || 0 })}
+            placeholder="0"
+            aria-label="Target weight"
+          />
+        </div>
+        <div className="ex-metric">
+          <span className="ex-metric__label">Rest (s)</span>
+          <input
+            className="ex-metric__input"
+            type="number"
+            min={0}
+            value={restValue || ''}
+            onChange={(e) => update({ rest: parseInt(e.target.value) || 0 })}
+            placeholder="0"
+            aria-label="Rest seconds"
+          />
+        </div>
       </div>
     </div>
   );

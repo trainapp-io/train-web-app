@@ -10,6 +10,7 @@ import WorkoutDetailsSection from './WorkoutDetailsSection';
 import CircuitItem from '../components/workoutBuilder/CircuitItem';
 import EmptyState from '../components/workoutBuilder/EmptyState';
 import { arrayMove } from '@dnd-kit/sortable';
+import { LuPlus } from 'react-icons/lu';
 import { WorkoutRequest, BlockType, Block } from '@trainapp-io/train-core';
 import { useProgramContext, programUtils } from '../contexts/ProgramContext';
 
@@ -242,10 +243,11 @@ const ProgramWorkoutView: React.FC = () => {
         <div className="circuits-container">
           {state.workoutRequest?.blocks?.length ? (
             <SortableContext items={state.workoutRequest.blocks.map(c => c.order)} strategy={verticalListSortingStrategy}>
-              {state.workoutRequest.blocks.map(circuit => (
+              {state.workoutRequest.blocks.map((circuit, idx) => (
                 <CircuitItem
                   key={circuit.order}
                   block={circuit}
+                  blockNumber={idx + 1}
                   editMode={state.workoutEditMode && state.workoutIsOwner}
                   workout={state.workoutRequest!}
                   onUpdateBlock={updateBlock}
@@ -262,7 +264,7 @@ const ProgramWorkoutView: React.FC = () => {
           
           {state.workoutEditMode && state.workoutIsOwner && (
             <button className="add-circuit-btn" onClick={addCircuit}>
-              + Add Circuit
+              <LuPlus aria-hidden="true" /> Add Block
             </button>
           )}
         </div>

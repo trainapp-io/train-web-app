@@ -1,4 +1,5 @@
 import React from 'react';
+import { LuClock } from 'react-icons/lu';
 import { useProgramContext } from '../contexts/ProgramContext';
 import TimePicker from '../components/workoutBuilder/TimePicker';
 
@@ -26,53 +27,53 @@ const WorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges
     setHasUnsavedChanges(true);
   };
 
-  return (
-    <div className="workout-details">
-      {editMode ? (
-        <input
-          type="text"
-          value={workout.name || ''}
-          onChange={(e) => handleNameChange(e.target.value)}
-          className="workout-name-input"
-          placeholder="Workout name"
-        />
-      ) : (
-        <h1>{workout.name}</h1>
-      )}
-      
-      {editMode ? (
-        <textarea
-          value={workout.description || ''}
-          onChange={(e) => handleDescriptionChange(e.target.value)}
-          className="workout-description-input"
-          placeholder="Workout description"
-          rows={3}
-        />
-      ) : (
-        <p className="workout-description">{workout.description}</p>
-      )}
-
-      <div className="workout-meta">
-        <div className="duration-section">
-          <h3>Duration</h3>
-          {editMode ? (
-            <TimePicker
-              value={(workout.duration || 0) * 60}
-              onChange={handleDurationChange}
-              placeholder="Duration"
-              defaultUnit="min"
-            />
-          ) : (
-            <span>{workout.duration} minutes</span>
+  if (!editMode) {
+    return (
+      <div className="wd-view">
+        <h1 className="wd-view__name">{workout.name || 'Untitled Workout'}</h1>
+        <div className="wd-view__row">
+          {workout.description && (
+            <p className="wd-view__desc">{workout.description}</p>
+          )}
+          {(workout.duration ?? 0) > 0 && (
+            <span className="wd-view__duration">
+              <LuClock aria-hidden="true" />
+              {workout.duration} min
+            </span>
           )}
         </div>
+      </div>
+    );
+  }
 
-        {/* <MuscleGroupsEditor
-          muscleGroups={workout.muscleGroups}
-          editMode={editMode}
-          setWorkout={setWorkout}
-          workout={workout}
-        /> */}
+  return (
+    <div className="wd-edit">
+      <input
+        className="wd-edit__name"
+        type="text"
+        value={workout.name || ''}
+        onChange={(e) => handleNameChange(e.target.value)}
+        placeholder="Workout name"
+        aria-label="Workout name"
+      />
+      <textarea
+        className="wd-edit__desc"
+        value={workout.description || ''}
+        onChange={(e) => handleDescriptionChange(e.target.value)}
+        placeholder="Description (optional)"
+        rows={2}
+        aria-label="Workout description"
+      />
+      <div className="wd-edit__duration">
+        <label className="wd-edit__duration-label">
+          <LuClock aria-hidden="true" /> Duration
+        </label>
+        <TimePicker
+          value={(workout.duration || 0) * 60}
+          onChange={handleDurationChange}
+          placeholder="0"
+          defaultUnit="min"
+        />
       </div>
     </div>
   );

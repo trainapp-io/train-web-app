@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import './WorkoutHeader.css';
+import { LuArrowLeft, LuCheck, LuPencil } from 'react-icons/lu';
 import { tokenService } from '../../../services/tokenService';
 import { userProfileService } from '../../profiles/services/userProfileService';
 
@@ -135,23 +136,33 @@ const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
 
   return (
     <>
-      <div className="workout-header">
-        <button className="back-button" onClick={onBack}>
-          &larr; {isStandaloneWorkout ? 'Back to Workouts' : 'Back to Week'}
+      <div className="wh-bar">
+        <button className="wh-back" onClick={onBack}>
+          <LuArrowLeft size={15} />
+          {isStandaloneWorkout ? 'Workouts' : 'Week'}
         </button>
 
-        <div className="header-actions">
-          {hasUnsavedChanges && <span className="unsaved-indicator">Unsaved changes</span>}
-
+        <div className="wh-actions">
           {!editMode && (
-            <button className="log-workout-button" onClick={handleLogWorkout}>
-              Log This Workout
+            <button className="wh-log" onClick={handleLogWorkout}>
+              Log Workout
             </button>
           )}
 
           {isOwner && (
-            <button className="edit-button" onClick={editMode ? handleDoneClick : onToggleEdit}>
-              {editMode ? 'Done' : 'Edit'}
+            <button className="wh-edit" onClick={editMode ? handleDoneClick : onToggleEdit}>
+              {editMode ? (
+                <>
+                  {hasUnsavedChanges && <span className="wh-dot" aria-hidden="true" />}
+                  <LuCheck size={14} />
+                  Done
+                </>
+              ) : (
+                <>
+                  <LuPencil size={13} />
+                  Edit
+                </>
+              )}
             </button>
           )}
         </div>
