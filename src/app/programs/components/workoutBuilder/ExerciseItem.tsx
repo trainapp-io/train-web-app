@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LuGripVertical, LuX, LuRefreshCw, LuUpload } from 'react-icons/lu';
+import { LuGripVertical, LuX, LuRefreshCw, LuUpload, LuCheck } from 'react-icons/lu';
 import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
 
 interface Props {
@@ -12,6 +12,9 @@ interface Props {
   exerciseIndex: number;
   updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
   removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
+  /** undefined = not in log mode; true = this exercise is active; false = inactive/dimmed */
+  isActive?: boolean;
+  onSelect?: () => void;
 }
 
 const AVATAR_COLORS = [
@@ -49,12 +52,16 @@ const ExerciseItem: React.FC<Props> = ({
   exerciseIndex,
   updateExerciseInBlockPartial,
   removeExerciseFromBlock,
+  isActive,
+  onSelect,
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.order });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const { attributes, listeners, setNodeRef, transform } = useSortable({ id: exercise.order });
+  const style = { transform: CSS.Transform.toString(transform) };
 
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [restType, setRestType] = useState<'rest' | 'intensity'>('rest');
+  const [checked, setChecked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -120,7 +127,7 @@ const ExerciseItem: React.FC<Props> = ({
   const summaryParts: string[] = [];
   if (metricValue) summaryParts.push(`${metricValue} ${metricLabel}`);
   if (weightValue) summaryParts.push(`${weightValue} ${weightUnit}`);
-  if (restValue) summaryParts.push(`${restValue}s rest`);
+  if (restValue) summaryParts.push(restType === 'rest' ? `${restValue}s rest` : `${restValue} intensity`);
 
   if (!editMode) {
     return (
@@ -147,38 +154,58 @@ const ExerciseItem: React.FC<Props> = ({
   }
 
   // ── Edit mode — single row ─────────────────────────────────────────────────
+  const logStateClass = isActive === true ? ' ex-card--log-active'
+    : isActive === false ? ' ex-card--log-inactive' : '';
+  const checkedClass = logMode && checked ? ' ex-card--log-checked' : '';
+
   return (
-    <div ref={setNodeRef} style={style} className="ex-card" {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`ex-card${logMode ? ' ex-card--log' : ''}${logStateClass}${checkedClass}`}
+      onClick={isActive === false ? onSelect : undefined}
+      {...attributes}
+    >
 
       {/* ── Single content row ── */}
       <div className="ex-card__row">
 
         {/* Drag handle */}
-        <span className="ex-card__drag" {...listeners} aria-label="Drag to reorder">
-          <LuGripVertical />
-        </span>
+        {!logMode && (
+          <span className="ex-card__drag" {...listeners} aria-label="Drag to reorder">
+            <LuGripVertical />
+          </span>
+        )}
 
         {/* Name */}
         <div className="ex-card__name-wrap">
-          <input
-            className="ex-card__name-input"
-            type="text"
-            value={exercise.name}
-            onChange={(e) => handleNameChange(e.target.value)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
-            placeholder="Exercise…"
-            aria-label="Exercise name"
-          />
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="ex-suggestions">
-              {suggestions.map((s, i) => (
-                <button key={i} className="ex-suggestion"
-                  onPointerDown={(e) => { e.preventDefault(); update({ name: s.name, exerciseId: s.id } as any); setShowSuggestions(false); }}>
-                  <span className="ex-suggestion__name">{s.name}</span>
-                  <span className="ex-suggestion__tag">{s.target}</span>
-                </button>
-              ))}
-            </div>
+          {logMode ? (
+            <span className="ex-card__name-input ex-card__name-input--readonly">
+              {exercise.name || 'Untitled'}
+            </span>
+          ) : (
+            <>
+              <input
+                className="ex-card__name-input"
+                type="text"
+                value={exercise.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
+                placeholder="Exercise…"
+                aria-label="Exercise name"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="ex-suggestions">
+                  {suggestions.map((s, i) => (
+                    <button key={i} className="ex-suggestion"
+                      onPointerDown={(e) => { e.preventDefault(); update({ name: s.name, exerciseId: s.id } as any); setShowSuggestions(false); }}>
+                      <span className="ex-suggestion__name">{s.name}</span>
+                      <span className="ex-suggestion__tag">{s.target}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -195,8 +222,6 @@ const ExerciseItem: React.FC<Props> = ({
               aria-label="Sets" />
             <span className="ex-m__label">sets</span>
           </div>
-
-          <span className="ex-m__sep">×</span>
 
           <div className="ex-m">
             <input className="ex-m__input" type="number" min={0}
@@ -229,11 +254,27 @@ const ExerciseItem: React.FC<Props> = ({
               value={restValue || ''}
               onChange={(e) => update({ rest: parseInt(e.target.value) || 0 })}
               placeholder="0"
-              aria-label="Rest" />
-            <span className="ex-m__label">s rest</span>
+              aria-label={restType} />
+            <button className="ex-m__label ex-m__label--tap"
+              onClick={() => setRestType(t => t === 'rest' ? 'intensity' : 'rest')}
+              title="Change type">
+              {restType === 'rest' ? 's rest' : 'intensity'}<LuRefreshCw size={9} />
+            </button>
           </div>
 
         </div>
+
+        {/* Log check */}
+        {logMode && (
+          <button
+            className={`ex-card__log-check${checked ? ' ex-card__log-check--done' : ''}`}
+            onClick={(e) => { e.stopPropagation(); setChecked((v) => !v); }}
+            aria-label={checked ? 'Mark incomplete' : 'Mark complete'}
+            type="button"
+          >
+            <LuCheck size={18} />
+          </button>
+        )}
 
         {/* Media trigger */}
         {!logMode && !mediaUrl && (

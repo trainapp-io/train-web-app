@@ -16,6 +16,9 @@ interface Props {
   onSetHasUnsavedChanges: (hasChanges: boolean) => void;
   updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => void;
   removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
+  /** Index of the active exercise within this block (-1 = none active in this block) */
+  activeExerciseIndex?: number;
+  onSelectExercise?: (exerciseIndex: number) => void;
 }
 
 const CircuitItem: React.FC<Props> = ({
@@ -29,6 +32,8 @@ const CircuitItem: React.FC<Props> = ({
   onSetHasUnsavedChanges,
   updateExerciseInBlockPartial,
   removeExerciseFromBlock,
+  activeExerciseIndex = -1,
+  onSelectExercise,
 }) => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -148,6 +153,8 @@ const CircuitItem: React.FC<Props> = ({
                 exerciseIndex={exerciseIndex}
                 updateExerciseInBlockPartial={updateExerciseInBlockPartial}
                 removeExerciseFromBlock={removeExerciseFromBlock}
+                isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
+                onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
               />
             ))}
           </div>
