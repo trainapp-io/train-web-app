@@ -227,17 +227,18 @@
 .wd-edit__duration {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
-.wd-edit__duration-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.82rem;
-  font-weight: 600;
+.wd-edit__duration-icon {
   color: var(--text-secondary);
-  white-space: nowrap;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Slightly wider than exercise metrics inputs */
+.wd-edit__duration-input {
+  width: 40px;
 }
 
 /* ══════════════════════════════════════════
@@ -258,25 +259,19 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* ── Block header (view) ── */
+/* ── Block header (single row — view & edit) ── */
 
 .block-card__header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 6px;
+  padding: 8px 10px 8px 12px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
-}
-
-/* ── Block header (edit) ── */
-
-.block-card__header--edit {
-  flex-wrap: wrap;
-  row-gap: 8px;
+  border-radius: 14px 14px 0 0;
 }
 
 .block-card__num {
@@ -301,27 +296,28 @@
 }
 
 .block-card__name-input {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.9375rem;
+  flex: 1 1 60px;
+  min-width: 50px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  padding: 0;
   font-family: inherit;
-  transition: border-color var(--transition-speed);
   touch-action: manipulation;
+  line-height: 1.5;
 }
 
-.block-card__name-input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px var(--wb-highlight);
-}
+.block-card__name-input:focus { outline: none; }
+.block-card__name-input::placeholder { color: var(--text-secondary); opacity: 0.4; }
 
-.block-card__name-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
+.block-card__divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
 
 /* ── Pills (view mode) ── */
 
@@ -353,76 +349,6 @@
   border: 1px solid var(--border-color);
 }
 
-/* ── Controls (edit mode) ── */
-
-.block-card__controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.block-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.block-ctrl__label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.block-ctrl__input {
-  width: 52px;
-  height: 36px;
-  padding: 0 6px;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  text-align: center;
-  font-family: inherit;
-  transition: border-color var(--transition-speed);
-  touch-action: manipulation;
-}
-
-.block-ctrl__input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-}
-
-.block-ctrl__input::-webkit-inner-spin-button,
-.block-ctrl__input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.block-ctrl__input[type=number] { -moz-appearance: textfield; }
-
-/* ── Remove block button ── */
-
-.block-card__remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 1rem;
-  flex-shrink: 0;
-  transition: color var(--transition-speed), background-color var(--transition-speed);
-  touch-action: manipulation;
-}
-
-.block-card__remove:hover {
-  color: var(--wb-danger);
-  background: var(--wb-danger-bg);
-}
 
 /* ── Exercise list ── */
 
@@ -529,123 +455,146 @@
   border-radius: 10px;
   margin-bottom: 6px;
   overflow: visible;
-  transition: box-shadow var(--transition-speed);
 }
 
 .ex-card:last-child { margin-bottom: 0; }
 
-/* ── Top row: drag + name + remove ── */
+/* ── Single content row ── */
 
-.ex-card__top {
+.ex-card__row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 10px 8px;
+  gap: 6px;
+  padding: 8px 8px 8px 6px;
+  min-width: 0;
   position: relative;
 }
 
+/* Drag handle */
 .ex-card__drag {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  flex-shrink: 0;
   color: var(--text-secondary);
   cursor: grab;
-  opacity: 0.4;
-  font-size: 1rem;
-  flex-shrink: 0;
+  opacity: 0.3;
+  font-size: 0.95rem;
   transition: opacity 0.2s;
   touch-action: none;
 }
 
-.ex-card__drag:hover { opacity: 0.8; }
+.ex-card__drag:hover { opacity: 0.7; }
 .ex-card__drag:active { cursor: grabbing; }
 
+/* Name */
 .ex-card__name-wrap {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 80px;
+  min-width: 60px;
   position: relative;
 }
 
 .ex-card__name-input {
   width: 100%;
-  font-size: 0.9375rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  padding: 0;
   font-family: inherit;
-  transition: border-color var(--transition-speed);
   touch-action: manipulation;
   box-sizing: border-box;
-  min-height: 44px;
+  line-height: 1.5;
+  min-height: 28px;
 }
 
-.ex-card__name-input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px var(--wb-highlight);
-}
+.ex-card__name-input:focus { outline: none; }
+.ex-card__name-input::placeholder { color: var(--text-secondary); opacity: 0.4; }
 
-.ex-card__name-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
-
-.ex-card__remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 1rem;
+/* Thin vertical divider between name and metrics */
+.ex-card__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
   flex-shrink: 0;
-  transition: color var(--transition-speed), background-color var(--transition-speed);
-  touch-action: manipulation;
 }
 
-.ex-card__remove:hover {
-  color: var(--wb-danger);
-  background: var(--wb-danger-bg);
-}
-
-/* ── Metrics row ── */
+/* ── Metrics group ── */
 
 .ex-card__metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  padding: 0 10px 10px;
-}
-
-.ex-metric {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
   gap: 4px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.ex-metric__label {
-  font-size: 0.72rem;
-  font-weight: 600;
+.ex-card__metrics::-webkit-scrollbar { display: none; }
+
+.ex-m {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ex-m__sep {
+  font-size: 0.75rem;
   color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: 0.4;
+  flex-shrink: 0;
 }
 
-/* Clickable cycling label */
-.ex-metric__label--btn {
+/* Naked number — looks like plain text, dotted underline shows it's editable */
+.ex-m__input {
+  width: 26px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dotted var(--border-color);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s;
+  touch-action: manipulation;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+.ex-m__input:hover { border-bottom-color: var(--text-secondary); }
+
+.ex-m__input:focus {
+  outline: none;
+  border-bottom-style: solid;
+  border-bottom-color: var(--accent-color);
+}
+
+.ex-m__input::placeholder { color: var(--text-secondary); opacity: 0.35; }
+
+.ex-m__input::-webkit-inner-spin-button,
+.ex-m__input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.ex-m__input[type=number] { -moz-appearance: textfield; }
+
+.ex-m__label {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Tappable cycling label */
+.ex-m__label--tap {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   background: none;
   border: none;
   padding: 0;
@@ -653,42 +602,276 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--accent-color);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   white-space: nowrap;
   touch-action: manipulation;
   transition: opacity 0.15s;
 }
 
-.ex-metric__label--btn:hover { opacity: 0.7; }
+.ex-m__label--tap:hover { opacity: 0.7; }
+.ex-m__label--tap svg { opacity: 0.7; margin-left: 1px; }
 
-.ex-metric__input {
+/* ── Media icon buttons (right of metrics) ── */
+
+.ex-card__media-trigger {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ex-card__media-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  opacity: 0.45;
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+
+.ex-card__media-icon-btn:hover {
+  opacity: 1;
+  color: var(--accent-color);
+  background: var(--wb-highlight);
+}
+
+.ex-card__media-icon-btn--active {
+  opacity: 0.6;
+  color: var(--text-secondary);
+}
+
+.ex-card__media-icon-btn--active:hover {
+  color: var(--wb-danger);
+  background: var(--wb-danger-bg);
+}
+
+/* Remove exercise */
+.ex-card__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  opacity: 0.35;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  touch-action: manipulation;
+}
+
+.ex-card__remove:hover {
+  opacity: 1;
+  color: var(--wb-danger);
+  background: var(--wb-danger-bg);
+}
+
+/* ── Media preview ── */
+
+.ex-card__media-preview {
+  position: relative;
+  margin: 0 10px 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  max-height: 200px;
+}
+
+.ex-card__media-img {
+  display: block;
   width: 100%;
-  height: 44px;
-  padding: 0 6px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ex-card__media-video-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.ex-card__media-link {
+  font-size: 0.78rem;
+  color: var(--accent-color);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ex-card__media-link:hover { text-decoration: underline; }
+
+.ex-card__media-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.15s;
+  touch-action: manipulation;
+}
+
+.ex-card__media-remove:hover { background: rgba(0, 0, 0, 0.75); }
+
+/* ── Add media bar ── */
+
+.ex-card__media-bar {
+  padding: 0 10px 10px;
+}
+
+.ex-card__media-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.ex-card__media-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color var(--transition-speed), color var(--transition-speed);
+}
+
+.ex-card__media-btn:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.ex-card__media-url-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ex-card__media-url-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  text-align: center;
+  font-size: 0.875rem;
   font-family: inherit;
-  font-variant-numeric: tabular-nums;
   transition: border-color var(--transition-speed);
   touch-action: manipulation;
   box-sizing: border-box;
 }
 
-.ex-metric__input:focus {
+.ex-card__media-url-input:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 2px var(--wb-highlight);
 }
 
-.ex-metric__input::-webkit-inner-spin-button,
-.ex-metric__input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.ex-metric__input[type=number] { -moz-appearance: textfield; }
+.ex-card__media-url-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
+
+.ex-card__media-apply {
+  height: 36px;
+  padding: 0 14px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  transition: background var(--transition-speed), opacity var(--transition-speed);
+}
+
+.ex-card__media-apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ex-card__media-apply:not(:disabled):hover { background: var(--accent-hover); }
+
+.ex-card__media-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  transition: color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.ex-card__media-cancel:hover {
+  color: var(--wb-danger);
+  border-color: var(--wb-danger);
+}
+
+/* ── View mode media thumbnail ── */
+
+.ex-row__media-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+}
+
+.ex-row__media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ex-row__media-thumb--video {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
 
 /* ── Suggestions dropdown ── */
 
@@ -867,15 +1050,40 @@
     padding: 12px;
   }
 
-  /* Collapse metrics to 2×2 grid on narrow screens */
-  .ex-card__metrics {
-    grid-template-columns: repeat(2, 1fr);
+  /* ── Exercise card: two-row layout on mobile ── */
+
+  /* Allow the row to wrap */
+  .ex-card__row {
+    flex-wrap: wrap;
+    row-gap: 4px;
   }
 
-  /* Block header controls drop to second row */
-  .block-card__controls {
-    width: 100%;
-    margin-left: 0;
+  /* Name stays in row 1, grows between drag handle and remove button */
+  .ex-card__name-wrap {
+    order: 0;
+  }
+
+  /* Hide the vertical divider between name and metrics */
+  .ex-card__divider {
+    display: none;
+  }
+
+  /* Metrics + media trigger share row 2 */
+  .ex-card__metrics {
+    order: 3;
+    max-width: calc(100% - 34px); /* leave room for the upload button */
+    padding-left: 26px; /* align under the name text */
+    padding-bottom: 4px;
+  }
+
+  .ex-card__media-trigger {
+    order: 3;
+    padding-bottom: 4px;
+  }
+
+  /* Remove button stays pinned to row 1 end */
+  .ex-card__remove {
+    order: 1;
   }
 }
 

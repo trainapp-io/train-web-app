@@ -1,74 +1,59 @@
 import React from 'react';
+import { LuPlay, LuPause, LuFlagTriangleRight } from 'react-icons/lu';
 import './WorkoutLogForm.css';
 
 interface CompletionFooterProps {
-  actualDuration: number;
-  isCompleted: boolean;
-  onCompletionToggle: (completed: boolean) => void;
-  onSave: () => void;
-  onCancel: () => void;
+  isLive: boolean;
+  isTimerRunning: boolean;
+  onStart: () => void;
+  onPause: () => void;
+  onFinish: () => void;
   isSaving?: boolean;
 }
 
 const CompletionFooter: React.FC<CompletionFooterProps> = ({
-  actualDuration,
-  isCompleted,
-  onCompletionToggle,
-  onSave,
-  onCancel,
+  isLive,
+  isTimerRunning,
+  onStart,
+  onPause,
+  onFinish,
   isSaving = false,
 }) => {
-  const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
-    } else {
-      return `${secs}s`;
-    }
-  };
-
   return (
-    <div className="completion-footer">
-      <div className="duration-summary">
-        <span className="duration-label">Total Duration:</span>
-        <span className="duration-value">{formatDuration(actualDuration)}</span>
-      </div>
+    <div className="wl-tabbar">
+      {isLive && (
+        <>
+          <button
+            className={`wl-tab ${!isTimerRunning ? 'wl-tab--active' : 'wl-tab--dim'}`}
+            onClick={onStart}
+            disabled={isTimerRunning}
+            type="button"
+          >
+            <LuPlay size={22} />
+            <span>Start</span>
+          </button>
 
-      <div className="completion-toggle">
-        <label className="completion-checkbox-label">
-          <input
-            type="checkbox"
-            checked={isCompleted}
-            onChange={(e) => onCompletionToggle(e.target.checked)}
-            className="completion-checkbox"
-          />
-          <span>Mark as Completed</span>
-        </label>
-      </div>
+          <button
+            className={`wl-tab ${isTimerRunning ? 'wl-tab--active' : 'wl-tab--dim'}`}
+            onClick={onPause}
+            disabled={!isTimerRunning}
+            type="button"
+          >
+            <LuPause size={22} />
+            <span>Pause</span>
+          </button>
+        </>
+      )}
 
-      <div className="footer-actions">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-cancel"
-          disabled={isSaving}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onSave}
-          className="btn-save"
-          disabled={isSaving}
-        >
-          {isSaving ? 'Saving...' : 'Save Workout Log'}
-        </button>
-      </div>
+      <button
+        className="wl-tab wl-tab--finish"
+        onClick={onFinish}
+        disabled={isSaving}
+        type="button"
+      >
+        <LuFlagTriangleRight size={22} />
+        <span>{isSaving ? 'Saving…' : 'Finish'}</span>
+      </button>
     </div>
   );
 };

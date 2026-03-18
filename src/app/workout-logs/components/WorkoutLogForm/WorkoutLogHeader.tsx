@@ -1,213 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { WorkoutSnapshot } from '@trainapp-io/train-core';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogHeaderProps {
   workoutSnapshot: WorkoutSnapshot;
+  isLive: boolean;
+  isTimerRunning: boolean;
+  elapsedSeconds: number;
   actualStartDate: Date;
-  actualEndDate: Date;
+  manualDuration: { hours: number; minutes: number };
+  onModeToggle: () => void;
   onStartDateChange: (date: Date) => void;
-  onEndDateChange: (date: Date) => void;
-  onDurationChange: (duration: number) => void;
+  onManualDurationChange: (field: 'hours' | 'minutes', value: number) => void;
+}
+
+function formatElapsed(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function formatDateTimeLocal(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 const WorkoutLogHeader: React.FC<WorkoutLogHeaderProps> = ({
   workoutSnapshot,
+  isLive,
+  isTimerRunning,
+  elapsedSeconds,
   actualStartDate,
+  manualDuration,
+  onModeToggle,
   onStartDateChange,
-  onEndDateChange,
-  onDurationChange,
+  onManualDurationChange,
 }) => {
-  const [isLive, setIsLive] = useState(true);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [manualDuration, setManualDuration] = useState({ hours: 0, minutes: 0 });
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setElapsedSeconds(prev => prev + 1);
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isTimerRunning]);
-
-  useEffect(() => {
-    if (isLive && isTimerRunning) {
-      const totalSeconds = elapsedSeconds;
-      onDurationChange(totalSeconds);
-      
-      // Update end date based on elapsed time
-      const newEndDate = new Date(actualStartDate.getTime() + totalSeconds * 1000);
-      onEndDateChange(newEndDate);
-    }
-  }, [elapsedSeconds, isLive, isTimerRunning, actualStartDate]);
-
-  useEffect(() => {
-    if (!isLive) {
-      const totalSeconds = manualDuration.hours * 3600 + manualDuration.minutes * 60;
-      onDurationChange(totalSeconds);
-      
-      // Update end date based on manual duration
-      const newEndDate = new Date(actualStartDate.getTime() + totalSeconds * 1000);
-      onEndDateChange(newEndDate);
-    }
-  }, [manualDuration, isLive, actualStartDate]);
-
-  const formatDateTimeLocal = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
-  const formatElapsedTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (hours > 0) {
-      return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-    return `${minutes}:${String(secs).padStart(2, '0')}`;
-  };
-
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onStartDateChange(new Date(e.target.value));
-  };
-
-  const handleStartTimer = () => {
-    if (!isTimerRunning) {
-      onStartDateChange(new Date());
-    }
-    setIsTimerRunning(true);
-  };
-
-  const handlePauseTimer = () => {
-    setIsTimerRunning(false);
-  };
-
-  const handleResetTimer = () => {
-    setIsTimerRunning(false);
-    setElapsedSeconds(0);
-    onStartDateChange(new Date());
-  };
-
-  const handleModeToggle = () => {
-    setIsLive(!isLive);
-    setIsTimerRunning(false);
-    setElapsedSeconds(0);
-  };
-
-  const handleManualDurationChange = (field: 'hours' | 'minutes', value: number) => {
-    setManualDuration(prev => ({
-      ...prev,
-      [field]: Math.max(0, value)
-    }));
-  };
-
   return (
-    <div>
+    <div className="wl-header">
       <h2>{workoutSnapshot.name}</h2>
       {workoutSnapshot.description && (
         <p className="workout-description">{workoutSnapshot.description}</p>
       )}
-      
-      <div className="workout-metadata">
-        {workoutSnapshot.difficulty && (
-          <span className="difficulty-badge">{workoutSnapshot.difficulty}</span>
-        )}
-        {workoutSnapshot.category && workoutSnapshot.category.length > 0 && (
-          <div className="category-tags">
-            {workoutSnapshot.category.map((cat, idx) => (
-              <span key={idx} className="category-tag">{cat}</span>
-            ))}
-          </div>
-        )}
-      </div>
+
+      {(workoutSnapshot.difficulty || (workoutSnapshot.category?.length ?? 0) > 0) && (
+        <div className="workout-metadata">
+          {workoutSnapshot.difficulty && (
+            <span className="difficulty-badge">{workoutSnapshot.difficulty}</span>
+          )}
+          {workoutSnapshot.category?.map((cat, i) => (
+            <span key={i} className="category-tag">{cat}</span>
+          ))}
+        </div>
+      )}
 
       <div className="workout-mode-toggle">
-        <button
-          type="button"
-          className={`mode-btn ${isLive ? 'active' : ''}`}
-          onClick={() => !isLive && handleModeToggle()}
-        >
-          Live Workout
-        </button>
-        <button
-          type="button"
-          className={`mode-btn ${!isLive ? 'active' : ''}`}
-          onClick={() => isLive && handleModeToggle()}
-        >
-          Historical Entry
-        </button>
+        <button className={`mode-btn ${isLive ? 'active' : ''}`}
+          onClick={() => !isLive && onModeToggle()}>Live</button>
+        <button className={`mode-btn ${!isLive ? 'active' : ''}`}
+          onClick={() => isLive && onModeToggle()}>Historical</button>
       </div>
 
       {isLive ? (
         <div className="live-timer-section">
           <div className="timer-display">
-            <span className="timer-label">Elapsed Time:</span>
-            <span className="timer-value">{formatElapsedTime(elapsedSeconds)}</span>
-          </div>
-          <div className="timer-controls">
-            {!isTimerRunning ? (
-              <button type="button" className="timer-btn start-btn" onClick={handleStartTimer}>
-                {elapsedSeconds > 0 ? 'Resume' : 'Start Timer'}
-              </button>
-            ) : (
-              <button type="button" className="timer-btn pause-btn" onClick={handlePauseTimer}>
-                Pause
-              </button>
-            )}
-            {elapsedSeconds > 0 && (
-              <button type="button" className="timer-btn reset-btn" onClick={handleResetTimer}>
-                Reset
-              </button>
-            )}
+            <span className="timer-label">Elapsed</span>
+            <span className={`timer-value ${isTimerRunning ? 'timer-value--running' : ''}`}>
+              {formatElapsed(elapsedSeconds)}
+            </span>
           </div>
         </div>
       ) : (
         <div className="historical-entry-section">
           <div className="time-input-group">
-            <label htmlFor="start-time">Workout Date & Time</label>
-            <input
-              id="start-time"
-              type="datetime-local"
+            <label htmlFor="start-time">Workout Date &amp; Time</label>
+            <input id="start-time" type="datetime-local" className="time-input"
               value={formatDateTimeLocal(actualStartDate)}
-              onChange={handleStartDateChange}
-              className="time-input"
-            />
+              onChange={(e) => onStartDateChange(new Date(e.target.value))} />
           </div>
           <div className="duration-input-section">
-            <label>Workout Duration</label>
+            <label>Duration</label>
             <div className="duration-inputs">
               <div className="duration-input-group">
-                <input
-                  type="number"
+                <input type="number" className="duration-input" min={0}
                   value={manualDuration.hours}
-                  onChange={(e) => handleManualDurationChange('hours', parseInt(e.target.value) || 0)}
-                  min="0"
-                  className="duration-input"
-                />
-                <span className="duration-label">hours</span>
+                  onChange={(e) => onManualDurationChange('hours', parseInt(e.target.value) || 0)} />
+                <span className="duration-label">hr</span>
               </div>
               <div className="duration-input-group">
-                <input
-                  type="number"
+                <input type="number" className="duration-input" min={0} max={59}
                   value={manualDuration.minutes}
-                  onChange={(e) => handleManualDurationChange('minutes', parseInt(e.target.value) || 0)}
-                  min="0"
-                  max="59"
-                  className="duration-input"
-                />
-                <span className="duration-label">minutes</span>
+                  onChange={(e) => onManualDurationChange('minutes', parseInt(e.target.value) || 0)} />
+                <span className="duration-label">min</span>
               </div>
             </div>
           </div>

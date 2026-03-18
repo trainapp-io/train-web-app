@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutLogRequest, BlockLog, ExerciseLog } from '@trainapp-io/train-core';
+import { WorkoutLogRequest, BlockLog, ExerciseLog, Block, WorkoutRequest } from '@trainapp-io/train-core';
 import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
+import CircuitItem from '../../../programs/components/workoutBuilder/CircuitItem';
 import WorkoutLogHeader from './WorkoutLogHeader';
-import BlockLogSection from './BlockLogSection';
 import CompletionFooter from './CompletionFooter';
 import './WorkoutLogForm.css';
 
@@ -13,6 +13,38 @@ interface WorkoutLogFormProps {
   isSaving?: boolean;
 }
 
+/** Convert a snapshot block into the same Block shape the builder uses */
+function snapshotToBlock(bs: any): Block {
+  return {
+    ...bs,
+    exercises: bs.exerciseSnapshot.map((es: any) => ({
+      ...es,
+      sets: bs.targetSets || 3,
+      hasSuperset: false,
+    })),
+  } as Block;
+}
+
+/** Read logged values back out of the edited Block */
+function blockToLog(block: Block, order: number): BlockLog {
+  return {
+    actualSets: block.targetSets,
+    actualRest: (block as any).rest || 0,
+    exerciseLogs: block.exercises.map((ex): ExerciseLog => ({
+      name: ex.name,
+      actualReps: ex.targetReps || 0,
+      actualWeight: ex.targetWeight || 0,
+      actualDurationSec: ex.targetDurationSec || 0,
+      actualDistance: ex.targetDistance || 0,
+      actualRest: ex.rest || 0,
+      isCompleted: false,
+      order: ex.order,
+    })),
+    order,
+    isCompleted: false,
+  };
+}
+
 const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   initialData,
   onSubmit,
@@ -20,6 +52,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   isSaving = false,
 }) => {
   const { workoutSnapshot, versionId } = useWorkoutLogContext();
+
   const [actualStartDate, setActualStartDate] = useState<Date>(
     initialData?.actualStartDate || new Date()
   );
@@ -29,107 +62,133 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   const [actualDuration, setActualDuration] = useState<number>(
     initialData?.actualDuration || 0
   );
-  const [blockLogs, setBlockLogs] = useState<BlockLog[]>([]);
   const [isCompleted, setIsCompleted] = useState<boolean>(
     initialData?.isCompleted || false
   );
 
-  // Initialize block logs from workout snapshot
+  // Blocks used by the builder components — pre-filled with target values
+  const [blocks, setBlocks] = useState<Block[]>([]);
+
   useEffect(() => {
-    console.log('WorkoutLogForm - workoutSnapshot:', workoutSnapshot);
-    console.log('WorkoutLogForm - blockSnapshot:', workoutSnapshot?.blockSnapshot);
-    
-    if (initialData?.blockLogs) {
-      setBlockLogs(initialData.blockLogs);
-    } else if (workoutSnapshot?.blockSnapshot) {
-      // Create initial block logs from snapshot
-      const initialBlockLogs: BlockLog[] = workoutSnapshot.blockSnapshot.map((blockSnapshot) => ({
-        actualRest: blockSnapshot.rest,
-        actualSets: blockSnapshot.targetSets,
-        exerciseLogs: blockSnapshot.exerciseSnapshot.map((exerciseSnapshot): ExerciseLog => ({
-          name: exerciseSnapshot.name,
-          actualRest: exerciseSnapshot.rest,
-          actualReps: exerciseSnapshot.targetReps,
-          actualDurationSec: exerciseSnapshot.targetDurationSec,
-          actualWeight: exerciseSnapshot.targetWeight,
-          actualDistance: exerciseSnapshot.targetDistance,
-          isCompleted: false,
-          order: exerciseSnapshot.order,
-        })),
-        order: blockSnapshot.order,
-        isCompleted: false,
-      }));
-      console.log('WorkoutLogForm - initialBlockLogs:', initialBlockLogs);
-      setBlockLogs(initialBlockLogs);
-    } else {
-      console.log('WorkoutLogForm - No blockSnapshot found!');
+    if (workoutSnapshot?.blockSnapshot) {
+      setBlocks(workoutSnapshot.blockSnapshot.map(snapshotToBlock));
     }
-  }, [workoutSnapshot, initialData]);
+  }, [workoutSnapshot]);
+
+  // ── Timer state ──
+  const [isLive, setIsLive] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [manualDuration, setManualDuration] = useState({ hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    if (!isTimerRunning) return;
+    const id = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [isTimerRunning]);
+
+  useEffect(() => {
+    if (!isLive || !isTimerRunning) return;
+    setActualDuration(elapsedSeconds);
+    setActualEndDate(new Date(actualStartDate.getTime() + elapsedSeconds * 1000));
+  }, [elapsedSeconds, isLive, isTimerRunning]);
+
+  useEffect(() => {
+    if (isLive) return;
+    const total = manualDuration.hours * 3600 + manualDuration.minutes * 60;
+    setActualDuration(total);
+    setActualEndDate(new Date(actualStartDate.getTime() + total * 1000));
+  }, [manualDuration, isLive, actualStartDate]);
+
+  const handleStartTimer = () => {
+    if (!isTimerRunning) setActualStartDate(new Date());
+    setIsTimerRunning(true);
+  };
+  const handlePauseTimer = () => setIsTimerRunning(false);
+  const handleModeToggle = () => {
+    setIsLive((v) => !v);
+    setIsTimerRunning(false);
+    setElapsedSeconds(0);
+  };
 
   if (!workoutSnapshot) {
-    return (
-      <div className="workout-log-form">
-        <p>Loading workout data...</p>
-      </div>
-    );
+    return <div className="workout-log-form"><p>Loading workout data…</p></div>;
   }
 
-  const handleBlockLogUpdate = (index: number, updatedBlockLog: BlockLog) => {
-    const updatedBlockLogs = [...blockLogs];
-    updatedBlockLogs[index] = updatedBlockLog;
-    setBlockLogs(updatedBlockLogs);
+  // Minimal WorkoutRequest shell so CircuitItem can resolve blockIndex
+  const workoutShell: WorkoutRequest = {
+    name: workoutSnapshot.name,
+    blocks,
+  } as WorkoutRequest;
+
+  const handleUpdateBlock = (index: number, updated: Block) => {
+    const next = [...blocks];
+    next[index] = updated;
+    setBlocks(next);
+  };
+
+  const updateExerciseInBlockPartial = (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => {
+    const next = [...blocks];
+    const exercises = [...next[blockIndex].exercises];
+    exercises[exerciseIndex] = { ...exercises[exerciseIndex], ...updates };
+    next[blockIndex] = { ...next[blockIndex], exercises };
+    setBlocks(next);
   };
 
   const handleSubmit = () => {
-    const workoutLogRequest: WorkoutLogRequest = {
+    onSubmit({
       userId: initialData?.userId || '',
       workoutId: initialData?.workoutId || '',
       versionId: initialData?.versionId || versionId,
       workoutSnapshot: workoutSnapshot!,
-      blockLogs,
+      blockLogs: blocks.map((b, i) => blockToLog(b, workoutSnapshot.blockSnapshot?.[i]?.order ?? i)),
       actualDuration,
       actualStartDate: actualStartDate.toISOString() as any,
       actualEndDate: actualEndDate.toISOString() as any,
       isCompleted,
-    };
-
-    onSubmit(workoutLogRequest);
+    });
   };
 
   return (
     <div className="workout-log-form">
       <WorkoutLogHeader
         workoutSnapshot={workoutSnapshot}
+        isLive={isLive}
+        isTimerRunning={isTimerRunning}
+        elapsedSeconds={elapsedSeconds}
         actualStartDate={actualStartDate}
-        actualEndDate={actualEndDate}
+        manualDuration={manualDuration}
+        onModeToggle={handleModeToggle}
         onStartDateChange={setActualStartDate}
-        onEndDateChange={setActualEndDate}
-        onDurationChange={setActualDuration}
+        onManualDurationChange={(field, value) =>
+          setManualDuration((prev) => ({ ...prev, [field]: Math.max(0, value) }))
+        }
       />
 
       <div className="block-logs-container">
-        {workoutSnapshot.blockSnapshot?.map((blockSnapshot, index) => (
-          <BlockLogSection
-            key={index}
-            blockSnapshot={blockSnapshot}
-            blockLog={blockLogs[index] || {
-              actualRest: 0,
-              actualSets: 0,
-              exerciseLogs: [],
-              order: blockSnapshot.order,
-              isCompleted: false,
-            }}
-            onUpdate={(updated) => handleBlockLogUpdate(index, updated)}
+        {blocks.map((block, index) => (
+          <CircuitItem
+            key={block.order}
+            block={block}
+            blockNumber={index + 1}
+            editMode={true}
+            logMode={true}
+            workout={workoutShell}
+            onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
+            onRemoveBlock={() => {}}
+            onSetHasUnsavedChanges={() => {}}
+            updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+            removeExerciseFromBlock={() => {}}
           />
         ))}
       </div>
 
       <CompletionFooter
-        actualDuration={actualDuration}
-        isCompleted={isCompleted}
-        onCompletionToggle={setIsCompleted}
-        onSave={handleSubmit}
-        onCancel={onCancel}
+        isLive={isLive}
+        isTimerRunning={isTimerRunning}
+        onStart={handleStartTimer}
+        onPause={handlePauseTimer}
+        onFinish={handleSubmit}
         isSaving={isSaving}
       />
     </div>

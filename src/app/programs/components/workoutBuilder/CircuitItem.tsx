@@ -3,13 +3,13 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { LuX, LuPlus } from 'react-icons/lu';
 import ExerciseItem from './ExerciseItem';
-import TimePicker from './TimePicker';
 import { Block, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 
 interface Props {
   block: Block;
   blockNumber: number;
   editMode: boolean;
+  logMode?: boolean;
   workout: WorkoutRequest;
   onUpdateBlock: (updated: Block) => void;
   onRemoveBlock: () => void;
@@ -22,6 +22,7 @@ const CircuitItem: React.FC<Props> = ({
   block,
   blockNumber,
   editMode,
+  logMode = false,
   workout,
   onUpdateBlock,
   onRemoveBlock,
@@ -67,47 +68,58 @@ const CircuitItem: React.FC<Props> = ({
 
   return (
     <div className="block-card">
-      {/* ── Block header ── */}
-      <div className={`block-card__header ${editMode ? 'block-card__header--edit' : ''}`}>
+      {/* ── Block header — single row ── */}
+      <div className="block-card__header">
+        <span className="block-card__num">#{blockNumber}</span>
+
         {editMode ? (
           <>
-            <span className="block-card__num">#{blockNumber}</span>
             <input
               className="block-card__name-input"
               type="text"
               value={block.name}
               onChange={(e) => onUpdateBlock({ ...block, name: e.target.value })}
-              placeholder="Block name"
+              placeholder="Block name…"
               aria-label="Block name"
             />
-            <div className="block-card__controls">
-              <div className="block-ctrl">
-                <span className="block-ctrl__label">Sets</span>
-                <input
-                  className="block-ctrl__input"
-                  type="number"
-                  min={1}
-                  value={block.targetSets}
-                  onChange={(e) => onUpdateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
-                  aria-label="Target sets"
-                />
-              </div>
-              <div className="block-ctrl">
-                <span className="block-ctrl__label">Rest</span>
-                <TimePicker
-                  value={restSeconds}
-                  onChange={(s) => onUpdateBlock({ ...block, rest: s } as any)}
-                  placeholder="0"
-                />
-              </div>
-              <button className="block-card__remove" onClick={onRemoveBlock} aria-label="Remove block">
-                <LuX />
-              </button>
+
+            <span className="block-card__divider" aria-hidden="true" />
+
+            <div className="ex-m">
+              <input
+                className="ex-m__input"
+                type="number"
+                min={1}
+                value={block.targetSets}
+                onChange={(e) => onUpdateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
+                aria-label="Target sets"
+              />
+              <span className="ex-m__label">sets</span>
             </div>
+
+            <span className="ex-m__sep">·</span>
+
+            <div className="ex-m">
+              <input
+                className="ex-m__input"
+                type="number"
+                min={0}
+                value={restSeconds || ''}
+                onChange={(e) => onUpdateBlock({ ...block, rest: parseInt(e.target.value) || 0 } as any)}
+                placeholder="0"
+                aria-label="Rest seconds"
+              />
+              <span className="ex-m__label">s rest</span>
+            </div>
+
+            {!logMode && (
+              <button className="ex-card__remove" onClick={onRemoveBlock} aria-label="Remove block">
+                <LuX size={15} />
+              </button>
+            )}
           </>
         ) : (
           <>
-            <span className="block-card__num">#{blockNumber}</span>
             <h3 className="block-card__name">{block.name}</h3>
             <div className="block-card__pills">
               <span className="block-pill block-pill--sets">{block.targetSets} sets</span>
@@ -131,6 +143,7 @@ const CircuitItem: React.FC<Props> = ({
                 key={exercise.order}
                 exercise={exercise}
                 editMode={editMode}
+                logMode={logMode}
                 blockIndex={blockIndex}
                 exerciseIndex={exerciseIndex}
                 updateExerciseInBlockPartial={updateExerciseInBlockPartial}
@@ -142,7 +155,7 @@ const CircuitItem: React.FC<Props> = ({
       </DndContext>
 
       {/* ── Add exercise ── */}
-      {editMode && (
+      {editMode && !logMode && (
         <button className="block-card__add-ex" onClick={addExercise}>
           <LuPlus aria-hidden="true" /> Add Exercise
         </button>

@@ -1,7 +1,8 @@
-import React from 'react';
-import { LuClock } from 'react-icons/lu';
+import React, { useState } from 'react';
+import { LuClock, LuRefreshCw } from 'react-icons/lu';
 import { useProgramContext } from '../contexts/ProgramContext';
-import TimePicker from '../components/workoutBuilder/TimePicker';
+
+type DurationUnit = 'min' | 'hr';
 
 interface Props {
   editMode: boolean;
@@ -11,6 +12,7 @@ interface Props {
 const WorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges }) => {
   const { state, updateWorkoutRequest } = useProgramContext();
   const workout = state.workoutRequest;
+  const [unit, setUnit] = useState<DurationUnit>('min');
 
   const handleNameChange = (name: string) => {
     updateWorkoutRequest({ ...workout, name });
@@ -22,10 +24,23 @@ const WorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges
     setHasUnsavedChanges(true);
   };
 
-  const handleDurationChange = (seconds: number) => {
-    updateWorkoutRequest({ ...workout, duration: Math.round(seconds / 60) });
+  // duration is stored in minutes
+  const handleDurationChange = (displayValue: string) => {
+    const n = parseFloat(displayValue) || 0;
+    const minutes = unit === 'hr' ? Math.round(n * 60) : Math.round(n);
+    updateWorkoutRequest({ ...workout, duration: minutes });
     setHasUnsavedChanges(true);
   };
+
+  const cycleUnit = () => {
+    setUnit(u => u === 'min' ? 'hr' : 'min');
+  };
+
+  // Convert stored minutes to display value
+  const storedMinutes = workout.duration || 0;
+  const displayValue = unit === 'hr'
+    ? (storedMinutes > 0 ? +(storedMinutes / 60).toFixed(2) : '')
+    : (storedMinutes > 0 ? storedMinutes : '');
 
   if (!editMode) {
     return (
@@ -35,10 +50,10 @@ const WorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges
           {workout.description && (
             <p className="wd-view__desc">{workout.description}</p>
           )}
-          {(workout.duration ?? 0) > 0 && (
+          {storedMinutes > 0 && (
             <span className="wd-view__duration">
               <LuClock aria-hidden="true" />
-              {workout.duration} min
+              {storedMinutes} min
             </span>
           )}
         </div>
@@ -65,15 +80,21 @@ const WorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges
         aria-label="Workout description"
       />
       <div className="wd-edit__duration">
-        <label className="wd-edit__duration-label">
-          <LuClock aria-hidden="true" /> Duration
-        </label>
-        <TimePicker
-          value={(workout.duration || 0) * 60}
-          onChange={handleDurationChange}
-          placeholder="0"
-          defaultUnit="min"
-        />
+        <LuClock size={13} className="wd-edit__duration-icon" aria-hidden="true" />
+        <div className="ex-m">
+          <input
+            className="ex-m__input wd-edit__duration-input"
+            type="number"
+            min={0}
+            value={displayValue}
+            onChange={(e) => handleDurationChange(e.target.value)}
+            placeholder="0"
+            aria-label="Duration"
+          />
+          <button className="ex-m__label--tap" onClick={cycleUnit} title="Change unit">
+            {unit}<LuRefreshCw size={9} />
+          </button>
+        </div>
       </div>
     </div>
   );
