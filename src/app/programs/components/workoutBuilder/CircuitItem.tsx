@@ -3,7 +3,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { LuX, LuPlus } from 'react-icons/lu';
 import ExerciseItem from './ExerciseItem';
-import { Block, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
+import { Block, BlockType, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 
 interface Props {
   block: Block;
@@ -68,13 +68,40 @@ const CircuitItem: React.FC<Props> = ({
     });
   };
 
+  const addSupersetAfter = (index: number) => {
+    const updated = [...block.exercises];
+    updated[index] = { ...updated[index], hasSuperset: true };
+    updated.splice(index + 1, 0, {
+      name: '',
+      rest: 0,
+      targetReps: 10,
+      targetDurationSec: 0,
+      targetWeight: 0,
+      targetDistance: 0,
+      measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
+      notes: '',
+      order: 0,
+      sets: 3,
+      hasSuperset: false,
+    });
+    onUpdateBlock({ ...block, exercises: updated.map((ex, i) => ({ ...ex, order: i })) });
+  };
+
+  const removeSupersetExercise = (index: number) => {
+    const updated = block.exercises
+      .map((ex, i) => i === index - 1 ? { ...ex, hasSuperset: false } : ex)
+      .filter((_, i) => i !== index)
+      .map((ex, i) => ({ ...ex, order: i }));
+    onUpdateBlock({ ...block, exercises: updated });
+  };
+
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
   const restSeconds = (block as any).rest || 0;
 
   return (
     <div className="block-card">
       {/* ── Block header — single row ── */}
-      <div className="block-card__header">
+      {block.type !== BlockType.SINGLE && (<div className="block-card__header">
         <span className="block-card__num">#{blockNumber}</span>
 
         {editMode ? (
@@ -134,7 +161,7 @@ const CircuitItem: React.FC<Props> = ({
             </div>
           </>
         )}
-      </div>
+      </div>)}
 
       {/* ── Exercises ── */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -143,26 +170,42 @@ const CircuitItem: React.FC<Props> = ({
             {block.exercises.length === 0 && editMode && (
               <p className="block-card__empty">No exercises yet — add one below.</p>
             )}
-            {block.exercises.map((exercise, exerciseIndex) => (
-              <ExerciseItem
-                key={exercise.order}
-                exercise={exercise}
-                editMode={editMode}
-                logMode={logMode}
-                blockIndex={blockIndex}
-                exerciseIndex={exerciseIndex}
-                updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-                removeExerciseFromBlock={removeExerciseFromBlock}
-                isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
-                onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
-              />
-            ))}
+            {block.exercises.map((exercise, exerciseIndex) => {
+              const isSuperset = exerciseIndex > 0 && block.exercises[exerciseIndex - 1].hasSuperset;
+              const isSinglePrimary = block.type === BlockType.SINGLE && exerciseIndex === 0;
+
+              const item = (
+                <ExerciseItem
+                  key={exercise.order}
+                  exercise={exercise}
+                  editMode={editMode}
+                  logMode={logMode}
+                  blockIndex={blockIndex}
+                  exerciseIndex={exerciseIndex}
+                  updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                  removeExerciseFromBlock={
+                    isSinglePrimary && !isSuperset
+                      ? () => onRemoveBlock()
+                      : isSuperset
+                      ? () => removeSupersetExercise(exerciseIndex)
+                      : removeExerciseFromBlock
+                  }
+                  isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
+                  onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
+                  onAddSuperset={editMode && !isSuperset ? () => addSupersetAfter(exerciseIndex) : undefined}
+                />
+              );
+
+              return isSuperset
+                ? <div key={exercise.order} className="ex-superset-wrapper">{item}</div>
+                : item;
+            })}
           </div>
         </SortableContext>
       </DndContext>
 
-      {/* ── Add exercise ── */}
-      {editMode && !logMode && (
+      {/* ── Add exercise (circuit/other blocks) ── */}
+      {editMode && !logMode && block.type !== BlockType.SINGLE && (
         <button className="block-card__add-ex" onClick={addExercise}>
           <LuPlus aria-hidden="true" /> Add Exercise
         </button>

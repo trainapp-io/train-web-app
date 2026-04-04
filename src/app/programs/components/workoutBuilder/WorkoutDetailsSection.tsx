@@ -1,38 +1,18 @@
 import React, { useState } from 'react';
 import { LuClock, LuRefreshCw } from 'react-icons/lu';
-import { useWorkoutContext } from '../contexts/WorkoutContext';
-import '../../programs/views/WorkoutView.css';
+import { WorkoutRequest } from '@trainapp-io/train-core';
 
 type DurationUnit = 'min' | 'hr';
 
 interface Props {
+  workout: WorkoutRequest;
   editMode: boolean;
-  setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
+  onUpdate: (updates: Partial<WorkoutRequest>) => void;
+  onSetHasUnsavedChanges: (v: boolean) => void;
 }
 
-const StandaloneWorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsavedChanges }) => {
-  const { state, updateWorkoutRequest } = useWorkoutContext();
-  const workout = state.workoutRequest;
+const WorkoutDetailsSection: React.FC<Props> = ({ workout, editMode, onUpdate, onSetHasUnsavedChanges }) => {
   const [unit, setUnit] = useState<DurationUnit>('min');
-
-  const handleNameChange = (name: string) => {
-    updateWorkoutRequest({ ...workout, name });
-    setHasUnsavedChanges(true);
-  };
-
-  const handleDescriptionChange = (description: string) => {
-    updateWorkoutRequest({ ...workout, description });
-    setHasUnsavedChanges(true);
-  };
-
-  const handleDurationChange = (displayValue: string) => {
-    const n = parseFloat(displayValue) || 0;
-    const minutes = unit === 'hr' ? Math.round(n * 60) : Math.round(n);
-    updateWorkoutRequest({ ...workout, duration: minutes });
-    setHasUnsavedChanges(true);
-  };
-
-  const cycleUnit = () => setUnit(u => u === 'min' ? 'hr' : 'min');
 
   const storedMinutes = workout.duration || 0;
   const displayValue = unit === 'hr'
@@ -44,9 +24,7 @@ const StandaloneWorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsa
       <div className="wd-view">
         <h1 className="wd-view__name">{workout.name || 'Untitled Workout'}</h1>
         <div className="wd-view__row">
-          {workout.description && (
-            <p className="wd-view__desc">{workout.description}</p>
-          )}
+          {workout.description && <p className="wd-view__desc">{workout.description}</p>}
           {storedMinutes > 0 && (
             <span className="wd-view__duration">
               <LuClock aria-hidden="true" />
@@ -64,14 +42,14 @@ const StandaloneWorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsa
         className="wd-edit__name"
         type="text"
         value={workout.name || ''}
-        onChange={(e) => handleNameChange(e.target.value)}
+        onChange={(e) => { onUpdate({ name: e.target.value }); onSetHasUnsavedChanges(true); }}
         placeholder="Workout name"
         aria-label="Workout name"
       />
       <textarea
         className="wd-edit__desc"
         value={workout.description || ''}
-        onChange={(e) => handleDescriptionChange(e.target.value)}
+        onChange={(e) => { onUpdate({ description: e.target.value }); onSetHasUnsavedChanges(true); }}
         placeholder="Description (optional)"
         rows={2}
         aria-label="Workout description"
@@ -84,11 +62,16 @@ const StandaloneWorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsa
             type="number"
             min={0}
             value={displayValue}
-            onChange={(e) => handleDurationChange(e.target.value)}
+            onChange={(e) => {
+              const n = parseFloat(e.target.value) || 0;
+              const minutes = unit === 'hr' ? Math.round(n * 60) : Math.round(n);
+              onUpdate({ duration: minutes });
+              onSetHasUnsavedChanges(true);
+            }}
             placeholder="0"
             aria-label="Duration"
           />
-          <button className="ex-m__label--tap" onClick={cycleUnit} title="Change unit">
+          <button className="ex-m__label--tap" onClick={() => setUnit(u => u === 'min' ? 'hr' : 'min')} title="Change unit">
             {unit}<LuRefreshCw size={9} />
           </button>
         </div>
@@ -97,4 +80,4 @@ const StandaloneWorkoutDetailsSection: React.FC<Props> = ({ editMode, setHasUnsa
   );
 };
 
-export default StandaloneWorkoutDetailsSection;
+export default WorkoutDetailsSection;

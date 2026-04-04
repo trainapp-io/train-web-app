@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LuGripVertical, LuX, LuRefreshCw, LuUpload, LuCheck } from 'react-icons/lu';
+import { LuGripVertical, LuX, LuRefreshCw, LuUpload, LuCheck, LuPlus } from 'react-icons/lu';
 import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   /** undefined = not in log mode; true = this exercise is active; false = inactive/dimmed */
   isActive?: boolean;
   onSelect?: () => void;
+  onAddSuperset?: () => void;
 }
 
 const AVATAR_COLORS = [
@@ -54,6 +55,7 @@ const ExerciseItem: React.FC<Props> = ({
   removeExerciseFromBlock,
   isActive,
   onSelect,
+  onAddSuperset,
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useSortable({ id: exercise.order });
   const style = { transform: CSS.Transform.toString(transform) };
@@ -261,6 +263,13 @@ const ExerciseItem: React.FC<Props> = ({
               {restType === 'rest' ? 's rest' : 'intensity'}<LuRefreshCw size={9} />
             </button>
           </div>
+
+          {/* Add superset */}
+          {!logMode && onAddSuperset && (
+            <button className="ex-card__add-superset" onClick={onAddSuperset} aria-label="Add superset">
+              <LuPlus size={14} />
+            </button>
+          )}
 
         </div>
 

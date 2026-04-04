@@ -366,6 +366,33 @@
 
 /* ── Add exercise button ── */
 
+.ex-superset-wrapper {
+  margin-left: 24px;
+  margin-bottom: 6px;
+  border-left: 2px solid var(--border-color);
+  padding-left: 8px;
+}
+
+.ex-card__add-superset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color var(--transition-speed);
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 4px;
+}
+
+.ex-card__add-superset:hover {
+  color: var(--accent-color);
+}
+
 .block-card__add-ex {
   display: flex;
   align-items: center;
@@ -1015,6 +1042,15 @@
 /* ══════════════════════════════════════════
    ADD BLOCK BUTTON
 ══════════════════════════════════════════ */
+
+.workout-view .add-block-row {
+  display: flex;
+  gap: 8px;
+}
+
+.workout-view .add-block-row .add-circuit-btn {
+  flex: 1;
+}
 
 .workout-view .add-circuit-btn {
   display: flex;
