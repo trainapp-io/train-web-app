@@ -2,9 +2,11 @@ import api from '../../../services/apiClient';
 import type {
   Client,
   ClientListResponse,
-  ClientProfile,
   CreateClientRequest,
   UpdateClientRequest,
+  WorkoutHistoryEntry,
+  ProgramSummary,
+  AppointmentSummary,
 } from '../types/crm.types';
 
 export const crmService = {
@@ -18,8 +20,18 @@ export const crmService = {
     return response.data;
   },
 
-  async getClientProfile(clientId: string): Promise<ClientProfile> {
-    const response = await api.get<ClientProfile>(`/crm/clients/${clientId}/profile`);
+  async getClientAppointments(clientId: string): Promise<AppointmentSummary[]> {
+    const response = await api.get<AppointmentSummary[]>(`/crm/clients/${clientId}/appointments`);
+    return response.data;
+  },
+
+  async getClientWorkoutHistory(clientId: string): Promise<WorkoutHistoryEntry[]> {
+    const response = await api.get<WorkoutHistoryEntry[]>(`/crm/clients/${clientId}/workout-history`);
+    return response.data;
+  },
+
+  async getClientPrograms(clientId: string): Promise<ProgramSummary[]> {
+    const response = await api.get<ProgramSummary[]>(`/crm/clients/${clientId}/programs`);
     return response.data;
   },
 

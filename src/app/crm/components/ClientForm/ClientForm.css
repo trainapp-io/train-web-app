@@ -59,6 +59,47 @@
   gap: 4px;
 }
 
+.client-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.client-form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.client-form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, rgba(255,255,255,0.15));
+  border-radius: 8px;
+  background-color: var(--bg-secondary, rgba(255,255,255,0.05));
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.client-form-select:focus {
+  outline: none;
+  border-color: var(--accent-color, #4f8ef7);
+  box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+}
+
+.client-form-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .client-form-actions {
   display: flex;
   gap: 12px;

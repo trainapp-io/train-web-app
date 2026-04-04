@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { CreateClientRequest, FieldErrorMap } from '../../types/crm.types';
+import type { ClientStatus, CreateClientRequest, FieldErrorMap } from '../../types/crm.types';
 import Button from '../../../../components/ui/Button';
 import TextInput from '../../../../components/ui/TextInput';
 import { LuX } from 'react-icons/lu';
@@ -21,7 +21,14 @@ const EMPTY_FORM: CreateClientRequest = {
   email: '',
   phone: '',
   dateOfBirth: '',
+  status: 'pending',
 };
+
+const STATUS_OPTIONS: { value: ClientStatus; label: string }[] = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
 
 const ClientForm: React.FC<ClientFormProps> = ({
   open,
@@ -55,6 +62,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
     if (form.email?.trim()) payload.email = form.email.trim();
     if (form.phone?.trim()) payload.phone = form.phone.trim();
     if (form.dateOfBirth?.trim()) payload.dateOfBirth = form.dateOfBirth.trim();
+    if (form.status) payload.status = form.status;
     onSubmit(payload);
   };
 
@@ -117,6 +125,21 @@ const ClientForm: React.FC<ClientFormProps> = ({
             disabled={isSaving}
             error={fieldErrors['dateOfBirth']}
           />
+
+          <div className="client-form-field">
+            <label className="client-form-label" htmlFor="status">Status</label>
+            <select
+              id="status"
+              className="client-form-select"
+              value={form.status ?? 'pending'}
+              onChange={(e) => handleChange('status', e.target.value)}
+              disabled={isSaving}
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="client-form-actions">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSaving}>

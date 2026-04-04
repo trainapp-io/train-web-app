@@ -27,6 +27,7 @@ export interface CreateClientRequest {
   phone?: string;
   dateOfBirth?: string;
   platformUserId?: string;
+  status?: ClientStatus;
 }
 
 export interface UpdateClientRequest {
@@ -88,30 +89,24 @@ export interface RefundPaymentRequest {
 
 export interface WorkoutHistoryEntry {
   id: string;
-  date: string;
-  workoutName: string;
+  userId: string;
+  workoutId: string;
+  workoutSnapshot: { name?: string; createdBy?: string };
+  isCompleted: boolean;
+  actualStartDate: string;
 }
 
 export interface ProgramSummary {
   id: string;
   name: string;
   status: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface AppointmentSummary {
-  id: string;
-  date: string;
-  type: string;
+  event: { id: string; title?: string; startDate?: string };
   status: string;
-}
-
-export interface PlatformProfile {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  profilePhoto: string | null;
 }
 
 export interface PaymentSummary {
@@ -120,13 +115,7 @@ export interface PaymentSummary {
   currency: string;
 }
 
-export interface ClientProfile {
-  client: Client;
-  platformProfile: PlatformProfile | null;
-  workoutHistory: WorkoutHistoryEntry[];
-  programs: ProgramSummary[];
-  appointments: AppointmentSummary[];
-  notes: Note[];
+export interface PaymentsResponse {
   payments: Payment[];
   paymentSummary: PaymentSummary;
 }

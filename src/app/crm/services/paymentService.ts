@@ -1,14 +1,15 @@
 import api from '../../../services/apiClient';
 import type {
   Payment,
+  PaymentsResponse,
   RecordPaymentRequest,
   UpdatePaymentRequest,
   RefundPaymentRequest,
 } from '../types/crm.types';
 
 export const paymentService = {
-  async listPayments(clientId: string): Promise<Payment[]> {
-    const response = await api.get<Payment[]>(`/crm/clients/${clientId}/payments`);
+  async listPayments(clientId: string): Promise<PaymentsResponse> {
+    const response = await api.get<PaymentsResponse>(`/crm/clients/${clientId}/payments`);
     return response.data;
   },
 

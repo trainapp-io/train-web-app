@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import api from '../../../../services/apiClient';
 import { crmService } from '../crmService';
-import type { Client, ClientListResponse, ClientProfile } from '../../types/crm.types';
+import type { Client, ClientListResponse, AppointmentSummary, WorkoutHistoryEntry, ProgramSummary } from '../../types/crm.types';
 
 vi.mock('../../../../services/apiClient');
 
@@ -48,15 +48,42 @@ describe('crmService.getClient', () => {
   });
 });
 
-describe('crmService.getClientProfile', () => {
-  it('calls GET /crm/clients/:id/profile and returns data', async () => {
-    const profile = { client: mockClient } as unknown as ClientProfile;
-    apiMock.get = vi.fn().mockResolvedValue({ data: profile });
+describe('crmService.getClientAppointments', () => {
+  it('calls GET /crm/clients/:id/appointments and returns data', async () => {
+    const appointments: AppointmentSummary[] = [{ event: { id: 'e1' }, status: 'confirmed' }];
+    apiMock.get = vi.fn().mockResolvedValue({ data: appointments });
 
-    const result = await crmService.getClientProfile('c1');
+    const result = await crmService.getClientAppointments('c1');
 
-    expect(apiMock.get).toHaveBeenCalledWith('/crm/clients/c1/profile');
-    expect(result).toEqual(profile);
+    expect(apiMock.get).toHaveBeenCalledWith('/crm/clients/c1/appointments');
+    expect(result).toEqual(appointments);
+  });
+});
+
+describe('crmService.getClientWorkoutHistory', () => {
+  it('calls GET /crm/clients/:id/workout-history and returns data', async () => {
+    const history: WorkoutHistoryEntry[] = [{
+      id: 'w1', userId: 'u1', workoutId: 'wk1', versionId: 1,
+      workoutSnapshot: { name: 'Leg Day' }, isCompleted: true, actualStartDate: '2024-01-01',
+    } as unknown as WorkoutHistoryEntry];
+    apiMock.get = vi.fn().mockResolvedValue({ data: history });
+
+    const result = await crmService.getClientWorkoutHistory('c1');
+
+    expect(apiMock.get).toHaveBeenCalledWith('/crm/clients/c1/workout-history');
+    expect(result).toEqual(history);
+  });
+});
+
+describe('crmService.getClientPrograms', () => {
+  it('calls GET /crm/clients/:id/programs and returns data', async () => {
+    const programs: ProgramSummary[] = [{ id: 'p1', name: 'Strength', status: 'active' }];
+    apiMock.get = vi.fn().mockResolvedValue({ data: programs });
+
+    const result = await crmService.getClientPrograms('c1');
+
+    expect(apiMock.get).toHaveBeenCalledWith('/crm/clients/c1/programs');
+    expect(result).toEqual(programs);
   });
 });
 

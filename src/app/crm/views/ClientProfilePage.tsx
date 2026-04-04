@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { LuArrowLeft, LuPencil, LuUserX, LuPlus, LuMail, LuPhone, LuCalendar, LuActivity, LuDumbbell, LuCalendarCheck } from 'react-icons/lu';
 import {
-  useClientProfile,
+  useClient,
+  useClientAppointments,
+  useClientWorkoutHistory,
+  useClientPrograms,
   useUpdateClient,
   useDeactivateClient,
 } from '../hooks/useCrmClients';
@@ -22,6 +25,7 @@ import type {
   CreateClientRequest,
   FieldErrorMap,
   ClientStatus,
+  PaymentSummary,
 } from '../types/crm.types';
 import './ClientProfilePage.css';
 
@@ -42,7 +46,10 @@ const ClientProfilePage: React.FC = () => {
   const [editFieldErrors, setEditFieldErrors] = useState<FieldErrorMap>({});
   const [paymentFieldErrors, setPaymentFieldErrors] = useState<FieldErrorMap>({});
 
-  const profileQuery = useClientProfile(clientId!);
+  const clientQuery = useClient(clientId!);
+  const appointmentsQuery = useClientAppointments(clientId!);
+  const workoutHistoryQuery = useClientWorkoutHistory(clientId!);
+  const programsQuery = useClientPrograms(clientId!);
   const notesQuery = useNotes(clientId!);
   const paymentsQuery = usePayments(clientId!);
   const stripeStatusQuery = useStripeStatus();
@@ -56,11 +63,11 @@ const ClientProfilePage: React.FC = () => {
   const refundPaymentMutation = useRefundPayment();
   const startOnboardingMutation = useStartOnboarding();
 
-  if (profileQuery.isLoading) {
+  if (clientQuery.isLoading) {
     return <div className="profile-loading" aria-live="polite">Loading profile…</div>;
   }
 
-  if (profileQuery.isError || !profileQuery.data) {
+  if (clientQuery.isError || !clientQuery.data) {
     return (
       <div className="profile-error" role="alert">
         Failed to load client profile.
@@ -68,11 +75,19 @@ const ClientProfilePage: React.FC = () => {
     );
   }
 
-  const { client, platformProfile, workoutHistory, programs, appointments, paymentSummary } =
-    profileQuery.data;
+  const client = clientQuery.data;
+  const appointments = appointmentsQuery.data ?? [];
+  const workoutHistory = workoutHistoryQuery.data ?? [];
+  const programs = programsQuery.data ?? [];
   const notes = notesQuery.data ?? [];
-  const payments = paymentsQuery.data ?? [];
+  const payments = paymentsQuery.data?.payments ?? [];
+  const paymentSummary: PaymentSummary = paymentsQuery.data?.paymentSummary ?? {
+    totalPaid: 0,
+    totalOutstanding: 0,
+    currency: 'USD',
+  };
   const isStripeOnboarded = stripeStatusQuery.data?.onboarded ?? false;
+  const hasPlatformData = !!client.platformUserId;
 
   const fullName = `${client.firstName} ${client.lastName}`;
   const initials = `${client.firstName.charAt(0)}${client.lastName.charAt(0)}`.toUpperCase();
@@ -248,7 +263,7 @@ const ClientProfilePage: React.FC = () => {
       </div>
 
       {/* ── Platform data ── */}
-      {platformProfile && (
+      {hasPlatformData && (
         <div className="profile-platform-section">
           <h2 className="profile-section-title">Platform Activity</h2>
           <div className="profile-platform-stats">
@@ -379,6 +394,7 @@ const ClientProfilePage: React.FC = () => {
           email: client.email ?? '',
           phone: client.phone ?? '',
           dateOfBirth: client.dateOfBirth ?? '',
+          status: client.status,
         }}
         isSaving={updateClientMutation.isPending}
         fieldErrors={editFieldErrors}

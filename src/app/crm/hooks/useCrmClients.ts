@@ -4,10 +4,12 @@ import { crmService } from '../services/crmService';
 import type {
   Client,
   ClientListResponse,
-  ClientProfile,
   CreateClientRequest,
   UpdateClientRequest,
   CrmApiError,
+  WorkoutHistoryEntry,
+  ProgramSummary,
+  AppointmentSummary,
 } from '../types/crm.types';
 import type { AxiosError } from 'axios';
 
@@ -22,11 +24,25 @@ export function useClient(clientId: string) {
   return useApiQuery<Client>(['crm', 'client', clientId], `/crm/clients/${clientId}`);
 }
 
-export function useClientProfile(clientId: string) {
-  return useApiQuery<ClientProfile>(
-    ['crm', 'profile', clientId],
-    `/crm/clients/${clientId}/profile`
-  );
+export function useClientAppointments(clientId: string) {
+  return useQuery<AppointmentSummary[], AxiosError>({
+    queryKey: ['crm', 'appointments', clientId],
+    queryFn: () => crmService.getClientAppointments(clientId),
+  });
+}
+
+export function useClientWorkoutHistory(clientId: string) {
+  return useQuery<WorkoutHistoryEntry[], AxiosError>({
+    queryKey: ['crm', 'workout-history', clientId],
+    queryFn: () => crmService.getClientWorkoutHistory(clientId),
+  });
+}
+
+export function useClientPrograms(clientId: string) {
+  return useQuery<ProgramSummary[], AxiosError>({
+    queryKey: ['crm', 'programs', clientId],
+    queryFn: () => crmService.getClientPrograms(clientId),
+  });
 }
 
 export function useCreateClient() {

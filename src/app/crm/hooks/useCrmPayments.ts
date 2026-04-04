@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApiQuery } from '../../../services/queryService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paymentService } from '../services/paymentService';
 import type {
   Payment,
+  PaymentsResponse,
   RecordPaymentRequest,
   UpdatePaymentRequest,
   RefundPaymentRequest,
@@ -11,7 +11,10 @@ import type {
 import type { AxiosError } from 'axios';
 
 export function usePayments(clientId: string) {
-  return useApiQuery<Payment[]>(['crm', 'payments', clientId], `/crm/clients/${clientId}/payments`);
+  return useQuery<PaymentsResponse, AxiosError>({
+    queryKey: ['crm', 'payments', clientId],
+    queryFn: () => paymentService.listPayments(clientId),
+  });
 }
 
 export function useRecordPayment() {
