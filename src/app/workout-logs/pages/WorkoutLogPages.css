@@ -1,5 +1,11 @@
 .workout-log-page {
-  padding: 1rem;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Page Header */

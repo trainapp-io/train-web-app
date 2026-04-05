@@ -1,0 +1,67 @@
+.stripe-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background-color: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--card-border-radius);
+  flex-wrap: wrap;
+}
+
+.stripe-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stripe-banner__icon {
+  font-size: 1.4rem;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.stripe-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stripe-banner__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.stripe-banner__subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.stripe-banner__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #6366f1;
+  border: none;
+  border-radius: var(--button-border-radius);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--transition-speed);
+}
+
+.stripe-banner__btn:hover:not(:disabled) {
+  background-color: #4f46e5;
+}
+
+.stripe-banner__btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

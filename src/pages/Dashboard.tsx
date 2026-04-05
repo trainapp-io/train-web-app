@@ -22,7 +22,9 @@ import WorkoutLogHistory from "../app/workout-logs/pages/WorkoutLogHistory";
 import { WorkoutProvider } from "../app/workouts/contexts/WorkoutContext";
 import WorkoutView from "../app/workouts/views/WorkoutView";
 
-import { LuHouse, LuCalendarDays, LuDumbbell, LuClipboardList, LuUser, LuCalendar, LuSearch } from "react-icons/lu";
+import { LuHouse, LuCalendarDays, LuDumbbell, LuClipboardList, LuUser, LuCalendar, LuSearch, LuUsers } from "react-icons/lu";
+import CrmPage from "../app/crm/views/CrmPage";
+import ClientProfilePage from "../app/crm/views/ClientProfilePage";
 
 const Dashboard: React.FC = () => {
   const tabs = [
@@ -33,6 +35,7 @@ const Dashboard: React.FC = () => {
     { id: "profile", label: "Profile", icon: <LuUser /> },
     { id: "events", label: "Events", icon: <LuCalendar /> },
     { id: "search", label: "Search", icon: <LuSearch /> },
+    { id: "crm", label: "Clients", icon: <LuUsers /> },
     ];
 
   return (
@@ -59,6 +62,8 @@ const Dashboard: React.FC = () => {
             <Route path="/workout-logs/:logId/edit" element={<WorkoutLogEdit />} />
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
             <Route path="/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
+            <Route path="/crm" element={<CrmPage />} />
+            <Route path="/crm/clients/:clientId" element={<ClientProfilePage />} />
           </Routes>
         </ProgramProvider>
         <WorkoutProvider>

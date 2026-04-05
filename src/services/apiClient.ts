@@ -28,8 +28,15 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 api.interceptors.request.use((config) => {
-  // Skip authentication for public endpoints
-  const isPublicEndpoint = config.url?.includes('/availability/public/');
+  // Skip authentication for public endpoints and auth endpoints
+  const isPublicEndpoint =
+    config.url?.includes('/availability/public/') ||
+    config.url?.includes('/user/login') ||
+    config.url?.includes('/user/register') ||
+    config.url?.includes('/user/google-auth') ||
+    config.url?.includes('/user/refresh') ||
+    config.url?.includes('/user/request-password-reset') ||
+    config.url?.includes('/user/reset-password-with-code');
   
   if (!isPublicEndpoint) {
     const token = tokenService.getAccessToken();
@@ -53,8 +60,15 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
     
-    // Skip token refresh for public endpoints
-    const isPublicEndpoint = originalRequest.url?.includes('/availability/public/');
+    // Skip token refresh for public/auth endpoints
+    const isPublicEndpoint =
+      originalRequest.url?.includes('/availability/public/') ||
+      originalRequest.url?.includes('/user/login') ||
+      originalRequest.url?.includes('/user/register') ||
+      originalRequest.url?.includes('/user/google-auth') ||
+      originalRequest.url?.includes('/user/refresh') ||
+      originalRequest.url?.includes('/user/request-password-reset') ||
+      originalRequest.url?.includes('/user/reset-password-with-code');
     if (isPublicEndpoint) {
       return Promise.reject(err);
     }

@@ -34,6 +34,8 @@ const ContentView: React.FC<ContentViewProps> = ({
 
 // Helper function to derive page title from URL path
 const getPageTitleFromPath = (path: string): string => {
+  if (path.endsWith('/log')) return 'Log Workout';
+
   // Remove leading slash and get first segment
   const segment = path.split('/')[1];
   

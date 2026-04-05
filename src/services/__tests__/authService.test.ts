@@ -281,6 +281,7 @@ describe('authService', () => {
       expect(api.post).toHaveBeenCalledWith(
         expect.stringContaining('/user/google-auth'),
         {
+          idToken: 'google-id-token',
           name: 'Test User',
           deviceId: 'mock-device-id',
           agreeToTerms: true

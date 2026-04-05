@@ -1,0 +1,70 @@
+.note-item {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: box-shadow var(--transition-speed);
+}
+
+.note-item:hover {
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.note-item__text {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  margin: 0 0 10px;
+}
+
+.note-item__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note-item__date {
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+.note-item__edited {
+  font-style: italic;
+}
+
+.note-item__actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--transition-speed);
+}
+
+.note-item:hover .note-item__actions {
+  opacity: 1;
+}
+
+.note-item__action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  transition: color var(--transition-speed), background-color var(--transition-speed);
+}
+
+.note-item__action-btn:hover {
+  color: var(--accent-color);
+  background-color: rgba(109, 40, 217, 0.08);
+}
+
+.note-item__action-btn--delete:hover {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.08);
+}

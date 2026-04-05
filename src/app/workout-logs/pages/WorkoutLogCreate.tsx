@@ -143,9 +143,6 @@ const WorkoutLogCreate: React.FC = () => {
 
   return (
     <div className="workout-log-page">
-      <div className="workout-log-page-header">
-        <h1>Log Workout</h1>
-      </div>
       <WorkoutLogForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}
