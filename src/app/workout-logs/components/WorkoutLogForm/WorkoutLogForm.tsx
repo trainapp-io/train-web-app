@@ -48,7 +48,7 @@ function blockToLog(block: Block, order: number): BlockLog {
 const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   initialData,
   onSubmit,
-  onCancel,
+  onCancel: _onCancel,
   isSaving = false,
 }) => {
   const { workoutSnapshot, versionId } = useWorkoutLogContext();
@@ -62,7 +62,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   const [actualDuration, setActualDuration] = useState<number>(
     initialData?.actualDuration || 0
   );
-  const [isCompleted, setIsCompleted] = useState<boolean>(
+  const [isCompleted, _setIsCompleted] = useState<boolean>(
     initialData?.isCompleted || false
   );
 

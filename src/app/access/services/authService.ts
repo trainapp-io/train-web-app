@@ -77,6 +77,7 @@ import { AxiosError } from 'axios';
         
         // Send the token to your backend with device ID
         const response = await api.post<UserResponse>(`${API_URL}/user/google-auth`, {
+          idToken,
           name: result.user.displayName,
           deviceId: tokenService.getDeviceId(),
           agreeToTerms: true

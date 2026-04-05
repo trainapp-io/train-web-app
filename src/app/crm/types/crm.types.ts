@@ -120,6 +120,17 @@ export interface PaymentsResponse {
   paymentSummary: PaymentSummary;
 }
 
+export interface ClientProfile {
+  client: Client;
+  platformProfile: unknown | null;
+  workoutHistory: WorkoutHistoryEntry[];
+  programs: ProgramSummary[];
+  appointments: AppointmentSummary[];
+  notes: Note[];
+  payments: Payment[];
+  paymentSummary: PaymentSummary;
+}
+
 export interface StripeOnboardingStatus {
   onboarded: boolean;
   stripeAccountId: string | null;
