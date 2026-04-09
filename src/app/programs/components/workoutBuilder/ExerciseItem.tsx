@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LuGripVertical, LuX, LuRefreshCw, LuUpload, LuCheck, LuPlus } from 'react-icons/lu';
-import { Exercise, MeasurementType, Unit } from '@trainapp-io/train-core';
+import { LuGripVertical, LuX } from 'react-icons/lu';
+import { Exercise, MeasurementType, Unit, SetTarget, SetLog } from '@trainapp-io/train-core';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import './ExerciseItem.css';
 
 interface Props {
   exercise: Exercise;
@@ -12,10 +19,13 @@ interface Props {
   exerciseIndex: number;
   updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
   removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
-  /** undefined = not in log mode; true = this exercise is active; false = inactive/dimmed */
   isActive?: boolean;
   onSelect?: () => void;
   onAddSuperset?: () => void;
+  /** Called when a set is checked in log mode; passes the rest duration in seconds */
+  onSetCompleted?: (restSeconds: number) => void;
+  /** Column label for set number — "Rnd" inside circuits */
+  setColumnLabel?: string;
 }
 
 const AVATAR_COLORS = [
@@ -34,6 +44,7 @@ function getAvatarStyle(name: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
+const MEASUREMENT_TYPES = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
 const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.REPS]: 'reps',
   [MeasurementType.TIME]: 'sec',
@@ -41,8 +52,31 @@ const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.BODYWEIGHT]: 'bw',
 };
 
-function isVideoUrl(url: string) {
-  return /youtube\.com|youtu\.be|vimeo\.com|\.mp4|\.webm|\.mov/i.test(url);
+/** Build initial setData from exercise, falling back to single-value fields */
+function getSetData(exercise: Exercise): SetTarget[] {
+  if (exercise.setData?.length) return exercise.setData;
+  const count = exercise.sets || 3;
+  return Array.from({ length: count }, () => ({
+    reps: exercise.targetReps,
+    weight: exercise.targetWeight,
+    durationSec: exercise.targetDurationSec,
+    distance: exercise.targetDistance,
+    rest: exercise.rest,
+  }));
+}
+
+/** Build initial setLogs from exercise, falling back to setData or single-value fields */
+function getSetLogs(exercise: Exercise): SetLog[] {
+  const logs = (exercise as any).setLogs as SetLog[] | undefined;
+  if (logs?.length) return logs;
+  return getSetData(exercise).map((s) => ({
+    actualReps: s.reps,
+    actualWeight: s.weight,
+    actualDurationSec: s.durationSec,
+    actualDistance: s.distance,
+    actualRest: s.rest,
+    isCompleted: false,
+  }));
 }
 
 const ExerciseItem: React.FC<Props> = ({
@@ -55,37 +89,46 @@ const ExerciseItem: React.FC<Props> = ({
   removeExerciseFromBlock,
   isActive,
   onSelect,
-  onAddSuperset,
+  onAddSuperset: _onAddSuperset,
+  onSetCompleted,
+  setColumnLabel = 'Set',
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useSortable({ id: exercise.order });
   const style = { transform: CSS.Transform.toString(transform) };
 
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [restType, setRestType] = useState<'rest' | 'intensity'>('rest');
-  const [checked, setChecked] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const [noteDialog, setNoteDialog] = useState<{ open: boolean; setIndex: number; value: string }>({
+    open: false, setIndex: 0, value: '',
+  });
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
 
   if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) return null;
 
   const measurementType = exercise.measurement?.measurementType || MeasurementType.REPS;
   const weightUnit = (exercise as any).weightUnit === Unit.KILOGRAM ? 'kg' : 'lbs';
-  const sets = (exercise as any).sets || 1;
-  const mediaUrl: string | undefined = (exercise as any).mediaUrl;
+  const restUnit: 'seconds' | 'minutes' = exercise.restUnit || 'seconds';
+  const avatar = getAvatarStyle(exercise.name || 'X');
+  const initial = (exercise.name || '?').charAt(0).toUpperCase();
+  const hasWeight = measurementType === MeasurementType.REPS || measurementType === MeasurementType.DISTANCE;
 
   const update = (updates: Partial<Exercise>) =>
     updateExerciseInBlockPartial(blockIndex, exerciseIndex, updates);
 
   const cycleMeasurement = () => {
-    const types = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
-    const next = types[(types.indexOf(measurementType) + 1) % types.length];
+    const next = MEASUREMENT_TYPES[(MEASUREMENT_TYPES.indexOf(measurementType) + 1) % MEASUREMENT_TYPES.length];
     update({ measurement: { ...exercise.measurement, measurementType: next } });
   };
 
   const cycleWeight = () => {
     const next = (exercise as any).weightUnit === Unit.KILOGRAM ? Unit.POUND : Unit.KILOGRAM;
     update({ weightUnit: next } as any);
+  };
+
+  const toggleRestUnit = () => {
+    update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
   };
 
   const handleNameChange = (value: string) => {
@@ -105,227 +148,358 @@ const ExerciseItem: React.FC<Props> = ({
     }, 300);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const result = ev.target?.result as string;
-      if (result) update({ mediaUrl: result } as any);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
-
   // ── View mode ──────────────────────────────────────────────────────────────
-  const avatar = getAvatarStyle(exercise.name || 'X');
-  const initial = (exercise.name || '?').charAt(0).toUpperCase();
-  const metricLabel = MEASUREMENT_LABELS[measurementType];
-  const metricValue = exercise.targetReps || 0;
-  const weightValue = exercise.targetWeight || 0;
-  const restValue = exercise.rest || 0;
-  const summaryParts: string[] = [];
-  if (metricValue) summaryParts.push(`${metricValue} ${metricLabel}`);
-  if (weightValue) summaryParts.push(`${weightValue} ${weightUnit}`);
-  if (restValue) summaryParts.push(restType === 'rest' ? `${restValue}s rest` : `${restValue} intensity`);
-
   if (!editMode) {
+    const setData = getSetData(exercise);
+    const summaryParts: string[] = [];
+    const first = setData[0] || {};
+    if (first.reps) summaryParts.push(`${first.reps} ${MEASUREMENT_LABELS[measurementType]}`);
+    if (first.weight) summaryParts.push(`${first.weight} ${weightUnit}`);
     return (
-      <div ref={setNodeRef} style={style} className="ex-row" {...attributes}>
-        {mediaUrl ? (
-          <div className="ex-row__media-thumb">
-            {isVideoUrl(mediaUrl)
-              ? <div className="ex-row__media-thumb--video">▶</div>
-              : <img src={mediaUrl} alt={exercise.name} className="ex-row__media-img" />}
-          </div>
-        ) : (
-          <div className="ex-row__avatar" style={{ background: avatar.bg, color: avatar.color }}>
-            {initial}
-          </div>
-        )}
-        <div className="ex-row__info">
-          <span className="ex-row__name">{exercise.name || 'Untitled'}</span>
+      <div ref={setNodeRef} style={style} className="ex-row-v2" {...attributes}>
+        <div className="ex-card-v2__avatar" style={{ background: avatar.bg, color: avatar.color }}>
+          {initial}
+        </div>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>{exercise.name || 'Untitled'}</div>
           {summaryParts.length > 0 && (
-            <span className="ex-row__meta">{sets} × {summaryParts.join(' · ')}</span>
+            <div className="ex-row-v2__meta">{setData.length} × {summaryParts.join(' · ')}</div>
           )}
         </div>
       </div>
     );
   }
 
-  // ── Edit mode — single row ─────────────────────────────────────────────────
-  const logStateClass = isActive === true ? ' ex-card--log-active'
-    : isActive === false ? ' ex-card--log-inactive' : '';
-  const checkedClass = logMode && checked ? ' ex-card--log-checked' : '';
+  // ── Log mode ──────────────────────────────────────────────────────────────
+  if (logMode) {
+    const setLogs = getSetLogs(exercise);
+    const activeIndex = setLogs.findIndex((s) => !s.isCompleted);
+
+    const checkSet = (index: number) => {
+      const wasCompleted = setLogs[index].isCompleted;
+      const next = setLogs.map((s, i) =>
+        i === index ? { ...s, isCompleted: !s.isCompleted } : s
+      );
+      update({ setLogs: next } as any);
+      if (!wasCompleted && onSetCompleted) {
+        onSetCompleted(setLogs[index].actualRest || 0);
+      }
+    };
+
+    const markAll = () => {
+      update({ setLogs: setLogs.map((s) => ({ ...s, isCompleted: true })) } as any);
+    };
+
+    return (
+      <div
+        className={`ex-card-v2 ex-card-v2--log${isActive === false ? ' ex-card-v2--inactive' : ''}`}
+        onClick={isActive === false ? onSelect : undefined}
+      >
+        <div className="ex-card-v2__header">
+          <div className="ex-card-v2__avatar" style={{ background: avatar.bg, color: avatar.color }}>
+            {initial}
+          </div>
+          <span className="ex-card-v2__name-static">{exercise.name || 'Untitled'}</span>
+          <span className="ex-toggle-chip" style={{ cursor: 'default' }}>{weightUnit}</span>
+        </div>
+
+        <div className="ex-set-table-wrap">
+          <table className="ex-set-table">
+            <thead>
+              <tr>
+                <th>{setColumnLabel}</th>
+                {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
+                <th>{MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {setLogs.map((sl, i) => (
+                <tr
+                  key={i}
+                  className={
+                    sl.isCompleted ? 'ex-log-row--done'
+                    : i === activeIndex ? 'ex-log-row--active'
+                    : ''
+                  }
+                >
+                  <td><span className="ex-set-num">{i + 1}</span></td>
+                  {hasWeight && (
+                    <td>
+                      <input
+                        className="ex-set-input"
+                        type="number" min={0}
+                        value={sl.actualWeight ?? ''}
+                        onChange={(e) => {
+                          const next = setLogs.map((s, idx) =>
+                            idx === i ? { ...s, actualWeight: parseFloat(e.target.value) || 0 } : s
+                          );
+                          update({ setLogs: next } as any);
+                        }}
+                      />
+                    </td>
+                  )}
+                  <td>
+                    <input
+                      className="ex-set-input"
+                      type="number" min={0}
+                      value={
+                        measurementType === MeasurementType.TIME ? (sl.actualDurationSec ?? '')
+                        : measurementType === MeasurementType.DISTANCE ? (sl.actualDistance ?? '')
+                        : (sl.actualReps ?? '')
+                      }
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        const field =
+                          measurementType === MeasurementType.TIME ? 'actualDurationSec'
+                          : measurementType === MeasurementType.DISTANCE ? 'actualDistance'
+                          : 'actualReps';
+                        const next = setLogs.map((s, idx) =>
+                          idx === i ? { ...s, [field]: val } : s
+                        );
+                        update({ setLogs: next } as any);
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <button
+                      className={`ex-check-btn${sl.isCompleted ? ' ex-check-btn--done' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); checkSet(i); }}
+                      aria-label={sl.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                      type="button"
+                    >
+                      ✓
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="ex-card-v2__footer">
+          <button className="ex-mark-all" onClick={markAll} type="button">
+            Mark All
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Edit (create) mode ────────────────────────────────────────────────────
+  const setData = getSetData(exercise);
+
+  const updateSet = (index: number, field: keyof SetTarget, value: number | string | undefined) => {
+    const next = setData.map((s, i) => i === index ? { ...s, [field]: value } : s);
+    update({ setData: next, sets: next.length });
+  };
+
+  const addSet = () => {
+    const last = setData[setData.length - 1] || {};
+    const next = [...setData, { ...last, note: undefined }];
+    update({ setData: next, sets: next.length });
+  };
+
+  const removeSet = (index: number) => {
+    if (setData.length <= 1) return;
+    const next = setData.filter((_, i) => i !== index);
+    update({ setData: next, sets: next.length });
+  };
+
+  const openNote = (index: number) => {
+    setNoteDialog({ open: true, setIndex: index, value: setData[index]?.note || '' });
+  };
+
+  const saveNote = () => {
+    updateSet(noteDialog.setIndex, 'note', noteDialog.value);
+    setNoteDialog((d) => ({ ...d, open: false }));
+  };
+
+  const displayRest = (rest: number | undefined) => {
+    if (!rest) return '';
+    return restUnit === 'minutes' ? String(+(rest / 60).toFixed(1)) : String(rest);
+  };
+
+  const parseRest = (val: string) => {
+    const n = parseFloat(val) || 0;
+    return restUnit === 'minutes' ? Math.round(n * 60) : n;
+  };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`ex-card${logMode ? ' ex-card--log' : ''}${logStateClass}${checkedClass}`}
-      onClick={isActive === false ? onSelect : undefined}
-      {...attributes}
-    >
-
-      {/* ── Single content row ── */}
-      <div className="ex-card__row">
-
-        {/* Drag handle */}
+    <div ref={setNodeRef} style={style} className="ex-card-v2" {...attributes}>
+      {/* Header */}
+      <div className="ex-card-v2__header">
         {!logMode && (
-          <span className="ex-card__drag" {...listeners} aria-label="Drag to reorder">
-            <LuGripVertical />
+          <span className="ex-card-v2__drag" {...listeners} style={{ cursor: 'grab', color: '#d1d5db', display: 'flex', alignItems: 'center' }}>
+            <LuGripVertical size={14} />
           </span>
         )}
 
-        {/* Name */}
-        <div className="ex-card__name-wrap">
-          {logMode ? (
-            <span className="ex-card__name-input ex-card__name-input--readonly">
-              {exercise.name || 'Untitled'}
-            </span>
-          ) : (
-            <>
-              <input
-                className="ex-card__name-input"
-                type="text"
-                value={exercise.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
-                placeholder="Exercise…"
-                aria-label="Exercise name"
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="ex-suggestions">
-                  {suggestions.map((s, i) => (
-                    <button key={i} className="ex-suggestion"
-                      onPointerDown={(e) => { e.preventDefault(); update({ name: s.name, exerciseId: s.id } as any); setShowSuggestions(false); }}>
-                      <span className="ex-suggestion__name">{s.name}</span>
-                      <span className="ex-suggestion__tag">{s.target}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
+        <div className="ex-card-v2__avatar" style={{ background: avatar.bg, color: avatar.color }}>
+          {initial}
+        </div>
+
+        <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+          <input
+            className="ex-card-v2__name"
+            type="text"
+            value={exercise.name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="Exercise..."
+            aria-label="Exercise name"
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="ex-suggestions-v2">
+              {suggestions.map((s, i) => (
+                <button key={i} className="ex-suggestion-v2"
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    update({ name: s.name, exerciseId: s.id } as any);
+                    setShowSuggestions(false);
+                  }}>
+                  <span>{s.name}</span>
+                  <span className="ex-suggestion-v2__tag">{s.target}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Divider */}
-        <span className="ex-card__divider" aria-hidden="true" />
-
-        {/* Metrics — all inline */}
-        <div className="ex-card__metrics">
-
-          <div className="ex-m">
-            <input className="ex-m__input" type="number" min={1}
-              value={sets}
-              onChange={(e) => update({ sets: parseInt(e.target.value) || 1 } as any)}
-              aria-label="Sets" />
-            <span className="ex-m__label">sets</span>
-          </div>
-
-          <div className="ex-m">
-            <input className="ex-m__input" type="number" min={0}
-              value={metricValue || ''}
-              onChange={(e) => update({ targetReps: parseInt(e.target.value) || 0 })}
-              placeholder="0"
-              aria-label={MEASUREMENT_LABELS[measurementType]} />
-            <button className="ex-m__label ex-m__label--tap" onClick={cycleMeasurement} title="Change type">
-              {MEASUREMENT_LABELS[measurementType]}<LuRefreshCw size={9} />
-            </button>
-          </div>
-
-          <span className="ex-m__sep">·</span>
-
-          <div className="ex-m">
-            <input className="ex-m__input" type="number" min={0}
-              value={weightValue || ''}
-              onChange={(e) => update({ targetWeight: parseInt(e.target.value) || 0 })}
-              placeholder="0"
-              aria-label="Weight" />
-            <button className="ex-m__label ex-m__label--tap" onClick={cycleWeight} title="Change unit">
-              {weightUnit}<LuRefreshCw size={9} />
-            </button>
-          </div>
-
-          <span className="ex-m__sep">·</span>
-
-          <div className="ex-m">
-            <input className="ex-m__input" type="number" min={0}
-              value={restValue || ''}
-              onChange={(e) => update({ rest: parseInt(e.target.value) || 0 })}
-              placeholder="0"
-              aria-label={restType} />
-            <button className="ex-m__label ex-m__label--tap"
-              onClick={() => setRestType(t => t === 'rest' ? 'intensity' : 'rest')}
-              title="Change type">
-              {restType === 'rest' ? 's rest' : 'intensity'}<LuRefreshCw size={9} />
-            </button>
-          </div>
-
-          {/* Add superset */}
-          {!logMode && onAddSuperset && (
-            <button className="ex-card__add-superset" onClick={onAddSuperset} aria-label="Add superset">
-              <LuPlus size={14} />
+        <div className="ex-card-v2__toggles">
+          {hasWeight && (
+            <button className="ex-toggle-chip" onClick={cycleWeight} type="button">
+              {weightUnit} <span style={{ fontSize: 9 }}>⟳</span>
             </button>
           )}
-
+          <button className="ex-toggle-chip" onClick={cycleMeasurement} type="button">
+            {MEASUREMENT_LABELS[measurementType]} <span style={{ fontSize: 9 }}>⟳</span>
+          </button>
         </div>
 
-        {/* Log check */}
-        {logMode && (
-          <button
-            className={`ex-card__log-check${checked ? ' ex-card__log-check--done' : ''}`}
-            onClick={(e) => { e.stopPropagation(); setChecked((v) => !v); }}
-            aria-label={checked ? 'Mark incomplete' : 'Mark complete'}
-            type="button"
-          >
-            <LuCheck size={18} />
-          </button>
-        )}
-
-        {/* Media trigger */}
-        {!logMode && !mediaUrl && (
-          <div className="ex-card__media-trigger">
-            <button className="ex-card__media-icon-btn" onClick={() => fileInputRef.current?.click()} aria-label="Upload image" title="Upload image / GIF">
-              <LuUpload size={14} />
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*,.gif"
-              style={{ display: 'none' }} onChange={handleFileChange} aria-label="Upload exercise image" />
-          </div>
-        )}
-        {!logMode && mediaUrl && (
-          <button className="ex-card__media-icon-btn ex-card__media-icon-btn--active"
-            onClick={() => update({ mediaUrl: undefined } as any)} aria-label="Remove media" title="Remove media">
-            <LuX size={14} />
-          </button>
-        )}
-
-        {/* Remove exercise */}
-        {!logMode && (
-          <button className="ex-card__remove"
-            onClick={() => removeExerciseFromBlock(blockIndex, exerciseIndex)} aria-label="Remove exercise">
-            <LuX size={15} />
-          </button>
-        )}
-
+        <button
+          className="ex-card-v2__remove"
+          onClick={() => removeExerciseFromBlock(blockIndex, exerciseIndex)}
+          aria-label="Remove exercise"
+          type="button"
+        >
+          <LuX size={14} />
+        </button>
       </div>
 
-      {/* ── Media preview (below the row, optional) ── */}
-      {mediaUrl && (
-        <div className="ex-card__media-preview">
-          {isVideoUrl(mediaUrl) ? (
-            <div className="ex-card__media-video-placeholder">
-              ▶ <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="ex-card__media-link">{mediaUrl}</a>
-            </div>
-          ) : (
-            <img src={mediaUrl} alt="Exercise media" className="ex-card__media-img" />
-          )}
-        </div>
-      )}
+      {/* Set table */}
+      <div className="ex-set-table-wrap">
+        <table className="ex-set-table">
+          <thead>
+            <tr>
+              <th>{setColumnLabel}</th>
+              {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
+              <th>{MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+              <th>REST</th>
+              <th aria-label="Notes">📝</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {setData.map((set, i) => (
+              <tr key={i}>
+                <td><span className="ex-set-num">{i + 1}</span></td>
 
+                {hasWeight && (
+                  <td>
+                    <input className="ex-set-input" type="number" min={0}
+                      value={set.weight ?? ''}
+                      onChange={(e) => updateSet(i, 'weight', parseFloat(e.target.value) || 0)}
+                      aria-label={`Set ${i + 1} weight`}
+                    />
+                  </td>
+                )}
 
+                <td>
+                  <input className="ex-set-input" type="number" min={0}
+                    value={
+                      measurementType === MeasurementType.TIME ? (set.durationSec ?? '')
+                      : measurementType === MeasurementType.DISTANCE ? (set.distance ?? '')
+                      : (set.reps ?? '')
+                    }
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      const field =
+                        measurementType === MeasurementType.TIME ? 'durationSec'
+                        : measurementType === MeasurementType.DISTANCE ? 'distance'
+                        : 'reps';
+                      updateSet(i, field as keyof SetTarget, val);
+                    }}
+                    aria-label={`Set ${i + 1} ${MEASUREMENT_LABELS[measurementType]}`}
+                  />
+                </td>
+
+                <td>
+                  <div className="ex-rest-cell">
+                    <input className="ex-set-input" type="number" min={0}
+                      style={{ width: 44 }}
+                      value={displayRest(set.rest)}
+                      onChange={(e) => updateSet(i, 'rest', parseRest(e.target.value))}
+                      aria-label={`Set ${i + 1} rest`}
+                    />
+                    <button className="ex-rest-unit" onClick={toggleRestUnit} type="button">
+                      {restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
+                    </button>
+                  </div>
+                </td>
+
+                <td>
+                  <button
+                    className={`ex-note-btn${set.note ? ' ex-note-btn--active' : ''}`}
+                    onClick={() => openNote(i)}
+                    aria-label={`Note for set ${i + 1}`}
+                    type="button"
+                  >
+                    📝
+                  </button>
+                </td>
+
+                <td>
+                  <button
+                    className="ex-remove-set"
+                    onClick={() => removeSet(i)}
+                    aria-label={`Remove set ${i + 1}`}
+                    type="button"
+                  >
+                    <LuX size={11} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div className="ex-card-v2__footer">
+        <button className="ex-add-set" onClick={addSet} type="button">
+          + Add Set
+        </button>
+      </div>
+
+      {/* Note dialog */}
+      <Dialog open={noteDialog.open} onClose={() => setNoteDialog((d) => ({ ...d, open: false }))} maxWidth="xs" fullWidth>
+        <DialogTitle>Note for Set {noteDialog.setIndex + 1}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            multiline rows={3} fullWidth variant="outlined"
+            placeholder="Add a coaching note for this set..."
+            value={noteDialog.value}
+            onChange={(e) => setNoteDialog((d) => ({ ...d, value: e.target.value }))}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNoteDialog((d) => ({ ...d, open: false }))}>Cancel</Button>
+          <Button onClick={saveNote} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
