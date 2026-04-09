@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutLogRequest, BlockLog, ExerciseLog, Block, WorkoutRequest, MeasurementType } from '@trainapp-io/train-core';
+import { WorkoutLogRequest, Block, WorkoutRequest, MeasurementType } from '@trainapp-io/train-core';
 import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
 import CircuitItem from '../../../programs/components/workoutBuilder/CircuitItem';
 import WorkoutLogHeader from './WorkoutLogHeader';
 import CompletionFooter from './CompletionFooter';
+import { snapshotToBlock, blockToLog } from './workoutLogHelpers';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogFormProps {
@@ -11,38 +12,6 @@ interface WorkoutLogFormProps {
   onSubmit: (workoutLogRequest: WorkoutLogRequest) => void;
   onCancel: () => void;
   isSaving?: boolean;
-}
-
-/** Convert a snapshot block into the same Block shape the builder uses */
-function snapshotToBlock(bs: any): Block {
-  return {
-    ...bs,
-    exercises: bs.exerciseSnapshot.map((es: any) => ({
-      ...es,
-      sets: bs.targetSets || 3,
-      hasSuperset: false,
-    })),
-  } as Block;
-}
-
-/** Read logged values back out of the edited Block */
-function blockToLog(block: Block, order: number): BlockLog {
-  return {
-    actualSets: block.targetSets,
-    actualRest: (block as any).rest || 0,
-    exerciseLogs: block.exercises.map((ex): ExerciseLog => ({
-      name: ex.name,
-      actualReps: ex.targetReps || 0,
-      actualWeight: ex.targetWeight || 0,
-      actualDurationSec: ex.targetDurationSec || 0,
-      actualDistance: ex.targetDistance || 0,
-      actualRest: ex.rest || 0,
-      isCompleted: false,
-      order: ex.order,
-    })),
-    order,
-    isCompleted: false,
-  };
 }
 
 const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
