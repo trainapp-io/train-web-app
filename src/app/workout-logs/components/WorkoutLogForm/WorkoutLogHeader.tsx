@@ -12,6 +12,7 @@ interface WorkoutLogHeaderProps {
   onModeToggle: () => void;
   onStartDateChange: (date: Date) => void;
   onManualDurationChange: (field: 'hours' | 'minutes', value: number) => void;
+  onFinish: () => void;
 }
 
 function formatElapsed(seconds: number): string {
@@ -37,63 +38,66 @@ const WorkoutLogHeader: React.FC<WorkoutLogHeaderProps> = ({
   onModeToggle,
   onStartDateChange,
   onManualDurationChange,
+  onFinish,
 }) => {
   return (
     <div className="wl-header">
-      <h2>{workoutSnapshot.name}</h2>
-      {workoutSnapshot.description && (
-        <p className="workout-description">{workoutSnapshot.description}</p>
-      )}
-
-      {(workoutSnapshot.difficulty || (workoutSnapshot.category?.length ?? 0) > 0) && (
-        <div className="workout-metadata">
-          {workoutSnapshot.difficulty && (
-            <span className="difficulty-badge">{workoutSnapshot.difficulty}</span>
-          )}
-          {workoutSnapshot.category?.map((cat, i) => (
-            <span key={i} className="category-tag">{cat}</span>
-          ))}
-        </div>
-      )}
-
-      <div className="workout-mode-toggle">
-        <button className={`mode-btn ${isLive ? 'active' : ''}`}
-          onClick={() => !isLive && onModeToggle()}>Live</button>
-        <button className={`mode-btn ${!isLive ? 'active' : ''}`}
-          onClick={() => isLive && onModeToggle()}>Historical</button>
+      {/* Row 1: name + finish */}
+      <div className="wl-header__top">
+        <span className="wl-header__name">{workoutSnapshot.name}</span>
+        <button className="wl-header__finish-btn" onClick={onFinish} type="button">
+          Finish
+        </button>
       </div>
 
-      {isLive ? (
-        <div className="live-timer-section">
-          <div className="timer-display">
-            <span className="timer-label">Elapsed</span>
-            <span className={`timer-value ${isTimerRunning ? 'timer-value--running' : ''}`}>
-              {formatElapsed(elapsedSeconds)}
-            </span>
-          </div>
+      {/* Row 2: timer display only */}
+      {isLive && (
+        <div className="wl-timer-row">
+          <span className={`wl-elapsed${!isTimerRunning ? ' wl-elapsed--paused' : ''}`}>
+            {formatElapsed(elapsedSeconds)}
+          </span>
         </div>
-      ) : (
-        <div className="historical-entry-section">
-          <div className="time-input-group">
-            <label htmlFor="start-time">Workout Date &amp; Time</label>
-            <input id="start-time" type="datetime-local" className="time-input"
+      )}
+
+      {/* Mode toggle — less prominent */}
+      <div className="wl-mode-toggle">
+        <button className="wl-mode-link" onClick={onModeToggle} type="button">
+          {isLive ? 'Switch to historical entry' : 'Switch to live timer'}
+        </button>
+      </div>
+
+      {/* Historical entry fields */}
+      {!isLive && (
+        <div className="wl-historical">
+          <div>
+            <label htmlFor="wl-start-time">Workout Date &amp; Time</label>
+            <input
+              id="wl-start-time"
+              type="datetime-local"
               value={formatDateTimeLocal(actualStartDate)}
-              onChange={(e) => onStartDateChange(new Date(e.target.value))} />
+              onChange={(e) => onStartDateChange(new Date(e.target.value))}
+            />
           </div>
-          <div className="duration-input-section">
+          <div>
             <label>Duration</label>
-            <div className="duration-inputs">
-              <div className="duration-input-group">
-                <input type="number" className="duration-input" min={0}
+            <div className="wl-duration-row">
+              <div className="wl-duration-group">
+                <input
+                  type="number" min={0}
                   value={manualDuration.hours}
-                  onChange={(e) => onManualDurationChange('hours', parseInt(e.target.value) || 0)} />
-                <span className="duration-label">hr</span>
+                  onChange={(e) => onManualDurationChange('hours', parseInt(e.target.value) || 0)}
+                  aria-label="Hours"
+                />
+                <span className="wl-duration-unit">hr</span>
               </div>
-              <div className="duration-input-group">
-                <input type="number" className="duration-input" min={0} max={59}
+              <div className="wl-duration-group">
+                <input
+                  type="number" min={0} max={59}
                   value={manualDuration.minutes}
-                  onChange={(e) => onManualDurationChange('minutes', parseInt(e.target.value) || 0)} />
-                <span className="duration-label">min</span>
+                  onChange={(e) => onManualDurationChange('minutes', parseInt(e.target.value) || 0)}
+                  aria-label="Minutes"
+                />
+                <span className="wl-duration-unit">min</span>
               </div>
             </div>
           </div>
