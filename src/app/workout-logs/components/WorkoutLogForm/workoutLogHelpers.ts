@@ -1,6 +1,9 @@
-import { Block, BlockLog, ExerciseLog, SetLog } from '@trainapp-io/train-core';
+import { Block, BlockLog, Exercise, ExerciseLog, SetLog } from '@trainapp-io/train-core';
 
-export function snapshotToBlock(bs: any): Block {
+export type ExerciseWithLogs = Exercise & { setLogs?: SetLog[] };
+export type BlockWithLogs = Omit<Block, 'exercises'> & { exercises: ExerciseWithLogs[] };
+
+export function snapshotToBlock(bs: any): BlockWithLogs {
   return {
     ...bs,
     exercises: bs.exerciseSnapshot.map((es: any) => {
@@ -32,12 +35,12 @@ export function snapshotToBlock(bs: any): Block {
   } as Block;
 }
 
-export function blockToLog(block: Block, order: number): BlockLog {
+export function blockToLog(block: BlockWithLogs, order: number): BlockLog {
   return {
     actualSets: block.targetSets,
     actualRest: (block as any).rest || 0,
     exerciseLogs: block.exercises.map((ex): ExerciseLog => {
-      const setLogs: SetLog[] = (ex as any).setLogs ?? [];
+      const setLogs: SetLog[] = ex.setLogs ?? [];
       return {
         name: ex.name,
         actualReps: ex.targetReps || 0,

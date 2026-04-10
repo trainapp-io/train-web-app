@@ -4,7 +4,7 @@ import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
 import CircuitItem from '../../../programs/components/workoutBuilder/CircuitItem';
 import WorkoutLogHeader from './WorkoutLogHeader';
 import CompletionFooter from './CompletionFooter';
-import { snapshotToBlock, blockToLog } from './workoutLogHelpers';
+import { snapshotToBlock, blockToLog, BlockWithLogs } from './workoutLogHelpers';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogFormProps {
@@ -36,7 +36,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   );
 
   // Blocks used by the builder components — pre-filled with target values
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [blocks, setBlocks] = useState<BlockWithLogs[]>([]);
 
   // Rest callback state
   const [restSeconds, setRestSeconds] = useState(0);

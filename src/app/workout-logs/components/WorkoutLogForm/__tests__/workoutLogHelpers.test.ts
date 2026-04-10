@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { snapshotToBlock, blockToLog } from '../workoutLogHelpers';
+import { snapshotToBlock, blockToLog, BlockWithLogs } from '../workoutLogHelpers';
 import { BlockType, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 
 const baseMeasurement = { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND };
@@ -22,13 +22,13 @@ describe('snapshotToBlock', () => {
     };
     const block = snapshotToBlock(bs);
     expect(block.exercises[0].setLogs).toHaveLength(2);
-    expect(block.exercises[0].setLogs[0]).toMatchObject({
+    expect(block.exercises[0].setLogs![0]).toMatchObject({
       actualReps: 8,
       actualWeight: 135,
       actualRest: 60,
       isCompleted: false,
     });
-    expect(block.exercises[0].setLogs[1]).toMatchObject({
+    expect(block.exercises[0].setLogs![1]).toMatchObject({
       actualReps: 6,
       actualWeight: 145,
       actualRest: 90,
@@ -53,7 +53,7 @@ describe('snapshotToBlock', () => {
     };
     const block = snapshotToBlock(bs);
     expect(block.exercises[0].setLogs).toHaveLength(3);
-    expect(block.exercises[0].setLogs[0]).toMatchObject({
+    expect(block.exercises[0].setLogs![0]).toMatchObject({
       actualReps: 10,
       actualWeight: 0,
       actualRest: 30,
@@ -80,7 +80,7 @@ describe('blockToLog', () => {
         ],
       }],
     };
-    const log = blockToLog(block as any, 0);
+    const log = blockToLog(block as BlockWithLogs, 0);
     expect(log.exerciseLogs[0].setLogs).toHaveLength(2);
     expect(log.exerciseLogs[0].setLogs![0].isCompleted).toBe(true);
     expect(log.exerciseLogs[0].setLogs![1].isCompleted).toBe(false);
@@ -101,7 +101,7 @@ describe('blockToLog', () => {
         ],
       }],
     };
-    const log = blockToLog(block as any, 0);
+    const log = blockToLog(block as BlockWithLogs, 0);
     expect(log.exerciseLogs[0].isCompleted).toBe(true);
   });
 });

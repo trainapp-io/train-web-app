@@ -1,6 +1,6 @@
 /* ── Exercise card ── */
 .ex-card-v2 {
-  background: var(--bg-primary, #fff);
+  background: var(--bg-secondary, #fff);
   border-radius: 14px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
   overflow: visible;
@@ -56,7 +56,7 @@
 /* Set table */
 .ex-set-table-wrap { padding: 0 14px 4px; }
 .ex-set-table {
-  width: 100%; border-collapse: collapse;
+  width: 100%; border-collapse: collapse; table-layout: fixed;
 }
 .ex-set-table th {
   font-size: 9.5px; font-weight: 700;
@@ -65,21 +65,28 @@
   padding: 5px 4px; text-align: center;
   border-bottom: 1px solid var(--border-color, #f3f4f6);
 }
-.ex-set-table th:first-child { text-align: left; width: 28px; }
-.ex-set-table td { padding: 6px 4px; border-bottom: 1px solid #f9fafb; vertical-align: middle; }
+/* Column widths — SET · metric · weight · REST · note · remove */
+.ex-set-table th:nth-child(1) { text-align: left; width: 32px; }
+.ex-set-table th:nth-child(2) { width: 72px; }
+.ex-set-table th:nth-child(3) { width: 72px; }
+.ex-set-table th:nth-child(4) { width: 120px; }
+.ex-set-table th:nth-child(5) { width: 32px; }
+.ex-set-table th:nth-child(6) { width: 28px; }
+.ex-set-table td { padding: 6px 4px; border-bottom: 1px solid #f9fafb; vertical-align: middle; text-align: center; }
+.ex-set-table td:first-child { text-align: left; }
 .ex-set-table tr:last-child td { border-bottom: none; }
 .ex-set-num { font-size: 11px; color: var(--text-tertiary, #9ca3af); font-weight: 600; }
 
 /* Inputs */
 .ex-set-input {
-  width: 50px; border: 1px solid var(--border-color, #e5e7eb);
+  width: 100%; max-width: 60px; border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 6px; padding: 4px 5px;
   font-size: 13px; text-align: center;
   color: var(--text-primary, #111);
-  background: var(--bg-secondary, #fafafa);
+  background: #fff;
   outline: none; font-family: inherit;
 }
-.ex-set-input:focus { border-color: #7c3aed; background: #fff; box-shadow: 0 0 0 2px rgba(124,58,237,0.1); }
+.ex-set-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.1); }
 
 /* Rest cell */
 .ex-rest-cell { display: flex; align-items: center; gap: 3px; justify-content: center; }

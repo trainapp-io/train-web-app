@@ -101,6 +101,8 @@ const ExerciseItem: React.FC<Props> = ({
   const [noteDialog, setNoteDialog] = useState<{ open: boolean; setIndex: number; value: string }>({
     open: false, setIndex: 0, value: '',
   });
+  // Raw string values while user is mid-edit (key: `${rowIndex}-${field}`)
+  const [rawValues, setRawValues] = useState<Record<string, string>>({});
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
@@ -331,6 +333,18 @@ const ExerciseItem: React.FC<Props> = ({
     return restUnit === 'minutes' ? Math.round(n * 60) : n;
   };
 
+  // While editing: show the raw string; on blur: commit parsed number
+  const rawKey = (row: number, field: string) => `${row}-${field}`;
+  const rawVal = (row: number, field: string, stored: number | undefined) =>
+    rawKey(row, field) in rawValues ? rawValues[rawKey(row, field)] : (stored ?? 0).toString();
+  const onRawChange = (row: number, field: string, val: string) =>
+    setRawValues((prev) => ({ ...prev, [rawKey(row, field)]: val }));
+  const onRawBlur = (row: number, field: keyof SetTarget, val: string) => {
+    const parsed = parseFloat(val);
+    updateSet(row, field, isNaN(parsed) ? 0 : parsed);
+    setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(row, field)]; return next; });
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="ex-card-v2" {...attributes}>
       {/* Header */}
@@ -412,8 +426,10 @@ const ExerciseItem: React.FC<Props> = ({
                 {hasWeight && (
                   <td>
                     <input className="ex-set-input" type="number" min={0}
-                      value={set.weight ?? ''}
-                      onChange={(e) => updateSet(i, 'weight', parseFloat(e.target.value) || 0)}
+                      value={rawVal(i, 'weight', set.weight)}
+                      onChange={(e) => onRawChange(i, 'weight', e.target.value)}
+                      onBlur={(e) => onRawBlur(i, 'weight', e.target.value)}
+                      onFocus={(e) => e.target.select()}
                       aria-label={`Set ${i + 1} weight`}
                     />
                   </td>
@@ -422,18 +438,25 @@ const ExerciseItem: React.FC<Props> = ({
                 <td>
                   <input className="ex-set-input" type="number" min={0}
                     value={
-                      measurementType === MeasurementType.TIME ? (set.durationSec ?? '')
-                      : measurementType === MeasurementType.DISTANCE ? (set.distance ?? '')
-                      : (set.reps ?? '')
+                      measurementType === MeasurementType.TIME ? rawVal(i, 'durationSec', set.durationSec)
+                      : measurementType === MeasurementType.DISTANCE ? rawVal(i, 'distance', set.distance)
+                      : rawVal(i, 'reps', set.reps)
                     }
                     onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
                       const field =
                         measurementType === MeasurementType.TIME ? 'durationSec'
                         : measurementType === MeasurementType.DISTANCE ? 'distance'
                         : 'reps';
-                      updateSet(i, field as keyof SetTarget, val);
+                      onRawChange(i, field, e.target.value);
                     }}
+                    onBlur={(e) => {
+                      const field =
+                        measurementType === MeasurementType.TIME ? 'durationSec'
+                        : measurementType === MeasurementType.DISTANCE ? 'distance'
+                        : 'reps';
+                      onRawBlur(i, field as keyof SetTarget, e.target.value);
+                    }}
+                    onFocus={(e) => e.target.select()}
                     aria-label={`Set ${i + 1} ${MEASUREMENT_LABELS[measurementType]}`}
                   />
                 </td>
@@ -442,8 +465,13 @@ const ExerciseItem: React.FC<Props> = ({
                   <div className="ex-rest-cell">
                     <input className="ex-set-input" type="number" min={0}
                       style={{ width: 44 }}
-                      value={displayRest(set.rest)}
-                      onChange={(e) => updateSet(i, 'rest', parseRest(e.target.value))}
+                      value={rawKey(i, 'rest') in rawValues ? rawValues[rawKey(i, 'rest')] : displayRest(set.rest)}
+                      onChange={(e) => onRawChange(i, 'rest', e.target.value)}
+                      onBlur={(e) => {
+                        updateSet(i, 'rest', parseRest(e.target.value));
+                        setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
+                      }}
+                      onFocus={(e) => e.target.select()}
                       aria-label={`Set ${i + 1} rest`}
                     />
                     <button className="ex-rest-unit" onClick={toggleRestUnit} type="button">

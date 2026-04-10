@@ -262,6 +262,13 @@
   overflow: visible;
 }
 
+/* Single-exercise blocks: no container background — let ex-card-v2 stand alone */
+.block-card--single {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
 /* ── Block header (single row — view & edit) ── */
 
 .block-card__header {
