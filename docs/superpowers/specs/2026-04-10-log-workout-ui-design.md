@@ -53,7 +53,17 @@ Each exercise in the list has one of four visual states:
 
 ## Active Exercise — Set Table
 
-Columns: **SET · LBS · REPS · ✓**
+Columns are dynamic based on the exercise's `measurement` (same logic as the workout builder's `ExerciseItem`):
+
+| Measurement type | Columns shown |
+|---|---|
+| Reps + lbs/kg | SET · LBS (or KG) · REPS · ✓ |
+| Reps + bodyweight | SET · REPS · ✓ |
+| Duration | SET · SEC · ✓ |
+| Distance | SET · DIST · ✓ |
+| Has rest per set | + REST column before ✓ |
+
+The column headers and which inputs are rendered follow the same `measurementType` / `measurementUnit` branching already in `ExerciseItem.tsx`.
 
 - All inputs pre-filled with target values from the workout snapshot
 - Current set row: purple background tint, purple input borders
