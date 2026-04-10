@@ -97,7 +97,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   };
 
   if (!workoutSnapshot) {
-    return <div className="workout-log-form"><p>Loading workout data…</p></div>;
+    return <div className="wl-page"><p>Loading workout data…</p></div>;
   }
 
   // Minimal WorkoutRequest shell so CircuitItem can resolve blockIndex
