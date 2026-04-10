@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { snapshotToBlock, blockToLog, BlockWithLogs } from '../workoutLogHelpers';
+import { snapshotToBlock, blockToLog, getInitialActiveBlock, BlockWithLogs, ExerciseWithLogs } from '../workoutLogHelpers';
 import { BlockType, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 
 const baseMeasurement = { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND };
@@ -103,5 +103,34 @@ describe('blockToLog', () => {
     };
     const log = blockToLog(block as BlockWithLogs, 0);
     expect(log.exerciseLogs[0].isCompleted).toBe(true);
+  });
+});
+
+function makeBlock(completedFlags: boolean[][]): BlockWithLogs {
+  return {
+    exercises: completedFlags.map((flags) => ({
+      setLogs: flags.map((isCompleted) => ({ isCompleted })),
+    })) as ExerciseWithLogs[],
+  } as BlockWithLogs;
+}
+
+describe('getInitialActiveBlock', () => {
+  it('returns 0 for empty blocks array', () => {
+    expect(getInitialActiveBlock([])).toBe(0);
+  });
+
+  it('returns 0 when first block has incomplete sets', () => {
+    const blocks = [makeBlock([[false, false]]), makeBlock([[false]])];
+    expect(getInitialActiveBlock(blocks)).toBe(0);
+  });
+
+  it('returns 1 when first block is fully completed', () => {
+    const blocks = [makeBlock([[true, true]]), makeBlock([[false]])];
+    expect(getInitialActiveBlock(blocks)).toBe(1);
+  });
+
+  it('returns 0 when all blocks are completed (resume from start)', () => {
+    const blocks = [makeBlock([[true]]), makeBlock([[true]])];
+    expect(getInitialActiveBlock(blocks)).toBe(0);
   });
 });

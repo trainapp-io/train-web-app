@@ -59,3 +59,13 @@ export function blockToLog(block: BlockWithLogs, order: number): BlockLog {
     isCompleted: false,
   };
 }
+
+export function getInitialActiveBlock(blocks: BlockWithLogs[]): number {
+  if (blocks.length === 0) return 0;
+  const idx = blocks.findIndex((block) =>
+    block.exercises.some((ex) =>
+      ((ex as ExerciseWithLogs).setLogs ?? []).some((s) => !s.isCompleted)
+    )
+  );
+  return idx === -1 ? 0 : idx;
+}
