@@ -70,13 +70,13 @@ function makeLogProps(exerciseOverrides: Record<string, any> = {}, propOverrides
 }
 
 describe('ExerciseItem log mode', () => {
-  it('renders one row per setLog entry', () => {
-    render(<ExerciseItem {...makeLogProps()} />);
+  it('renders one row per setLog entry when active', () => {
+    render(<ExerciseItem {...makeLogProps()} isActive={true} />);
     expect(screen.getAllByRole('row').length).toBeGreaterThanOrEqual(3); // header + 2 data rows
   });
 
   it('checking a set calls updateExerciseInBlockPartial with isCompleted: true for that set', () => {
-    const props = makeLogProps();
+    const props = makeLogProps({}, { isActive: true });
     render(<ExerciseItem {...props} />);
     const checkBtns = screen.getAllByRole('button', { name: /mark complete/i });
     fireEvent.click(checkBtns[0]);
@@ -87,18 +87,46 @@ describe('ExerciseItem log mode', () => {
 
   it('calls onSetCompleted with the rest seconds when a set is checked', () => {
     const onSetCompleted = vi.fn();
-    const props = makeLogProps({}, { onSetCompleted });
+    const props = makeLogProps({}, { onSetCompleted, isActive: true });
     render(<ExerciseItem {...props} />);
     fireEvent.click(screen.getAllByRole('button', { name: /mark complete/i })[0]);
     expect(onSetCompleted).toHaveBeenCalledWith(60);
   });
 
-  it('"Mark All" marks all sets complete', () => {
+  it('"Add Set" adds a set when active', () => {
+    const props = makeLogProps({}, { isActive: true });
+    render(<ExerciseItem {...props} />);
+    fireEvent.click(screen.getByText(/\+ add set/i));
+    const call = props.updateExerciseInBlockPartial.mock.calls[0][2];
+    expect(call.setLogs).toHaveLength(3);
+  });
+
+  it('renders upcoming state when not active and no sets completed', () => {
     const props = makeLogProps();
     render(<ExerciseItem {...props} />);
-    fireEvent.click(screen.getByText(/mark all/i));
-    const call = props.updateExerciseInBlockPartial.mock.calls[0][2];
-    expect(call.setLogs.every((s: any) => s.isCompleted)).toBe(true);
+    expect(screen.getByText(/jump to →/i)).toBeInTheDocument();
+  });
+
+  it('renders done state when all sets are completed', () => {
+    const props = makeLogProps({
+      setLogs: [
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: true },
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: true },
+      ],
+    });
+    render(<ExerciseItem {...props} />);
+    expect(screen.getByText('✓')).toBeInTheDocument();
+  });
+
+  it('renders in-progress state when some sets are completed', () => {
+    const props = makeLogProps({
+      setLogs: [
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: true },
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: false },
+      ],
+    });
+    render(<ExerciseItem {...props} />);
+    expect(screen.getByText(/in progress/i)).toBeInTheDocument();
   });
 });
 

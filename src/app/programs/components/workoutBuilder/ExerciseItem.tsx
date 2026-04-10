@@ -176,9 +176,85 @@ const ExerciseItem: React.FC<Props> = ({
     );
   }
 
+  // While editing: show the raw string; on blur: commit parsed number
+  const rawKey = (row: number, field: string) => `${row}-${field}`;
+  const onRawChange = (row: number, field: string, val: string) =>
+    setRawValues((prev) => ({ ...prev, [rawKey(row, field)]: val }));
+
   // ── Log mode ──────────────────────────────────────────────────────────────
   if (logMode) {
     const setLogs = getSetLogs(exercise);
+    const allCompleted = setLogs.length > 0 && setLogs.every((s) => s.isCompleted);
+    const someCompleted = setLogs.some((s) => s.isCompleted);
+    const isCurrentlyActive = isActive === true;
+
+    // Determine visual state
+    const logState: 'active' | 'done' | 'inProgress' | 'upcoming' =
+      isCurrentlyActive ? 'active'
+      : allCompleted ? 'done'
+      : someCompleted ? 'inProgress'
+      : 'upcoming';
+
+    // ── Completed row ──
+    if (logState === 'done') {
+      const weights = setLogs.map((s) => s.actualWeight).filter((w): w is number => w != null && w > 0);
+      const weightStr = weights.length === 0 ? ''
+        : weights.length === 1 || Math.min(...weights) === Math.max(...weights)
+          ? `${weights[0]} lbs`
+          : `${Math.min(...weights)}–${Math.max(...weights)} lbs`;
+      const summary = [
+        `${setLogs.length} ×`,
+        weightStr,
+      ].filter(Boolean).join(' ');
+
+      return (
+        <div ref={setNodeRef} style={style} className="ex-log-done" onClick={onSelect}>
+          <div className="ex-log-done__check">✓</div>
+          <span className="ex-log-done__name">{exercise.name || 'Untitled'}</span>
+          <span className="ex-log-done__summary">{summary}</span>
+        </div>
+      );
+    }
+
+    // ── In-progress row ──
+    if (logState === 'inProgress') {
+      const completedCount = setLogs.filter((s) => s.isCompleted).length;
+      return (
+        <div ref={setNodeRef} style={style} className="ex-log-inprogress" onClick={onSelect}>
+          <div className="ex-log-inprogress__badge">
+            {completedCount}/{setLogs.length}
+          </div>
+          <span className="ex-log-inprogress__name">{exercise.name || 'Untitled'}</span>
+          <span className="ex-log-inprogress__status">In progress · tap to resume</span>
+        </div>
+      );
+    }
+
+    // ── Upcoming row ──
+    if (logState === 'upcoming') {
+      const first = setLogs[0];
+      const metricVal = measurementType === MeasurementType.TIME
+        ? first?.actualDurationSec
+        : measurementType === MeasurementType.DISTANCE
+          ? first?.actualDistance
+          : first?.actualReps;
+      const metricLabel = MEASUREMENT_LABELS[measurementType];
+      const weightStr = hasWeight && first?.actualWeight
+        ? ` · ${first.actualWeight} ${weightUnit}`
+        : '';
+      const meta = `${setLogs.length} × ${metricVal ?? '?'} ${metricLabel}${weightStr}`;
+
+      return (
+        <div ref={setNodeRef} style={style} className="ex-log-upcoming" onClick={onSelect}>
+          <div className="ex-log-upcoming__num">{exerciseIndex + 1}</div>
+          <span className="ex-log-upcoming__name">{exercise.name || 'Untitled'}</span>
+          <span className="ex-log-upcoming__meta">{meta}</span>
+          <span className="ex-log-upcoming__jump">Jump to →</span>
+        </div>
+      );
+    }
+
+    // ── Active expanded card ──
     const activeIndex = setLogs.findIndex((s) => !s.isCompleted);
 
     const checkSet = (index: number) => {
@@ -192,23 +268,25 @@ const ExerciseItem: React.FC<Props> = ({
       }
     };
 
-    const markAll = () => {
-      update({ setLogs: setLogs.map((s) => ({ ...s, isCompleted: true })) } as any);
+    const addLogSet = () => {
+      const last = setLogs[setLogs.length - 1] || {};
+      update({ setLogs: [...setLogs, { ...last, isCompleted: false }] } as any);
     };
 
     return (
       <div
         ref={setNodeRef}
         style={style}
-        className={`ex-card-v2 ex-card-v2--log${isActive === false ? ' ex-card-v2--inactive' : ''}`}
-        onClick={isActive === false ? onSelect : undefined}
+        className="ex-card-v2 ex-card-v2--log"
       >
         <div className="ex-card-v2__header">
           <div className="ex-card-v2__avatar" style={{ background: avatar.bg, color: avatar.color }}>
             {initial}
           </div>
           <span className="ex-card-v2__name-static">{exercise.name || 'Untitled'}</span>
-          <span className="ex-toggle-chip" style={{ cursor: 'default' }}>{weightUnit}</span>
+          <span className="ex-active__progress" style={{ fontSize: 12, color: '#9ca3af', fontWeight: 600 }}>
+            {setLogs.filter(s => s.isCompleted).length} / {setLogs.length} sets
+          </span>
         </div>
 
         <div className="ex-set-table-wrap">
@@ -237,13 +315,18 @@ const ExerciseItem: React.FC<Props> = ({
                       <input
                         className="ex-set-input"
                         type="number" min={0}
-                        value={sl.actualWeight ?? ''}
-                        onChange={(e) => {
+                        value={rawKey(i, 'weight') in rawValues ? rawValues[rawKey(i, 'weight')] : (sl.actualWeight ?? 0).toString()}
+                        onChange={(e) => onRawChange(i, 'weight', e.target.value)}
+                        onBlur={(e) => {
+                          const parsed = parseFloat(e.target.value);
                           const next = setLogs.map((s, idx) =>
-                            idx === i ? { ...s, actualWeight: parseFloat(e.target.value) || 0 } : s
+                            idx === i ? { ...s, actualWeight: isNaN(parsed) ? 0 : parsed } : s
                           );
                           update({ setLogs: next } as any);
+                          setRawValues((prev) => { const n = { ...prev }; delete n[rawKey(i, 'weight')]; return n; });
                         }}
+                        onFocus={(e) => e.target.select()}
+                        aria-label={`Set ${i + 1} weight`}
                       />
                     </td>
                   )}
@@ -252,21 +335,31 @@ const ExerciseItem: React.FC<Props> = ({
                       className="ex-set-input"
                       type="number" min={0}
                       value={
-                        measurementType === MeasurementType.TIME ? (sl.actualDurationSec ?? '')
-                        : measurementType === MeasurementType.DISTANCE ? (sl.actualDistance ?? '')
-                        : (sl.actualReps ?? '')
+                        measurementType === MeasurementType.TIME
+                          ? (rawKey(i, 'dur') in rawValues ? rawValues[rawKey(i, 'dur')] : (sl.actualDurationSec ?? 0).toString())
+                          : measurementType === MeasurementType.DISTANCE
+                            ? (rawKey(i, 'dist') in rawValues ? rawValues[rawKey(i, 'dist')] : (sl.actualDistance ?? 0).toString())
+                            : (rawKey(i, 'reps') in rawValues ? rawValues[rawKey(i, 'reps')] : (sl.actualReps ?? 0).toString())
                       }
                       onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 0;
-                        const field =
-                          measurementType === MeasurementType.TIME ? 'actualDurationSec'
-                          : measurementType === MeasurementType.DISTANCE ? 'actualDistance'
-                          : 'actualReps';
+                        const field = measurementType === MeasurementType.TIME ? 'dur'
+                          : measurementType === MeasurementType.DISTANCE ? 'dist' : 'reps';
+                        onRawChange(i, field, e.target.value);
+                      }}
+                      onBlur={(e) => {
+                        const parsed = parseFloat(e.target.value);
+                        const field: keyof SetLog = measurementType === MeasurementType.TIME ? 'actualDurationSec'
+                          : measurementType === MeasurementType.DISTANCE ? 'actualDistance' : 'actualReps';
                         const next = setLogs.map((s, idx) =>
-                          idx === i ? { ...s, [field]: val } : s
+                          idx === i ? { ...s, [field]: isNaN(parsed) ? 0 : parsed } : s
                         );
                         update({ setLogs: next } as any);
+                        const rawField = measurementType === MeasurementType.TIME ? 'dur'
+                          : measurementType === MeasurementType.DISTANCE ? 'dist' : 'reps';
+                        setRawValues((prev) => { const n = { ...prev }; delete n[rawKey(i, rawField)]; return n; });
                       }}
+                      onFocus={(e) => e.target.select()}
+                      aria-label={`Set ${i + 1} ${MEASUREMENT_LABELS[measurementType]}`}
                     />
                   </td>
                   <td>
@@ -286,8 +379,8 @@ const ExerciseItem: React.FC<Props> = ({
         </div>
 
         <div className="ex-card-v2__footer">
-          <button className="ex-mark-all" onClick={markAll} type="button">
-            Mark All
+          <button className="ex-add-set" onClick={addLogSet} type="button">
+            + Add Set
           </button>
         </div>
       </div>
@@ -333,12 +426,8 @@ const ExerciseItem: React.FC<Props> = ({
     return restUnit === 'minutes' ? Math.round(n * 60) : n;
   };
 
-  // While editing: show the raw string; on blur: commit parsed number
-  const rawKey = (row: number, field: string) => `${row}-${field}`;
   const rawVal = (row: number, field: string, stored: number | undefined) =>
     rawKey(row, field) in rawValues ? rawValues[rawKey(row, field)] : (stored ?? 0).toString();
-  const onRawChange = (row: number, field: string, val: string) =>
-    setRawValues((prev) => ({ ...prev, [rawKey(row, field)]: val }));
   const onRawBlur = (row: number, field: keyof SetTarget, val: string) => {
     const parsed = parseFloat(val);
     updateSet(row, field, isNaN(parsed) ? 0 : parsed);
