@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LuPlay, LuPause, LuFlagTriangleRight, LuTimer } from 'react-icons/lu';
+import { LuPlay, LuPause, LuTimer } from 'react-icons/lu';
 import './WorkoutLogForm.css';
 
 interface CompletionFooterProps {
@@ -13,6 +13,9 @@ interface CompletionFooterProps {
   restSeconds?: number;
 }
 
+const RING_RADIUS = 19;
+const CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 119.4
+
 const CompletionFooter: React.FC<CompletionFooterProps> = ({
   isLive,
   isTimerRunning,
@@ -23,16 +26,19 @@ const CompletionFooter: React.FC<CompletionFooterProps> = ({
   restSeconds = 0,
 }) => {
   const [restRemaining, setRestRemaining] = useState<number | null>(null);
+  const [restDuration, setRestDuration] = useState<number>(0);
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Start rest countdown when restSeconds prop changes to > 0
+  // Auto-start rest when restSeconds prop changes to > 0
   useEffect(() => {
     if (restSeconds > 0) {
       if (restRef.current) clearInterval(restRef.current);
       setRestRemaining(restSeconds);
+      setRestDuration(restSeconds);
     }
   }, [restSeconds]);
 
+  // Countdown tick
   useEffect(() => {
     if (restRef.current) clearInterval(restRef.current);
     if (restRemaining === null || restRemaining <= 0) {
@@ -51,52 +57,93 @@ const CompletionFooter: React.FC<CompletionFooterProps> = ({
 
   const startManualRest = () => {
     if (restRemaining !== null && restRemaining > 0) {
+      // Cancel active rest
       setRestRemaining(null);
     } else {
       setRestRemaining(60);
+      setRestDuration(60);
     }
   };
 
-  const formatRest = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const formatRest = (s: number) =>
+    `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
   const restIdle = restRemaining === null;
   const restDone = restRemaining === 0;
 
+  // Progress ring: full when just started, empty when done
+  const progress = restDuration > 0 && restRemaining !== null
+    ? restRemaining / restDuration
+    : 1;
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
+
   return (
     <div className="wl-tabbar">
-      {/* Start / Pause */}
+      {/* Start / Pause — only in live mode */}
       {isLive && (
         <button
-          className="wl-tab wl-tab--active"
+          className="wl-pause-btn"
           onClick={isTimerRunning ? onPause : onStart}
           type="button"
+          aria-label={isTimerRunning ? 'Pause workout timer' : 'Start workout timer'}
         >
-          {isTimerRunning ? <LuPause size={22} /> : <LuPlay size={22} />}
-          <span>{isTimerRunning ? 'Pause' : 'Start'}</span>
+          {isTimerRunning ? <LuPause size={18} /> : <LuPlay size={18} />}
         </button>
       )}
 
-      {/* Rest */}
-      <button
-        className={`wl-tab wl-tab--mid${!restIdle && !restDone ? ' wl-tab--rest-active' : ''}`}
-        onClick={startManualRest}
-        type="button"
-        title={restIdle ? 'Start rest timer' : 'Cancel rest'}
-      >
-        <LuTimer size={22} />
-        <span>
-          {restDone ? 'Go!' : restIdle ? 'Rest' : formatRest(restRemaining!)}
-        </span>
-      </button>
+      {/* Rest timer */}
+      {restIdle ? (
+        <button className="wl-rest-idle" onClick={startManualRest} type="button">
+          <LuTimer size={18} className="wl-rest-idle__icon" />
+          <span className="wl-rest-idle__label">Rest</span>
+        </button>
+      ) : (
+        <div className="wl-rest-card" onClick={startManualRest} role="button" tabIndex={0}>
+          <div className="wl-rest-ring">
+            <svg
+              width="46"
+              height="46"
+              viewBox="0 0 46 46"
+              style={{ transform: 'rotate(-90deg)' }}
+              aria-hidden="true"
+            >
+              <circle
+                cx="23" cy="23" r={RING_RADIUS}
+                fill="none" stroke="#ede9fe" strokeWidth="4"
+              />
+              <circle
+                cx="23" cy="23" r={RING_RADIUS}
+                fill="none" stroke="#7c3aed" strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={dashOffset}
+                style={{ transition: 'stroke-dashoffset 1s linear' }}
+              />
+            </svg>
+            <div className="wl-rest-ring__label">REST</div>
+          </div>
+          <div className="wl-rest-info">
+            <div className="wl-rest-info__title">Resting</div>
+            {restDone ? (
+              <div className="wl-rest-info__done">Go!</div>
+            ) : (
+              <div className="wl-rest-info__countdown">
+                {formatRest(restRemaining!)}
+              </div>
+            )}
+          </div>
+          <span className="wl-rest-skip">Skip →</span>
+        </div>
+      )}
 
       {/* Finish */}
       <button
-        className="wl-tab wl-tab--finish"
+        className="wl-finish-btn"
         onClick={onFinish}
         disabled={isSaving}
         type="button"
       >
-        <LuFlagTriangleRight size={22} />
-        <span>{isSaving ? 'Saving…' : 'Finish'}</span>
+        {isSaving ? 'Saving…' : 'Finish'}
       </button>
     </div>
   );
