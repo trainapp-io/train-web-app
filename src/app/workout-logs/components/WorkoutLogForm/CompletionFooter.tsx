@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LuPlay, LuPause, LuFlagTriangleRight, LuTimer, LuLayers } from 'react-icons/lu';
+import { LuPlay, LuPause, LuFlagTriangleRight, LuTimer } from 'react-icons/lu';
 import './WorkoutLogForm.css';
 
 interface CompletionFooterProps {
@@ -9,12 +9,8 @@ interface CompletionFooterProps {
   onPause: () => void;
   onFinish: () => void;
   isSaving?: boolean;
-  /** 'sets' = tap-through set counter; 'rest' = rest countdown timer */
-  midButton?: 'sets' | 'rest';
-  /** Total sets to cycle through (sets mode) */
-  totalSets?: number;
-  /** Default rest duration in seconds (rest mode, default 60) */
-  defaultRestSeconds?: number;
+  /** When > 0, immediately starts a rest countdown for this many seconds */
+  restSeconds?: number;
 }
 
 const CompletionFooter: React.FC<CompletionFooterProps> = ({
@@ -24,16 +20,18 @@ const CompletionFooter: React.FC<CompletionFooterProps> = ({
   onPause,
   onFinish,
   isSaving = false,
-  midButton = 'sets',
-  totalSets = 3,
-  defaultRestSeconds = 60,
+  restSeconds = 0,
 }) => {
-  // ── Set counter state ──
-  const [currentSet, setCurrentSet] = useState(1);
-
-  // ── Rest timer state ──
   const [restRemaining, setRestRemaining] = useState<number | null>(null);
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Start rest countdown when restSeconds prop changes to > 0
+  useEffect(() => {
+    if (restSeconds > 0) {
+      if (restRef.current) clearInterval(restRef.current);
+      setRestRemaining(restSeconds);
+    }
+  }, [restSeconds]);
 
   useEffect(() => {
     if (restRef.current) clearInterval(restRef.current);
@@ -44,33 +42,31 @@ const CompletionFooter: React.FC<CompletionFooterProps> = ({
       }
       return;
     }
-    restRef.current = setInterval(() => setRestRemaining((s) => (s !== null ? s - 1 : null)), 1000);
+    restRef.current = setInterval(
+      () => setRestRemaining((s) => (s !== null ? s - 1 : null)),
+      1000
+    );
     return () => { if (restRef.current) clearInterval(restRef.current); };
   }, [restRemaining]);
 
-  const startRest = () => {
+  const startManualRest = () => {
     if (restRemaining !== null && restRemaining > 0) {
       setRestRemaining(null);
     } else {
-      setRestRemaining(defaultRestSeconds);
+      setRestRemaining(60);
     }
   };
 
-  const advanceSet = () => {
-    setCurrentSet((s) => (s >= totalSets ? 1 : s + 1));
-  };
-
   const formatRest = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-
   const restIdle = restRemaining === null;
   const restDone = restRemaining === 0;
 
   return (
     <div className="wl-tabbar">
-      {/* ── Start / Pause toggle ── */}
+      {/* Start / Pause */}
       {isLive && (
         <button
-          className={`wl-tab wl-tab--active`}
+          className="wl-tab wl-tab--active"
           onClick={isTimerRunning ? onPause : onStart}
           type="button"
         >
@@ -79,32 +75,20 @@ const CompletionFooter: React.FC<CompletionFooterProps> = ({
         </button>
       )}
 
-      {/* ── Middle button ── */}
-      {midButton === 'sets' ? (
-        <button
-          className="wl-tab wl-tab--mid"
-          onClick={advanceSet}
-          type="button"
-          title="Tap to advance set"
-        >
-          <LuLayers size={22} />
-          <span>Set {currentSet}/{totalSets}</span>
-        </button>
-      ) : (
-        <button
-          className={`wl-tab wl-tab--mid ${!restIdle && !restDone ? 'wl-tab--rest-active' : ''}`}
-          onClick={startRest}
-          type="button"
-          title={restIdle ? 'Start rest timer' : 'Cancel rest'}
-        >
-          <LuTimer size={22} />
-          <span>
-            {restDone ? 'Go!' : restIdle ? 'Rest' : formatRest(restRemaining!)}
-          </span>
-        </button>
-      )}
+      {/* Rest */}
+      <button
+        className={`wl-tab wl-tab--mid${!restIdle && !restDone ? ' wl-tab--rest-active' : ''}`}
+        onClick={startManualRest}
+        type="button"
+        title={restIdle ? 'Start rest timer' : 'Cancel rest'}
+      >
+        <LuTimer size={22} />
+        <span>
+          {restDone ? 'Go!' : restIdle ? 'Rest' : formatRest(restRemaining!)}
+        </span>
+      </button>
 
-      {/* ── Finish ── */}
+      {/* Finish */}
       <button
         className="wl-tab wl-tab--finish"
         onClick={onFinish}

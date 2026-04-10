@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutLogRequest, Block, WorkoutRequest, MeasurementType } from '@trainapp-io/train-core';
+import { WorkoutLogRequest, Block, WorkoutRequest } from '@trainapp-io/train-core';
 import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
 import CircuitItem from '../../../programs/components/workoutBuilder/CircuitItem';
 import WorkoutLogHeader from './WorkoutLogHeader';
@@ -38,9 +38,14 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   // Blocks used by the builder components — pre-filled with target values
   const [blocks, setBlocks] = useState<Block[]>([]);
 
-  // Active exercise selection
-  const [activeBlockIdx, setActiveBlockIdx] = useState(0);
-  const [activeExerciseIdx, setActiveExerciseIdx] = useState(0);
+  // Rest callback state
+  const [restSeconds, setRestSeconds] = useState(0);
+  const [restKey, setRestKey] = useState(0);
+
+  const handleSetCompleted = (seconds: number) => {
+    setRestSeconds(seconds);
+    setRestKey((k) => k + 1);
+  };
 
   useEffect(() => {
     if (workoutSnapshot?.blockSnapshot) {
@@ -87,13 +92,6 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   if (!workoutSnapshot) {
     return <div className="workout-log-form"><p>Loading workout data…</p></div>;
   }
-
-  // Middle button config — driven by the active exercise
-  const activeBlock = blocks[activeBlockIdx];
-  const activeExercise = activeBlock?.exercises[activeExerciseIdx];
-  const midButton = activeExercise?.measurement?.measurementType === MeasurementType.TIME ? 'rest' : 'sets';
-  const totalSets = activeBlock?.targetSets ?? 1;
-  const defaultRestSeconds = (activeExercise as any)?.rest || 60;
 
   // Minimal WorkoutRequest shell so CircuitItem can resolve blockIndex
   const workoutShell: WorkoutRequest = {
@@ -159,23 +157,20 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
             onSetHasUnsavedChanges={() => {}}
             updateExerciseInBlockPartial={updateExerciseInBlockPartial}
             removeExerciseFromBlock={() => {}}
-            activeExerciseIndex={index === activeBlockIdx ? activeExerciseIdx : -1}
-            onSelectExercise={(exIdx) => { setActiveBlockIdx(index); setActiveExerciseIdx(exIdx); }}
+            onSetCompleted={handleSetCompleted}
           />
         ))}
       </div>
 
       <CompletionFooter
-        key={`${activeBlockIdx}-${activeExerciseIdx}`}
+        key={restKey}
         isLive={isLive}
         isTimerRunning={isTimerRunning}
         onStart={handleStartTimer}
         onPause={handlePauseTimer}
         onFinish={handleSubmit}
         isSaving={isSaving}
-        midButton={midButton}
-        totalSets={totalSets}
-        defaultRestSeconds={defaultRestSeconds}
+        restSeconds={restSeconds}
       />
     </div>
   );
