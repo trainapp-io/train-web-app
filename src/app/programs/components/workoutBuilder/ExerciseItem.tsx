@@ -133,9 +133,13 @@ const ExerciseItem: React.FC<Props> = ({
 
   const handleNameChange = (value: string) => {
     update({ name: value });
+    if (!value || value.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
-      if (!value || value.length < 2) return setSuggestions([]);
+      if (!value || value.length < 2) return;
       const apiKey = import.meta.env.VITE_RAPIDAPI_KEY;
       if (!apiKey) return;
       try {
@@ -192,6 +196,8 @@ const ExerciseItem: React.FC<Props> = ({
 
     return (
       <div
+        ref={setNodeRef}
+        style={style}
         className={`ex-card-v2 ex-card-v2--log${isActive === false ? ' ex-card-v2--inactive' : ''}`}
         onClick={isActive === false ? onSelect : undefined}
       >
@@ -329,11 +335,9 @@ const ExerciseItem: React.FC<Props> = ({
     <div ref={setNodeRef} style={style} className="ex-card-v2" {...attributes}>
       {/* Header */}
       <div className="ex-card-v2__header">
-        {!logMode && (
-          <span className="ex-card-v2__drag" {...listeners} style={{ cursor: 'grab', color: '#d1d5db', display: 'flex', alignItems: 'center' }}>
-            <LuGripVertical size={14} />
-          </span>
-        )}
+        <span className="ex-card-v2__drag" {...listeners} style={{ cursor: 'grab', color: '#d1d5db', display: 'flex', alignItems: 'center' }}>
+          <LuGripVertical size={14} />
+        </span>
 
         <div className="ex-card-v2__avatar" style={{ background: avatar.bg, color: avatar.color }}>
           {initial}
