@@ -49,6 +49,59 @@ function makeProps(exerciseOverrides: Record<string, any> = {}, propOverrides: R
   };
 }
 
+function makeLogProps(exerciseOverrides: Record<string, any> = {}, propOverrides: Record<string, any> = {}) {
+  const updateFn = vi.fn();
+  return {
+    exercise: makeExercise({
+      setLogs: [
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: false },
+        { actualReps: 8, actualWeight: 135, actualRest: 60, isCompleted: false },
+      ],
+      ...exerciseOverrides,
+    }),
+    editMode: true,
+    logMode: true,
+    blockIndex: 0,
+    exerciseIndex: 0,
+    updateExerciseInBlockPartial: updateFn,
+    removeExerciseFromBlock: vi.fn(),
+    ...propOverrides,
+  };
+}
+
+describe('ExerciseItem log mode', () => {
+  it('renders one row per setLog entry', () => {
+    render(<ExerciseItem {...makeLogProps()} />);
+    expect(screen.getAllByRole('row').length).toBeGreaterThanOrEqual(3); // header + 2 data rows
+  });
+
+  it('checking a set calls updateExerciseInBlockPartial with isCompleted: true for that set', () => {
+    const props = makeLogProps();
+    render(<ExerciseItem {...props} />);
+    const checkBtns = screen.getAllByRole('button', { name: /mark complete/i });
+    fireEvent.click(checkBtns[0]);
+    const call = props.updateExerciseInBlockPartial.mock.calls[0][2];
+    expect(call.setLogs[0].isCompleted).toBe(true);
+    expect(call.setLogs[1].isCompleted).toBe(false);
+  });
+
+  it('calls onSetCompleted with the rest seconds when a set is checked', () => {
+    const onSetCompleted = vi.fn();
+    const props = makeLogProps({}, { onSetCompleted });
+    render(<ExerciseItem {...props} />);
+    fireEvent.click(screen.getAllByRole('button', { name: /mark complete/i })[0]);
+    expect(onSetCompleted).toHaveBeenCalledWith(60);
+  });
+
+  it('"Mark All" marks all sets complete', () => {
+    const props = makeLogProps();
+    render(<ExerciseItem {...props} />);
+    fireEvent.click(screen.getByText(/mark all/i));
+    const call = props.updateExerciseInBlockPartial.mock.calls[0][2];
+    expect(call.setLogs.every((s: any) => s.isCompleted)).toBe(true);
+  });
+});
+
 describe('ExerciseItem create mode', () => {
   it('renders a set row for each set in setData', () => {
     const props = makeProps({
