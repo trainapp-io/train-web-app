@@ -74,17 +74,12 @@ const WorkoutLogEdit: React.FC = () => {
   };
 
   return (
-    <div className="workout-log-page">
-      <div className="workout-log-page-header">
-        <h1>Edit Workout Log</h1>
-      </div>
-      <WorkoutLogForm
-        initialData={initialData}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isSaving={updateWorkoutLogMutation.isPending}
-      />
-    </div>
+    <WorkoutLogForm
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      isSaving={updateWorkoutLogMutation.isPending}
+    />
   );
 };
 

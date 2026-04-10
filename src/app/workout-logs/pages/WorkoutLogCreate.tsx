@@ -142,13 +142,11 @@ const WorkoutLogCreate: React.FC = () => {
   }
 
   return (
-    <div className="workout-log-page">
-      <WorkoutLogForm
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isSaving={createWorkoutLogMutation.isPending}
-      />
-    </div>
+    <WorkoutLogForm
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      isSaving={createWorkoutLogMutation.isPending}
+    />
   );
 };
 
