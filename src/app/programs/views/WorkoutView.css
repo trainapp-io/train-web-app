@@ -1242,3 +1242,60 @@
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0ms !important; }
 }
+
+/* ── Circuit group card ── */
+.block-card--group .block-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px 14px 0 0;
+}
+
+.block-card__badge {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 5px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+/* "then" connector between exercises inside a group */
+.block-card__connector {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+.block-card__connector-line {
+  width: 0;
+  height: 14px;
+  border-left: 2px solid #ddd6fe;
+  margin-left: 14px;
+  margin-right: 10px;
+}
+.block-card__connector-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.block-card__add-ex {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  border: 1px dashed #c4b5fd;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: #7c3aed;
+  font-family: inherit;
+}
+.block-card__add-ex:hover { background: #faf5ff; }

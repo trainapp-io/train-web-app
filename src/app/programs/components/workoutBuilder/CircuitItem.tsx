@@ -16,14 +16,20 @@ interface Props {
   onSetHasUnsavedChanges: (hasChanges: boolean) => void;
   updateExerciseInBlockPartial?: (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => void;
   removeExerciseFromBlock?: (blockIndex: number, exerciseIndex: number) => void;
-  /** Index of the active exercise within this block (-1 = none active in this block) */
   activeExerciseIndex?: number;
   onSelectExercise?: (exerciseIndex: number) => void;
+  onSetCompleted?: (restSeconds: number) => void;
+}
+
+function getGroupLabel(count: number): { label: string; color: string; bg: string } {
+  if (count === 2) return { label: 'Superset', color: '#1d4ed8', bg: '#eff6ff' };
+  if (count === 3) return { label: 'Tri-set', color: '#6d28d9', bg: '#faf5ff' };
+  return { label: 'Circuit', color: '#6d28d9', bg: '#faf5ff' };
 }
 
 const CircuitItem: React.FC<Props> = ({
   block,
-  blockNumber,
+  blockNumber: _blockNumber,
   editMode,
   logMode = false,
   workout,
@@ -34,6 +40,7 @@ const CircuitItem: React.FC<Props> = ({
   removeExerciseFromBlock,
   activeExerciseIndex = -1,
   onSelectExercise,
+  onSetCompleted,
 }) => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -63,46 +70,58 @@ const CircuitItem: React.FC<Props> = ({
           order: block.exercises.length,
           sets: 3,
           hasSuperset: false,
+          setData: Array.from({ length: 3 }, () => ({ reps: 10, weight: 0, rest: 0 })),
         },
       ],
     });
   };
 
-  const addSupersetAfter = (index: number) => {
-    const updated = [...block.exercises];
-    updated[index] = { ...updated[index], hasSuperset: true };
-    updated.splice(index + 1, 0, {
-      name: '',
-      rest: 0,
-      targetReps: 10,
-      targetDurationSec: 0,
-      targetWeight: 0,
-      targetDistance: 0,
-      measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
-      notes: '',
-      order: 0,
-      sets: 3,
-      hasSuperset: false,
-    });
-    onUpdateBlock({ ...block, exercises: updated.map((ex, i) => ({ ...ex, order: i })) });
-  };
-
-  const removeSupersetExercise = (index: number) => {
-    const updated = block.exercises
-      .map((ex, i) => i === index - 1 ? { ...ex, hasSuperset: false } : ex)
-      .filter((_, i) => i !== index)
-      .map((ex, i) => ({ ...ex, order: i }));
-    onUpdateBlock({ ...block, exercises: updated });
-  };
-
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
   const restSeconds = (block as any).rest || 0;
+  const isSingle = block.type === BlockType.SINGLE;
+
+  // ── SINGLE block: render ExerciseItem directly, no group card ──
+  if (isSingle) {
+    return (
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={block.exercises.map((e) => e.order)} strategy={verticalListSortingStrategy}>
+          <div className="block-card block-card--single">
+            {block.exercises.map((exercise, exerciseIndex) => (
+              <ExerciseItem
+                key={exercise.order}
+                exercise={exercise}
+                editMode={editMode}
+                logMode={logMode}
+                blockIndex={blockIndex}
+                exerciseIndex={exerciseIndex}
+                updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                removeExerciseFromBlock={
+                  exerciseIndex === 0
+                    ? () => onRemoveBlock()
+                    : removeExerciseFromBlock
+                }
+                isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
+                onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
+                onSetCompleted={onSetCompleted}
+                setColumnLabel="Set"
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
+  // ── Circuit / Superset / Tri-set: grouped card ──
+  const { label, color, bg } = getGroupLabel(block.exercises.length);
 
   return (
-    <div className="block-card">
-      {/* ── Block header — single row ── */}
-      {block.type !== BlockType.SINGLE && (<div className="block-card__header">
-        <span className="block-card__num">#{blockNumber}</span>
+    <div className="block-card block-card--group">
+      {/* Group header */}
+      <div className="block-card__header" style={{ background: bg, borderBottom: `1px solid ${color}22` }}>
+        <span className="block-card__badge" style={{ background: color }}>
+          {label}
+        </span>
 
         {editMode ? (
           <>
@@ -111,31 +130,26 @@ const CircuitItem: React.FC<Props> = ({
               type="text"
               value={block.name}
               onChange={(e) => onUpdateBlock({ ...block, name: e.target.value })}
-              placeholder="Block name…"
+              placeholder="Group name…"
               aria-label="Block name"
+              style={{ color }}
             />
 
-            <span className="block-card__divider" aria-hidden="true" />
-
-            <div className="ex-m">
+            <div className="ex-m" style={{ marginLeft: 'auto' }}>
               <input
                 className="ex-m__input"
-                type="number"
-                min={1}
+                type="number" min={1}
                 value={block.targetSets}
                 onChange={(e) => onUpdateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
-                aria-label="Target sets"
+                aria-label="Rounds"
               />
-              <span className="ex-m__label">sets</span>
+              <span className="ex-m__label">rounds</span>
             </div>
 
-            <span className="ex-m__sep">·</span>
-
-            <div className="ex-m">
+            <div className="ex-m" style={{ marginLeft: 8 }}>
               <input
                 className="ex-m__input"
-                type="number"
-                min={0}
+                type="number" min={0}
                 value={restSeconds || ''}
                 onChange={(e) => onUpdateBlock({ ...block, rest: parseInt(e.target.value) || 0 } as any)}
                 placeholder="0"
@@ -152,63 +166,55 @@ const CircuitItem: React.FC<Props> = ({
           </>
         ) : (
           <>
-            <h3 className="block-card__name">{block.name}</h3>
+            <h3 className="block-card__name" style={{ color }}>{block.name}</h3>
             <div className="block-card__pills">
-              <span className="block-pill block-pill--sets">{block.targetSets} sets</span>
+              <span className="block-pill block-pill--sets">{block.targetSets} rounds</span>
               {restSeconds > 0 && (
                 <span className="block-pill block-pill--rest">{restSeconds}s rest</span>
               )}
             </div>
           </>
         )}
-      </div>)}
+      </div>
 
-      {/* ── Exercises ── */}
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={block.exercises.map((e) => e.order)} strategy={verticalListSortingStrategy}>
-          <div className="block-card__exercises">
-            {block.exercises.length === 0 && editMode && (
-              <p className="block-card__empty">No exercises yet — add one below.</p>
-            )}
-            {block.exercises.map((exercise, exerciseIndex) => {
-              const isSuperset = exerciseIndex > 0 && block.exercises[exerciseIndex - 1].hasSuperset;
-              const isSinglePrimary = block.type === BlockType.SINGLE && exerciseIndex === 0;
-
-              const item = (
+      {/* Exercises */}
+      <div className="block-card__exercises" style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={block.exercises.map((e) => e.order)} strategy={verticalListSortingStrategy}>
+            {block.exercises.map((exercise, exerciseIndex) => (
+              <React.Fragment key={exercise.order}>
+                {exerciseIndex > 0 && (
+                  <div className="block-card__connector" aria-hidden="true">
+                    <div className="block-card__connector-line" style={{ borderColor: color }} />
+                    <span className="block-card__connector-label">then</span>
+                  </div>
+                )}
                 <ExerciseItem
-                  key={exercise.order}
                   exercise={exercise}
                   editMode={editMode}
                   logMode={logMode}
                   blockIndex={blockIndex}
                   exerciseIndex={exerciseIndex}
                   updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-                  removeExerciseFromBlock={
-                    isSinglePrimary && !isSuperset
-                      ? () => onRemoveBlock()
-                      : isSuperset
-                      ? () => removeSupersetExercise(exerciseIndex)
-                      : removeExerciseFromBlock
-                  }
+                  removeExerciseFromBlock={removeExerciseFromBlock}
                   isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
                   onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
-                  onAddSuperset={editMode && !isSuperset ? () => addSupersetAfter(exerciseIndex) : undefined}
+                  onSetCompleted={onSetCompleted}
+                  setColumnLabel="Rnd"
                 />
-              );
+              </React.Fragment>
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
 
-              return isSuperset
-                ? <div key={exercise.order} className="ex-superset-wrapper">{item}</div>
-                : item;
-            })}
-          </div>
-        </SortableContext>
-      </DndContext>
-
-      {/* ── Add exercise (circuit/other blocks) ── */}
-      {editMode && !logMode && block.type !== BlockType.SINGLE && (
-        <button className="block-card__add-ex" onClick={addExercise}>
-          <LuPlus aria-hidden="true" /> Add Exercise
-        </button>
+      {/* Add exercise inside group */}
+      {editMode && !logMode && (
+        <div style={{ padding: '6px 12px 12px' }}>
+          <button className="block-card__add-ex" onClick={addExercise} style={{ borderColor: `${color}55`, color }}>
+            <LuPlus aria-hidden="true" /> Add Exercise
+          </button>
+        </div>
       )}
     </div>
   );
