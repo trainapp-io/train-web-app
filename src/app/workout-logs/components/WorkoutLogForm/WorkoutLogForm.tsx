@@ -4,7 +4,7 @@ import { useWorkoutLogContext } from '../../contexts/WorkoutLogContext';
 import CircuitItem from '../../../programs/components/workoutBuilder/CircuitItem';
 import WorkoutLogHeader from './WorkoutLogHeader';
 import CompletionFooter from './CompletionFooter';
-import { snapshotToBlock, blockToLog, BlockWithLogs } from './workoutLogHelpers';
+import { snapshotToBlock, blockToLog, BlockWithLogs, getInitialActiveBlock } from './workoutLogHelpers';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogFormProps {
@@ -37,6 +37,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
 
   // Blocks used by the builder components — pre-filled with target values
   const [blocks, setBlocks] = useState<BlockWithLogs[]>([]);
+  const [activeBlockIndex, setActiveBlockIndex] = useState<number>(0);
 
   // Rest callback state
   const [restSeconds, setRestSeconds] = useState(0);
@@ -52,6 +53,12 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       setBlocks(workoutSnapshot.blockSnapshot.map(snapshotToBlock));
     }
   }, [workoutSnapshot]);
+
+  useEffect(() => {
+    if (blocks.length > 0) {
+      setActiveBlockIndex(getInitialActiveBlock(blocks));
+    }
+  }, [blocks.length]);
 
   // ── Timer state ──
   const [isLive, setIsLive] = useState(true);
@@ -105,6 +112,10 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
     setBlocks(next);
   };
 
+  const handleJumpTo = (blockIndex: number) => {
+    setActiveBlockIndex(blockIndex);
+  };
+
   const updateExerciseInBlockPartial = (blockIndex: number, exerciseIndex: number, updates: Partial<any>) => {
     const next = [...blocks];
     const exercises = [...next[blockIndex].exercises];
@@ -128,7 +139,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   };
 
   return (
-    <div className="workout-log-form">
+    <div className="wl-page">
       <WorkoutLogHeader
         workoutSnapshot={workoutSnapshot}
         isLive={isLive}
@@ -141,9 +152,10 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
         onManualDurationChange={(field, value) =>
           setManualDuration((prev) => ({ ...prev, [field]: Math.max(0, value) }))
         }
+        onFinish={handleSubmit}
       />
 
-      <div className="workout-view block-logs-container">
+      <div className="wl-body">
         {blocks.map((block, index) => (
           <CircuitItem
             key={block.order}
@@ -158,6 +170,9 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
             updateExerciseInBlockPartial={updateExerciseInBlockPartial}
             removeExerciseFromBlock={() => {}}
             onSetCompleted={handleSetCompleted}
+            isBlockActive={activeBlockIndex === index}
+            onJumpTo={() => handleJumpTo(index)}
+            activeExerciseIndex={0}
           />
         ))}
       </div>
