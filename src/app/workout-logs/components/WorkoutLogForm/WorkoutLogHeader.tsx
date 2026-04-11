@@ -31,7 +31,7 @@ const WorkoutLogHeader: React.FC<WorkoutLogHeaderProps> = ({
 
   return (
     <div className="wl-header">
-      {/* Row 1: back button + title + finish */}
+      {/* Row 1: back button (left) + finish (right) */}
       <div className="wl-header__top">
         <button
           className="wl-back-btn"
@@ -39,15 +39,20 @@ const WorkoutLogHeader: React.FC<WorkoutLogHeaderProps> = ({
           type="button"
           aria-label="Go back"
         >
-          <LuChevronLeft size={20} />
+          <LuChevronLeft size={16} />
+          <span>Back</span>
         </button>
-        <span className="wl-header__name">{workoutSnapshot.name}</span>
         <button className="wl-header__finish-btn" onClick={onFinish} type="button">
           Finish
         </button>
       </div>
 
-      {/* Row 2: pause/play + timer */}
+      {/* Row 2: workout title centered */}
+      <div className="wl-header__title-row">
+        <span className="wl-header__name">{workoutSnapshot.name}</span>
+      </div>
+
+      {/* Row 3: pause/play + timer centered */}
       <div className="wl-timer-row">
         <button
           className="wl-pause-btn"

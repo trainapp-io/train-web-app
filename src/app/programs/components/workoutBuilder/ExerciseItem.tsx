@@ -104,8 +104,20 @@ const ExerciseItem: React.FC<Props> = ({
   // Raw string values while user is mid-edit (key: `${rowIndex}-${field}`)
   const [rawValues, setRawValues] = useState<Record<string, string>>({});
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasInitializedSetData = useRef(false);
 
   useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
+
+  // Populate setData from top-level fields on first edit-mode mount so it always persists on save
+  useEffect(() => {
+    if (!editMode || logMode) return;
+    if (hasInitializedSetData.current || exercise.setData?.length) return;
+    if (!updateExerciseInBlockPartial) return;
+    hasInitializedSetData.current = true;
+    const generated = getSetData(exercise);
+    updateExerciseInBlockPartial(blockIndex, exerciseIndex, { setData: generated, sets: generated.length });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editMode, logMode]);
 
   if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) return null;
 

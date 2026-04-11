@@ -27,33 +27,35 @@
 }
 
 .wl-back-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
   background: none;
   border: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
   cursor: pointer;
   color: #7c3aed;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 4px 6px;
+  border-radius: 6px;
   flex-shrink: 0;
-  margin-right: 4px;
-  padding: 0;
 }
 
 .wl-back-btn:hover { background: #f3f0ff; }
+
+.wl-header__title-row {
+  text-align: center;
+  padding: 4px 0 2px;
+}
 
 .wl-header__name {
   font-size: 17px;
   font-weight: 700;
   color: var(--text-primary, #111);
-  flex: 1;
-  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-right: 12px;
 }
 
 .wl-header__finish-btn {
