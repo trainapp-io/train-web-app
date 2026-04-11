@@ -61,10 +61,8 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   }, [blocks.length]);
 
   // ── Timer state ──
-  const [isLive, setIsLive] = useState(true);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [manualDuration, setManualDuration] = useState({ hours: 0, minutes: 0 });
 
   useEffect(() => {
     if (!isTimerRunning) return;
@@ -73,28 +71,30 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
   }, [isTimerRunning]);
 
   useEffect(() => {
-    if (!isLive || !isTimerRunning) return;
+    if (!isTimerRunning) return;
     setActualDuration(elapsedSeconds);
     setActualEndDate(new Date(actualStartDate.getTime() + elapsedSeconds * 1000));
-  }, [elapsedSeconds, isLive, isTimerRunning]);
+  }, [elapsedSeconds, isTimerRunning]);
 
+  // Auto-advance to next block when current block is fully complete
   useEffect(() => {
-    if (isLive) return;
-    const total = manualDuration.hours * 3600 + manualDuration.minutes * 60;
-    setActualDuration(total);
-    setActualEndDate(new Date(actualStartDate.getTime() + total * 1000));
-  }, [manualDuration, isLive, actualStartDate]);
+    if (blocks.length === 0) return;
+    const current = blocks[activeBlockIndex];
+    if (!current) return;
+    const allDone = current.exercises.every((ex) => {
+      const logs = (ex as any).setLogs as any[] | undefined;
+      return logs && logs.length > 0 && logs.every((s: any) => s.isCompleted);
+    });
+    if (allDone && activeBlockIndex < blocks.length - 1) {
+      setActiveBlockIndex(activeBlockIndex + 1);
+    }
+  }, [blocks, activeBlockIndex]);
 
   const handleStartTimer = () => {
     if (!isTimerRunning) setActualStartDate(new Date());
     setIsTimerRunning(true);
   };
   const handlePauseTimer = () => setIsTimerRunning(false);
-  const handleModeToggle = () => {
-    setIsLive((v) => !v);
-    setIsTimerRunning(false);
-    setElapsedSeconds(0);
-  };
 
   if (!workoutSnapshot) {
     return <div className="wl-page"><p>Loading workout data…</p></div>;
@@ -142,16 +142,9 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
     <div className="wl-page">
       <WorkoutLogHeader
         workoutSnapshot={workoutSnapshot}
-        isLive={isLive}
         isTimerRunning={isTimerRunning}
         elapsedSeconds={elapsedSeconds}
-        actualStartDate={actualStartDate}
-        manualDuration={manualDuration}
-        onModeToggle={handleModeToggle}
-        onStartDateChange={setActualStartDate}
-        onManualDurationChange={(field, value) =>
-          setManualDuration((prev) => ({ ...prev, [field]: Math.max(0, value) }))
-        }
+        onPausePlay={isTimerRunning ? handlePauseTimer : handleStartTimer}
         onFinish={handleSubmit}
       />
 
@@ -179,7 +172,7 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
 
       <CompletionFooter
         key={restKey}
-        isLive={isLive}
+        isLive={true}
         isTimerRunning={isTimerRunning}
         onStart={handleStartTimer}
         onPause={handlePauseTimer}

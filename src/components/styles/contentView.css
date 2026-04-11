@@ -1,6 +1,7 @@
 .content-view {
   flex: 1;
   margin-left: 250px;
+  --sidebar-w: 250px;
   transition: margin-left 0.3s ease;
 }
 
@@ -9,5 +10,6 @@
   .content-view {
     margin: 0;
     padding-top: 80px;
+    --sidebar-w: 0px;
   }
 }

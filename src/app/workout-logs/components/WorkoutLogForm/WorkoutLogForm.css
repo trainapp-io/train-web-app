@@ -26,6 +26,24 @@
   margin-bottom: 10px;
 }
 
+.wl-back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #7c3aed;
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 0;
+}
+
+.wl-back-btn:hover { background: #f3f0ff; }
+
 .wl-header__name {
   font-size: 17px;
   font-weight: 700;
@@ -323,7 +341,8 @@
 .wl-tabbar {
   position: fixed;
   bottom: 0;
-  left: 50%;
+  /* Center within the content area, accounting for the sidebar width */
+  left: calc(50% + var(--sidebar-w, 0px) / 2);
   transform: translateX(-50%);
   width: 100%;
   max-width: 640px;

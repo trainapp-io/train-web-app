@@ -49,6 +49,7 @@
 
 .sidebar.collapsed ~ .content-view {
   margin-left: 60px;
+  --sidebar-w: 60px;
 }
 
 /* Sidebar header with logo and toggle button */

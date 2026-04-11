@@ -127,9 +127,9 @@
 .ex-add-set:hover { color: #5b21b6; }
 
 /* ── Log mode ── */
-.ex-card-v2--log .ex-log-row--active td { background: #f0f9ff; }
-.ex-card-v2--log .ex-log-row--active .ex-set-num { color: #2563eb; }
-.ex-card-v2--log .ex-log-row--active .ex-set-input { color: #2563eb; font-weight: 700; }
+.ex-card-v2--log .ex-log-row--active td { background: #faf5ff; }
+.ex-card-v2--log .ex-log-row--active .ex-set-num { color: #7c3aed; }
+.ex-card-v2--log .ex-log-row--active .ex-set-input { color: #7c3aed; font-weight: 700; border-color: #c4b5fd; }
 .ex-card-v2--log .ex-log-row--done { opacity: 0.42; }
 
 .ex-check-btn {
@@ -140,8 +140,8 @@
   margin: 0 auto; font-size: 12px; font-family: inherit;
   transition: all 0.12s;
 }
-.ex-check-btn:hover { border-color: #2563eb; color: #2563eb; }
-.ex-check-btn--done { background: #2563eb; border-color: #2563eb; color: #fff; }
+.ex-check-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+.ex-check-btn--done { background: #22c55e; border-color: #22c55e; color: #fff; }
 
 .ex-mark-all {
   display: block; width: 100%; text-align: center;

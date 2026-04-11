@@ -1,17 +1,14 @@
 import React from 'react';
 import { WorkoutSnapshot } from '@trainapp-io/train-core';
+import { LuPlay, LuPause, LuChevronLeft } from 'react-icons/lu';
+import { useNavigate } from 'react-router';
 import './WorkoutLogForm.css';
 
 interface WorkoutLogHeaderProps {
   workoutSnapshot: WorkoutSnapshot;
-  isLive: boolean;
   isTimerRunning: boolean;
   elapsedSeconds: number;
-  actualStartDate: Date;
-  manualDuration: { hours: number; minutes: number };
-  onModeToggle: () => void;
-  onStartDateChange: (date: Date) => void;
-  onManualDurationChange: (field: 'hours' | 'minutes', value: number) => void;
+  onPausePlay: () => void;
   onFinish: () => void;
 }
 
@@ -23,86 +20,47 @@ function formatElapsed(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-function formatDateTimeLocal(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 const WorkoutLogHeader: React.FC<WorkoutLogHeaderProps> = ({
   workoutSnapshot,
-  isLive,
   isTimerRunning,
   elapsedSeconds,
-  actualStartDate,
-  manualDuration,
-  onModeToggle,
-  onStartDateChange,
-  onManualDurationChange,
+  onPausePlay,
   onFinish,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="wl-header">
-      {/* Row 1: name + finish */}
+      {/* Row 1: back button + title + finish */}
       <div className="wl-header__top">
+        <button
+          className="wl-back-btn"
+          onClick={() => navigate(-1)}
+          type="button"
+          aria-label="Go back"
+        >
+          <LuChevronLeft size={20} />
+        </button>
         <span className="wl-header__name">{workoutSnapshot.name}</span>
         <button className="wl-header__finish-btn" onClick={onFinish} type="button">
           Finish
         </button>
       </div>
 
-      {/* Row 2: timer display only */}
-      {isLive && (
-        <div className="wl-timer-row">
-          <span className={`wl-elapsed${!isTimerRunning ? ' wl-elapsed--paused' : ''}`}>
-            {formatElapsed(elapsedSeconds)}
-          </span>
-        </div>
-      )}
-
-      {/* Mode toggle — less prominent */}
-      <div className="wl-mode-toggle">
-        <button className="wl-mode-link" onClick={onModeToggle} type="button">
-          {isLive ? 'Switch to historical entry' : 'Switch to live timer'}
+      {/* Row 2: pause/play + timer */}
+      <div className="wl-timer-row">
+        <button
+          className="wl-pause-btn"
+          onClick={onPausePlay}
+          type="button"
+          aria-label={isTimerRunning ? 'Pause timer' : 'Start timer'}
+        >
+          {isTimerRunning ? <LuPause size={16} /> : <LuPlay size={16} />}
         </button>
+        <span className={`wl-elapsed${!isTimerRunning ? ' wl-elapsed--paused' : ''}`}>
+          {formatElapsed(elapsedSeconds)}
+        </span>
       </div>
-
-      {/* Historical entry fields */}
-      {!isLive && (
-        <div className="wl-historical">
-          <div>
-            <label htmlFor="wl-start-time">Workout Date &amp; Time</label>
-            <input
-              id="wl-start-time"
-              type="datetime-local"
-              value={formatDateTimeLocal(actualStartDate)}
-              onChange={(e) => onStartDateChange(new Date(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Duration</label>
-            <div className="wl-duration-row">
-              <div className="wl-duration-group">
-                <input
-                  type="number" min={0}
-                  value={manualDuration.hours}
-                  onChange={(e) => onManualDurationChange('hours', parseInt(e.target.value) || 0)}
-                  aria-label="Hours"
-                />
-                <span className="wl-duration-unit">hr</span>
-              </div>
-              <div className="wl-duration-group">
-                <input
-                  type="number" min={0} max={59}
-                  value={manualDuration.minutes}
-                  onChange={(e) => onManualDurationChange('minutes', parseInt(e.target.value) || 0)}
-                  aria-label="Minutes"
-                />
-                <span className="wl-duration-unit">min</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
