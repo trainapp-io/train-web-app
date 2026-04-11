@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { LuX, LuPlus } from 'react-icons/lu';
@@ -43,7 +43,7 @@ const CircuitItem: React.FC<Props> = ({
   updateExerciseInBlockPartial,
   removeExerciseFromBlock,
   activeExerciseIndex = -1,
-  onSelectExercise,
+  onSelectExercise: _onSelectExercise,
   onSetCompleted,
   isBlockActive = true,
   onJumpTo,
@@ -85,6 +85,20 @@ const CircuitItem: React.FC<Props> = ({
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
   const restSeconds = (block as any).rest || 0;
   const isSingle = block.type === BlockType.SINGLE;
+
+  // ── Group exercise advancement (log mode only) ──
+  // For group blocks, CircuitItem owns which exercise is currently active.
+  // When you check the current set of exercise N:
+  //   - if N+1 exists → advance to it (don't fire rest yet)
+  //   - if N is last  → reset to exercise 0 and fire rest (round complete)
+  const [groupActiveExIdx, setGroupActiveExIdx] = useState(0);
+
+  // Reset to first exercise whenever this block becomes the active block
+  useEffect(() => {
+    if (isBlockActive && !isSingle) {
+      setGroupActiveExIdx(0);
+    }
+  }, [isBlockActive, isSingle]);
 
   // ── Log mode collapsed state for groups ──
   if (logMode && !isSingle && !isBlockActive) {
@@ -275,9 +289,19 @@ const CircuitItem: React.FC<Props> = ({
                   exerciseIndex={exerciseIndex}
                   updateExerciseInBlockPartial={updateExerciseInBlockPartial}
                   removeExerciseFromBlock={removeExerciseFromBlock}
-                  isActive={logMode ? (isBlockActive && activeExerciseIndex === exerciseIndex) : undefined}
-                  onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
-                  onSetCompleted={onSetCompleted}
+                  isActive={logMode ? (isBlockActive && groupActiveExIdx === exerciseIndex) : undefined}
+                  onSelect={logMode ? () => setGroupActiveExIdx(exerciseIndex) : undefined}
+                  onSetCompleted={logMode ? (restSecs) => {
+                    const nextIdx = exerciseIndex + 1;
+                    if (nextIdx < block.exercises.length) {
+                      // More exercises in this round — advance, no rest yet
+                      setGroupActiveExIdx(nextIdx);
+                    } else {
+                      // Last exercise in round — reset to first, fire rest
+                      setGroupActiveExIdx(0);
+                      onSetCompleted?.(restSecs);
+                    }
+                  } : onSetCompleted}
                   setColumnLabel="Rnd"
                 />
               </React.Fragment>
