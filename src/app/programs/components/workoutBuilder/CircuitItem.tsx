@@ -3,7 +3,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { LuX, LuPlus } from 'react-icons/lu';
 import ExerciseItem from './ExerciseItem';
-import { Block, BlockType, WorkoutRequest, MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
+import { Block, BlockType, WorkoutRequest, MeasurementType, MeasurementUnit, SetLog } from '@trainapp-io/train-core';
 
 interface Props {
   block: Block;
@@ -19,12 +19,16 @@ interface Props {
   activeExerciseIndex?: number;
   onSelectExercise?: (exerciseIndex: number) => void;
   onSetCompleted?: (restSeconds: number) => void;
+  /** Whether this block is the currently focused/expanded block in log mode */
+  isBlockActive?: boolean;
+  /** Called when user taps a collapsed block to jump to it */
+  onJumpTo?: () => void;
 }
 
 function getGroupLabel(count: number): { label: string; color: string; bg: string } {
-  if (count === 2) return { label: 'Superset', color: '#1d4ed8', bg: '#eff6ff' };
-  if (count === 3) return { label: 'Tri-set', color: '#6d28d9', bg: '#faf5ff' };
-  return { label: 'Circuit', color: '#6d28d9', bg: '#faf5ff' };
+  if (count === 2) return { label: 'Superset', color: '#6d28d9', bg: '#faf5ff' };
+  if (count === 3) return { label: 'Tri-set', color: '#9d174d', bg: '#fce7f3' };
+  return { label: 'Circuit', color: '#065f46', bg: '#d1fae5' };
 }
 
 const CircuitItem: React.FC<Props> = ({
@@ -41,6 +45,8 @@ const CircuitItem: React.FC<Props> = ({
   activeExerciseIndex = -1,
   onSelectExercise,
   onSetCompleted,
+  isBlockActive = true,
+  onJumpTo,
 }) => {
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -80,7 +86,79 @@ const CircuitItem: React.FC<Props> = ({
   const restSeconds = (block as any).rest || 0;
   const isSingle = block.type === BlockType.SINGLE;
 
-  // ── SINGLE block: render ExerciseItem directly, no group card ──
+  // ── Log mode collapsed state for groups ──
+  if (logMode && !isSingle && !isBlockActive) {
+    const { label, color, bg } = getGroupLabel(block.exercises.length);
+    const allExLogs = block.exercises.map((ex) =>
+      ((ex as any).setLogs as SetLog[] | undefined) ?? []
+    );
+    const allCompleted = allExLogs.every((logs) => logs.length > 0 && logs.every((s) => s.isCompleted));
+    const someCompleted = allExLogs.some((logs) => logs.some((s) => s.isCompleted));
+    const completedRounds = allExLogs.length > 0
+      ? Math.min(...allExLogs.map((logs) => logs.filter((s) => s.isCompleted).length))
+      : 0;
+    const totalRounds = block.targetSets || 1;
+
+    if (allCompleted) {
+      return (
+        <div className="ex-log-done" onClick={onJumpTo} role="button" tabIndex={0}>
+          <div className="ex-log-done__check">✓</div>
+          <span
+            style={{
+              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
+              padding: '2px 7px', borderRadius: 5, textTransform: 'uppercase' as const,
+              background: bg, color, flexShrink: 0,
+            }}
+          >
+            {label}
+          </span>
+          <span className="ex-log-done__name">{block.name || label}</span>
+          <span className="ex-log-done__summary">{completedRounds} rounds</span>
+        </div>
+      );
+    }
+
+    if (someCompleted) {
+      return (
+        <div className="ex-log-inprogress" onClick={onJumpTo} role="button" tabIndex={0}>
+          <div className="ex-log-inprogress__badge">{completedRounds}/{totalRounds}</div>
+          <span
+            style={{
+              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
+              padding: '2px 7px', borderRadius: 5, textTransform: 'uppercase' as const,
+              background: bg, color, flexShrink: 0,
+            }}
+          >
+            {label}
+          </span>
+          <span className="ex-log-inprogress__name">{block.name || label}</span>
+          <span className="ex-log-inprogress__status">In progress · tap to resume</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="ex-log-upcoming" onClick={onJumpTo} role="button" tabIndex={0}>
+        <div className="ex-log-upcoming__num">
+          {block.exercises.length}
+        </div>
+        <span
+          style={{
+            fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
+            padding: '2px 7px', borderRadius: 5, textTransform: 'uppercase' as const,
+            background: bg, color, flexShrink: 0,
+          }}
+        >
+          {label}
+        </span>
+        <span className="ex-log-upcoming__name">{block.name || label}</span>
+        <span className="ex-log-upcoming__meta">{totalRounds} rounds</span>
+        <span className="ex-log-upcoming__jump">Jump to →</span>
+      </div>
+    );
+  }
+
+  // ── SINGLE block: render ExerciseItem directly ──
   if (isSingle) {
     return (
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -100,8 +178,8 @@ const CircuitItem: React.FC<Props> = ({
                     ? () => onRemoveBlock()
                     : removeExerciseFromBlock
                 }
-                isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
-                onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
+                isActive={logMode ? (isBlockActive && activeExerciseIndex === exerciseIndex) : undefined}
+                onSelect={logMode ? onJumpTo : undefined}
                 onSetCompleted={onSetCompleted}
                 setColumnLabel="Set"
               />
@@ -197,7 +275,7 @@ const CircuitItem: React.FC<Props> = ({
                   exerciseIndex={exerciseIndex}
                   updateExerciseInBlockPartial={updateExerciseInBlockPartial}
                   removeExerciseFromBlock={removeExerciseFromBlock}
-                  isActive={logMode ? activeExerciseIndex === exerciseIndex : undefined}
+                  isActive={logMode ? (isBlockActive && activeExerciseIndex === exerciseIndex) : undefined}
                   onSelect={logMode ? () => onSelectExercise?.(exerciseIndex) : undefined}
                   onSetCompleted={onSetCompleted}
                   setColumnLabel="Rnd"
