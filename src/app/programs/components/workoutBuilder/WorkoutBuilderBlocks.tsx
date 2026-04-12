@@ -75,6 +75,7 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
             order: 0,
             sets: 3,
             hasSuperset: false,
+            setData: Array.from({ length: 3 }, () => ({ reps: 10, weight: 0, rest: 0 })),
           },
         ],
         order: blocks.length + 1,
