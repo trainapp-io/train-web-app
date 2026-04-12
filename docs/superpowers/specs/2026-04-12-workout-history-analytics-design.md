@@ -216,8 +216,8 @@ router.get('/analytics/exercises/:exerciseName', authMiddleware.authenticateToke
 ### Install recharts
 ```bash
 npm install recharts
-npm install --save-dev @types/recharts
 ```
+recharts ships its own TypeScript types — no `@types/recharts` needed.
 
 ### New files
 
@@ -353,7 +353,7 @@ Top-level page component. Owns:
 
 **Navigation routing** — replace `WorkoutLogHistory` with `WorkoutAnalytics` at `/workout-logs/history`. The existing `WorkoutLogDetail`, `WorkoutLogCreate`, and `WorkoutLogEdit` pages are unchanged.
 
-Find the route file (likely `src/components/navigation/Navigation.tsx` or `src/app/Navigation.tsx`) and swap:
+Update `src/components/navigation/Navigation.tsx` and swap:
 ```typescript
 // Before
 import WorkoutLogHistory from '../workout-logs/pages/WorkoutLogHistory';
