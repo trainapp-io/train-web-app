@@ -2,6 +2,13 @@
 **Date:** 2026-04-13  
 **Status:** Approved
 
+### Implementation branches
+| Repo | Branch |
+|------|--------|
+| train-core | main |
+| train-service | ng-workout |
+| train-web-app | ng-test |
+
 ---
 
 ## Overview
@@ -234,10 +241,102 @@ Existing workouts that only use `blocks` (no `sections`) continue to work unchan
 | `WorkoutContext.tsx` | Add section CRUD actions: `addSection`, `updateSection`, `removeSection`, `addBlockToSection`, etc. |
 | `WorkoutDetailsSection.tsx` | Add workout type pill selector to header area. |
 | `workoutService.ts` | Update request/response mapping to include `sections` and `workoutType`. |
+| `WorkoutLogCreate.tsx` | Merge `workout.blocks` + `workout.sections[].blocks` sorted by order into `blockSnapshot`. Map `workout.sections` → `sectionSnapshot`. |
+| `WorkoutLogForm.tsx` | Render section name dividers before the first block in each section using `sectionSnapshot`. |
 
 ---
 
-## 9. Out of Scope
+## 9. Workout Log Impact
+
+Sections must be accounted for in the workout logging flow. The logging experience stays linear (blocks presented one after another), but section names are preserved as visual dividers so the user knows which phase they're in (e.g. "W/U (400)" before those blocks, "Main (400)" before the next group).
+
+### The core problem
+
+`WorkoutLogCreate.tsx` currently only maps `workout.blocks → blockSnapshot`. If a workout has `sections`, those exercises are invisible to the log — they simply won't appear. This must be fixed.
+
+### Strategy: flatten sections into blocks for logging
+
+Sections don't need to be containers in the log. The log works with a flat ordered list of blocks. Sections contribute their blocks to that list, and a lightweight `sectionSnapshot` records section names + which block orders they cover so the log UI can render section dividers.
+
+### Changes required
+
+**train-core (`program.dto.ts`)**
+
+```typescript
+// New interface
+export interface SectionSnapshot {
+  name: string;
+  order: number;
+  blockOrders: number[];  // which block.order values belong to this section
+}
+
+// Added to WorkoutSnapshot
+export interface WorkoutSnapshot {
+  ...existing fields...
+  sectionSnapshot?: SectionSnapshot[];  // NEW
+}
+```
+
+**train-web-app `WorkoutLogCreate.tsx`**
+
+When building the snapshot, merge blocks from both sources sorted by `order`:
+
+```typescript
+// Collect all blocks in order (standalone + from sections)
+const allBlocks = [
+  ...(workout.blocks ?? []),
+  ...(workout.sections ?? []).flatMap(s => s.blocks),
+].sort((a, b) => a.order - b.order);
+
+// Map to blockSnapshot (same as before, just using allBlocks)
+blockSnapshot: allBlocks.map((block): BlockSnapshot => ({ ... }))
+
+// Also capture section names for display during logging
+sectionSnapshot: (workout.sections ?? []).map(s => ({
+  name: s.name,
+  order: s.order,
+  blockOrders: s.blocks.map(b => b.order),
+}))
+```
+
+**train-web-app `WorkoutLogForm.tsx`**
+
+Before rendering each `CircuitItem`, check if any `sectionSnapshot` entry starts at that block's order and insert a section header divider if so:
+
+```tsx
+// Visual section divider — no state, no logic change
+{sectionSnapshot?.find(s => s.blockOrders[0] === block.order) && (
+  <div className="wl-section-header">
+    {section.name}
+  </div>
+)}
+<CircuitItem ... />
+```
+
+**train-service `workoutLogModel.ts`**
+
+```typescript
+const SectionSnapshotSchema = new Schema({
+  name: { type: String, required: true },
+  order: { type: Number, required: true },
+  blockOrders: { type: [Number], required: true },
+}, { _id: false });
+
+// Added to WorkoutSnapshotSchema
+sectionSnapshot: { type: [SectionSnapshotSchema], required: false }
+```
+
+### What does NOT change
+
+- `workoutLogHelpers.ts` — `snapshotToBlock()` and `blockToLog()` operate on a flat block list; sections are irrelevant to them
+- `blockLogs` structure — stays flat; no `SectionLog` type needed
+- `WorkoutLogService.ts` — passes DTOs through; no logic change
+- `WorkoutLogAnalyticsService.ts` — aggregates `blockLogs.exerciseLogs`; sections have no effect on analytics
+- The rest unit toggle on group blocks — already stored as seconds in `block.rest`; log reads it the same way
+
+---
+
+## 10. Out of Scope
 
 - Watts (W) measurement unit — niche, can be added later
 - Section collapse/expand animation — can be added as a polish pass
