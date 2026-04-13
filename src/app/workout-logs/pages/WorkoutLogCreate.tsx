@@ -63,6 +63,8 @@ const WorkoutLogCreate: React.FC = () => {
                 measurementType: exercise.measurement?.measurementType || 'REPS',
                 measurementUnit: exercise.measurement?.measurementUnit || 'COUNT',
               },
+              setData: exercise.setData,
+              restUnit: exercise.restUnit,
             })),
             order: block.order,
           })) || [],

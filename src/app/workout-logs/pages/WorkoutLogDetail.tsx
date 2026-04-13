@@ -1,18 +1,84 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useWorkoutLog, useDeleteWorkoutLog } from '../../../services/apiHooks';
-import Button from '../../../components/ui/Button';
-import './WorkoutLogPages.css';
+import type { ExerciseLog } from '@trainapp-io/train-core';
+import '../components/analytics/WorkoutAnalytics.css';
+
+function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${secs}s`;
+  return `${secs}s`;
+}
+
+function ExerciseCard({ exercise }: { exercise: ExerciseLog }) {
+  const completedSets = exercise.setLogs?.filter((s) => s.isCompleted) ?? [];
+  const totalSets = exercise.setLogs?.length ?? 0;
+
+  return (
+    <div className="wld-exercise-card">
+      <div className="wld-exercise-card__header">
+        <span className="wld-exercise-card__name">{exercise.name}</span>
+        <span className={`wla-status-badge ${completedSets.length === totalSets && totalSets > 0 ? 'wla-status-badge--done' : 'wla-status-badge--partial'}`}>
+          {completedSets.length}/{totalSets} sets
+        </span>
+      </div>
+
+      {exercise.setLogs && exercise.setLogs.length > 0 ? (
+        <table className="wla-set-table">
+          <thead>
+            <tr>
+              <th>Set</th>
+              {exercise.setLogs.some((s) => s.actualWeight !== undefined) && <th>Weight</th>}
+              {exercise.setLogs.some((s) => s.actualReps !== undefined) && <th>Reps</th>}
+              {exercise.setLogs.some((s) => s.actualDurationSec !== undefined) && <th>Duration</th>}
+              {exercise.setLogs.some((s) => s.actualDistance !== undefined) && <th>Distance</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {exercise.setLogs.map((set, i) => (
+              <tr key={i} className={!set.isCompleted ? 'wla-set-table__row--incomplete' : undefined}>
+                <td>{i + 1}</td>
+                {exercise.setLogs!.some((s) => s.actualWeight !== undefined) && (
+                  <td>{set.actualWeight !== undefined ? `${set.actualWeight} lbs` : '—'}</td>
+                )}
+                {exercise.setLogs!.some((s) => s.actualReps !== undefined) && (
+                  <td>{set.actualReps !== undefined ? set.actualReps : '—'}</td>
+                )}
+                {exercise.setLogs!.some((s) => s.actualDurationSec !== undefined) && (
+                  <td>{set.actualDurationSec !== undefined ? `${set.actualDurationSec}s` : '—'}</td>
+                )}
+                {exercise.setLogs!.some((s) => s.actualDistance !== undefined) && (
+                  <td>{set.actualDistance !== undefined ? set.actualDistance : '—'}</td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="wld-exercise-card__no-sets">No set data recorded</p>
+      )}
+    </div>
+  );
+}
 
 const WorkoutLogDetail: React.FC = () => {
   const navigate = useNavigate();
   const { logId } = useParams<{ logId: string }>();
   const { data: workoutLog, isLoading, error } = useWorkoutLog(logId!);
   const deleteWorkoutLogMutation = useDeleteWorkoutLog();
-
-  const handleEdit = () => {
-    navigate(`/workout-logs/${logId}/edit`);
-  };
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this workout log?')) {
@@ -25,35 +91,14 @@ const WorkoutLogDetail: React.FC = () => {
     }
   };
 
-  const formatDate = (date: Date): string => {
-    return new Date(date).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
-    } else {
-      return `${secs}s`;
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="workout-log-page">
-        <div className="loading-container">
-          <p>Loading workout log...</p>
+      <div className="wla-page">
+        <div className="wla-body">
+          <div className="wla-skeleton">
+            <div className="wla-skeleton-card" />
+            <div className="wla-skeleton-card" />
+          </div>
         </div>
       </div>
     );
@@ -61,121 +106,83 @@ const WorkoutLogDetail: React.FC = () => {
 
   if (error || !workoutLog) {
     return (
-      <div className="workout-log-page">
-        <div className="error-container">
-          <h2>Error</h2>
-          <p>Failed to load workout log</p>
-          <Button variant="secondary" onClick={() => navigate('/workout-logs/history')}>
-            Back to History
-          </Button>
+      <div className="wla-page">
+        <div className="wla-body">
+          <div className="wla-empty-state">
+            <div className="wla-empty-state__icon">⚠️</div>
+            <h2 className="wla-empty-state__title">Workout not found</h2>
+            <p className="wla-empty-state__sub">This log may have been deleted.</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Collect all exercise logs across all blocks
+  const allExercises: ExerciseLog[] = workoutLog.blockLogs?.flatMap((b) => b.exerciseLogs) ?? workoutLog.exerciseLogs ?? [];
+
   return (
-    <div className="workout-log-page">
-      <div className="workout-log-page-header">
-        <Button variant="secondary" onClick={() => navigate('/workout-logs/history')}>
-          ← Back to History
-        </Button>
-        <div className="header-actions">
-          <Button onClick={handleEdit}>
-            Edit
-          </Button>
-          <Button variant="danger" onClick={handleDelete} disabled={deleteWorkoutLogMutation.isPending} isLoading={deleteWorkoutLogMutation.isPending}>
-            Delete
-          </Button>
+    <div className="wla-page">
+      {/* Header */}
+      <div className="wla-header">
+        <div className="wla-header__top">
+          <button className="wld-back-btn" onClick={() => navigate('/workout-logs/history')}>
+            ← History
+          </button>
+          <div className="wld-header-actions">
+            <button className="wld-edit-btn" onClick={() => navigate(`/workout-logs/${logId}/edit`)}>
+              Edit
+            </button>
+            <button
+              className="wld-delete-btn"
+              onClick={handleDelete}
+              disabled={deleteWorkoutLogMutation.isPending}
+            >
+              {deleteWorkoutLogMutation.isPending ? '…' : 'Delete'}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="workout-log-detail">
-        <div className="detail-header">
-          <h1>{workoutLog.workoutSnapshot.name}</h1>
-          {workoutLog.isCompleted && (
-            <span className="status-badge completed">Completed</span>
-          )}
+      <div className="wla-body">
+        {/* Title + status */}
+        <div className="wld-title-row">
+          <h1 className="wld-title">{workoutLog.workoutSnapshot.name}</h1>
+          <span className={`wla-status-badge ${workoutLog.isCompleted ? 'wla-status-badge--done' : 'wla-status-badge--partial'}`}>
+            {workoutLog.isCompleted ? 'Completed' : 'Partial'}
+          </span>
         </div>
 
-        {workoutLog.workoutSnapshot.description && (
-          <p className="workout-description">{workoutLog.workoutSnapshot.description}</p>
-        )}
-
-        <div className="workout-metadata">
-          <div className="metadata-item">
-            <span className="label">Version:</span>
-            <span className="value">v{workoutLog.versionId}</span>
-          </div>
-          <div className="metadata-item">
-            <span className="label">Start:</span>
-            <span className="value">{formatDate(workoutLog.actualStartDate)}</span>
-          </div>
-          <div className="metadata-item">
-            <span className="label">End:</span>
-            <span className="value">{formatDate(workoutLog.actualEndDate)}</span>
-          </div>
-          <div className="metadata-item">
-            <span className="label">Duration:</span>
-            <span className="value">{formatDuration(workoutLog.actualDuration)}</span>
+        {/* Meta card */}
+        <div className="wla-card">
+          <div className="wld-meta-grid">
+            <div className="wld-meta-item">
+              <span className="wld-meta-label">Start</span>
+              <span className="wld-meta-value">{formatDate(workoutLog.actualStartDate)}</span>
+            </div>
+            <div className="wld-meta-item">
+              <span className="wld-meta-label">End</span>
+              <span className="wld-meta-value">{formatDate(workoutLog.actualEndDate)}</span>
+            </div>
+            <div className="wld-meta-item">
+              <span className="wld-meta-label">Duration</span>
+              <span className="wld-meta-value">{formatDuration(workoutLog.actualDuration)}</span>
+            </div>
+            <div className="wld-meta-item">
+              <span className="wld-meta-label">Version</span>
+              <span className="wld-meta-value">v{workoutLog.versionId}</span>
+            </div>
           </div>
         </div>
 
-        {workoutLog.blockLogs && workoutLog.blockLogs.length > 0 && (
-          <div className="blocks-section">
-            <h2>Blocks</h2>
-            {workoutLog.blockLogs.map((blockLog, blockIndex) => {
-              const blockSnapshot = workoutLog.workoutSnapshot.blockSnapshot?.[blockIndex];
-              if (!blockSnapshot) return null;
-              
-              return (
-                <div key={blockIndex} className={`block-detail ${blockLog.isCompleted ? 'completed' : ''}`}>
-                  <div className="block-header">
-                    <h3>{blockSnapshot.name || blockSnapshot.type}</h3>
-                    {blockLog.isCompleted && <span className="check-icon">✓</span>}
-                  </div>
-                  
-                  <div className="block-stats">
-                    <div className="stat">
-                      <span className="stat-label">Sets:</span>
-                      <span className="stat-value">{blockLog.actualSets || 0} / {blockSnapshot.targetSets || 0}</span>
-                    </div>
-                    <div className="stat">
-                      <span className="stat-label">Rest:</span>
-                      <span className="stat-value">{blockLog.actualRest || 0}s</span>
-                    </div>
-                  </div>
-
-                  <div className="exercises-list">
-                    {blockLog.exerciseLogs.map((exerciseLog, exerciseIndex) => {
-                      const exerciseSnapshot = blockSnapshot.exerciseSnapshot[exerciseIndex];
-                      return (
-                        <div key={exerciseIndex} className={`exercise-detail ${exerciseLog.isCompleted ? 'completed' : ''}`}>
-                          <div className="exercise-name">
-                            {exerciseLog.isCompleted && <span className="check-icon">✓</span>}
-                            <span>{exerciseSnapshot.name}</span>
-                          </div>
-                          <div className="exercise-stats">
-                            {exerciseLog.actualReps !== undefined && (
-                              <span>Reps: {exerciseLog.actualReps}</span>
-                            )}
-                            {exerciseLog.actualWeight !== undefined && (
-                              <span>Weight: {exerciseLog.actualWeight}</span>
-                            )}
-                            {exerciseLog.actualDurationSec !== undefined && (
-                              <span>Duration: {exerciseLog.actualDurationSec}s</span>
-                            )}
-                            {exerciseLog.actualDistance !== undefined && (
-                              <span>Distance: {exerciseLog.actualDistance}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* Exercises */}
+        {allExercises.length > 0 && (
+          <>
+            <p className="wld-section-label">Exercises</p>
+            {allExercises.map((exercise, i) => (
+              <ExerciseCard key={i} exercise={exercise} />
+            ))}
+          </>
         )}
       </div>
     </div>

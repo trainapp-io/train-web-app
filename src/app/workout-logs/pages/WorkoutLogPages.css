@@ -362,6 +362,134 @@
   line-height: 1.6;
 }
 
+/* ============================================================
+   WorkoutLogDetail — .wld- prefix
+   ============================================================ */
+
+.wld-back-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.wld-back-btn:hover { background: #f9fafb; }
+
+.wld-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.wld-edit-btn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.wld-edit-btn:hover { background: #6d28d9; }
+
+.wld-delete-btn {
+  background: none;
+  border: 1px solid #fca5a5;
+  color: #ef4444;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.wld-delete-btn:hover { background: #fef2f2; }
+.wld-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.wld-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wld-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.wld-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.wld-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wld-meta-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+}
+
+.wld-meta-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+}
+
+.wld-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+  margin: 4px 0 0 2px;
+}
+
+.wld-exercise-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #f0f0f3;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.wld-exercise-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.wld-exercise-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.wld-exercise-card__no-sets {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .workout-log-page {

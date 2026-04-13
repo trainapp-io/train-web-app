@@ -58,6 +58,7 @@ const WorkoutView: React.FC = () => {
         }
 
         const response = await workoutService.getWorkoutById(workoutId);
+        console.log('Fetched workout:', response);
         const workoutRequest = workoutUtils.responseToRequest(response, user.userId);
         setWorkoutRequest(workoutRequest);
 
@@ -95,6 +96,7 @@ const WorkoutView: React.FC = () => {
 
   const handleCreateWorkout = async (request: WorkoutRequest) => {
     try {
+      console.log('Creating workout:', request);
       const response = await workoutService.createWorkout(request);
       setWorkoutRequest(response);
       setHasUnsavedChanges(false);
@@ -108,6 +110,7 @@ const WorkoutView: React.FC = () => {
 
   const handleUpdateWorkout = async (request: WorkoutRequest) => {
     try {
+      console.log('Updating workout:', request);
       await workoutService.updateWorkout(workoutId!, request);
       setHasUnsavedChanges(false);
     } catch (error) {
