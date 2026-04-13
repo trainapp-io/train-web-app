@@ -16,7 +16,9 @@ import {
   CustomSectionRequest,
   CustomSectionResponse,
   WorkoutLogRequest,
-  WorkoutLogResponse
+  WorkoutLogResponse,
+  WorkoutAnalyticsResponse,
+  ExerciseProgressResponse,
 } from '@trainapp-io/train-core';
 import { tokenService } from './tokenService';
 
@@ -410,5 +412,31 @@ export function useDeleteWorkoutLog() {
         // queryClient.invalidateQueries(['workoutLogs']);
       }
     }
+  );
+}
+
+// WORKOUT ANALYTICS API HOOKS
+
+/**
+ * Hook to fetch workout analytics for the current user
+ */
+export function useWorkoutAnalytics(range: 'week' | 'month' | 'year', options?: any) {
+  return useApiQuery<WorkoutAnalyticsResponse>(
+    ['workoutAnalytics', range],
+    '/workout-logs/analytics',
+    { range },
+    options
+  );
+}
+
+/**
+ * Hook to fetch per-exercise progress (strength curve + session history)
+ */
+export function useExerciseProgress(exerciseName: string, enabled: boolean, options?: any) {
+  return useApiQuery<ExerciseProgressResponse>(
+    ['exerciseProgress', exerciseName],
+    `/workout-logs/analytics/exercises/${encodeURIComponent(exerciseName)}`,
+    undefined,
+    { enabled, ...options }
   );
 }
