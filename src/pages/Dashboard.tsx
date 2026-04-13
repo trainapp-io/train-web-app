@@ -18,7 +18,7 @@ import { ProgramProvider } from "../app/programs/contexts/ProgramContext";
 import WorkoutLogCreate from "../app/workout-logs/pages/WorkoutLogCreate";
 import WorkoutLogDetail from "../app/workout-logs/pages/WorkoutLogDetail";
 import WorkoutLogEdit from "../app/workout-logs/pages/WorkoutLogEdit";
-import WorkoutLogHistory from "../app/workout-logs/pages/WorkoutLogHistory";
+import WorkoutAnalytics from "../app/workout-logs/pages/WorkoutAnalytics";
 import { WorkoutProvider } from "../app/workouts/contexts/WorkoutContext";
 import WorkoutView from "../app/workouts/views/WorkoutView";
 
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId" element={<ProgramWorkoutView />} />
             
             {/* Workout Log Routes */}
-            <Route path="/workout-logs/history" element={<WorkoutLogHistory />} />
+            <Route path="/workout-logs/history" element={<WorkoutAnalytics />} />
             <Route path="/workout-logs/:logId" element={<WorkoutLogDetail />} />
             <Route path="/workout-logs/:logId/edit" element={<WorkoutLogEdit />} />
             <Route path="/programs/:programId/weeks/:weekId/workouts/:workoutId/log" element={<WorkoutLogCreate />} />
