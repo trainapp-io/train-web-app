@@ -167,6 +167,19 @@
   white-space: nowrap;
 }
 
+.wd-view__type-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  background: rgba(109, 40, 217, 0.1);
+  border: 1px solid var(--accent-color);
+  border-radius: 20px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
 /* ══════════════════════════════════════════
    WORKOUT DETAILS — EDIT MODE
 ══════════════════════════════════════════ */
@@ -239,6 +252,29 @@
 /* Slightly wider than exercise metrics inputs */
 .wd-edit__duration-input {
   width: 40px;
+}
+
+.wd-edit__type-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wd-edit__type-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.wd-edit__type-pill--selected {
+  border-color: var(--accent-color);
+  background: rgba(109, 40, 217, 0.1);
+  color: var(--accent-color);
 }
 
 /* ══════════════════════════════════════════

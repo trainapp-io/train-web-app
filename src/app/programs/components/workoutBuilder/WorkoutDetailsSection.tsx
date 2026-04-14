@@ -90,26 +90,19 @@ const WorkoutDetailsSection: React.FC<Props> = ({ workout, editMode, onUpdate, o
       </div>
 
       {/* Workout type pills */}
-      <div className="wd-edit__type-row" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+      <div className="wd-edit__type-row">
         {WORKOUT_TYPES.map((t) => {
           const isSelected = workout.workoutType === t.value;
           return (
             <button
               key={t.value}
               type="button"
+              className={`wd-edit__type-pill${isSelected ? ' wd-edit__type-pill--selected' : ''}`}
               aria-label={`Workout type: ${t.label}`}
               aria-pressed={isSelected}
               onClick={() => {
                 onUpdate({ workoutType: isSelected ? undefined : t.value });
                 onSetHasUnsavedChanges(true);
-              }}
-              style={{
-                fontSize: 12, fontWeight: 600,
-                padding: '4px 12px', borderRadius: 20,
-                border: isSelected ? '1.5px solid #6d28d9' : '1.5px solid #e5e7eb',
-                background: isSelected ? '#ede9fe' : '#fff',
-                color: isSelected ? '#6d28d9' : '#6b7280',
-                cursor: 'pointer',
               }}
             >
               {t.label}
