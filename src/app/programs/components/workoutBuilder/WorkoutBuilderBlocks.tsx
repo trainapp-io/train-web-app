@@ -11,7 +11,9 @@ interface Props {
   workout: WorkoutRequest;
   editMode: boolean;
   isOwner: boolean;
+  /** Called whenever the blocks array changes. Parent should call updateWorkoutRequest({ blocks }). */
   onBlocksChange: (blocks: Block[]) => void;
+  /** Called whenever the sections array changes. Parent should call updateWorkoutRequest({ sections }). */
   onSectionsChange?: (sections: Section[]) => void;
   onSetHasUnsavedChanges: (v: boolean) => void;
   updateExerciseInBlockPartial: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
@@ -30,6 +32,81 @@ function mergeByOrder(blocks: Block[], sections: Section[]): OrderedItem[] {
   ];
   return result.sort((a, b) => a.item.order - b.item.order);
 }
+
+interface SectionItemWrapperProps {
+  section: Section;
+  sections: Section[];
+  onSectionsChange?: (sections: Section[]) => void;
+  onSetHasUnsavedChanges: (v: boolean) => void;
+  editMode: boolean;
+  isOwner: boolean;
+  workout: WorkoutRequest;
+  updateExerciseInBlockPartial: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
+  removeExerciseFromBlock: (blockIndex: number, exerciseIndex: number) => void;
+}
+
+const SectionItemWrapper: React.FC<SectionItemWrapperProps> = ({
+  section,
+  sections,
+  onSectionsChange,
+  onSetHasUnsavedChanges,
+  editMode,
+  isOwner,
+  workout,
+  updateExerciseInBlockPartial,
+  removeExerciseFromBlock,
+}) => {
+  const updateExerciseInSection = (
+    blockIndex: number,
+    exerciseIndex: number,
+    updates: Partial<Exercise>
+  ) => {
+    const updatedBlocks = section.blocks.map((b, bIdx) => {
+      if (bIdx !== blockIndex) return b;
+      const updatedExercises = b.exercises.map((ex, eIdx) =>
+        eIdx === exerciseIndex ? { ...ex, ...updates } : ex
+      );
+      return { ...b, exercises: updatedExercises };
+    });
+    onSectionsChange?.(
+      sections.map((s) =>
+        s.order === section.order ? { ...s, blocks: updatedBlocks } : s
+      )
+    );
+  };
+
+  const removeExerciseFromSection = (
+    blockIndex: number,
+    exerciseIndex: number
+  ) => {
+    const updatedBlocks = section.blocks.map((b, bIdx) => {
+      if (bIdx !== blockIndex) return b;
+      return { ...b, exercises: b.exercises.filter((_, eIdx) => eIdx !== exerciseIndex) };
+    });
+    onSectionsChange?.(
+      sections.map((s) =>
+        s.order === section.order ? { ...s, blocks: updatedBlocks } : s
+      )
+    );
+  };
+
+  return (
+    <SectionItem
+      section={section}
+      editMode={editMode && isOwner}
+      workout={workout}
+      onUpdate={(updated) =>
+        onSectionsChange?.(sections.map((s) => s.order === updated.order ? updated : s))
+      }
+      onRemove={() =>
+        onSectionsChange?.(sections.filter((s) => s.order !== section.order))
+      }
+      onSetHasUnsavedChanges={onSetHasUnsavedChanges}
+      updateExerciseInBlockPartial={updateExerciseInSection}
+      removeExerciseFromBlock={removeExerciseFromSection}
+    />
+  );
+};
 
 const WorkoutBuilderBlocks: React.FC<Props> = ({
   workout,
@@ -50,6 +127,7 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
+    // TODO: implement cross-item drag for sections
     const oldIndex = blocks.findIndex((c) => c.order === active.id);
     const newIndex = blocks.findIndex((c) => c.order === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
@@ -84,6 +162,7 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
         order: maxOrder + 1,
       },
     ]);
+    onSetHasUnsavedChanges(true);
   };
 
   const addSection = () => {
@@ -97,6 +176,7 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
         order: maxOrder + 1,
       },
     ]);
+    onSetHasUnsavedChanges(true);
   };
 
   const isEmpty = orderedItems.length === 0;
@@ -106,63 +186,23 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
       <div className="circuits-container">
         {!isEmpty ? (
           <SortableContext
-            items={orderedItems.map((oi) => oi.item.order)}
+            items={blocks.map((b) => b.order)}
             strategy={verticalListSortingStrategy}
           >
-            {orderedItems.map((oi) => {
+            {orderedItems.map((oi, idx) => {
               if (oi.kind === 'section') {
-                const section = oi.item as Section;
-                // Provide section-scoped exercise callbacks so CircuitItem resolves
-                // blockIndex against section.blocks, not the top-level workout.blocks.
-                const updateExerciseInSection = (
-                  blockIndex: number,
-                  exerciseIndex: number,
-                  updates: Partial<Exercise>
-                ) => {
-                  const updatedBlocks = section.blocks.map((b, bIdx) => {
-                    if (bIdx !== blockIndex) return b;
-                    const updatedExercises = b.exercises.map((ex, eIdx) =>
-                      eIdx === exerciseIndex ? { ...ex, ...updates } : ex
-                    );
-                    return { ...b, exercises: updatedExercises };
-                  });
-                  onSectionsChange?.(
-                    sections.map((s) =>
-                      s.order === section.order ? { ...s, blocks: updatedBlocks } : s
-                    )
-                  );
-                };
-
-                const removeExerciseFromSection = (
-                  blockIndex: number,
-                  exerciseIndex: number
-                ) => {
-                  const updatedBlocks = section.blocks.map((b, bIdx) => {
-                    if (bIdx !== blockIndex) return b;
-                    return { ...b, exercises: b.exercises.filter((_, eIdx) => eIdx !== exerciseIndex) };
-                  });
-                  onSectionsChange?.(
-                    sections.map((s) =>
-                      s.order === section.order ? { ...s, blocks: updatedBlocks } : s
-                    )
-                  );
-                };
-
                 return (
-                  <SectionItem
-                    key={`section-${section.order}`}
-                    section={section}
-                    editMode={editMode && isOwner}
-                    workout={workout}
-                    onUpdate={(updated) =>
-                      onSectionsChange?.(sections.map((s) => s.order === updated.order ? updated : s))
-                    }
-                    onRemove={() =>
-                      onSectionsChange?.(sections.filter((s) => s.order !== section.order))
-                    }
+                  <SectionItemWrapper
+                    key={`section-${oi.item.order}`}
+                    section={oi.item as Section}
+                    sections={sections}
+                    onSectionsChange={onSectionsChange}
                     onSetHasUnsavedChanges={onSetHasUnsavedChanges}
-                    updateExerciseInBlockPartial={updateExerciseInSection}
-                    removeExerciseFromBlock={removeExerciseFromSection}
+                    editMode={editMode}
+                    isOwner={isOwner}
+                    workout={workout}
+                    updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                    removeExerciseFromBlock={removeExerciseFromBlock}
                   />
                 );
               }
@@ -171,7 +211,7 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
                 <CircuitItem
                   key={`block-${block.order}`}
                   block={block}
-                  blockNumber={orderedItems.indexOf(oi) + 1}
+                  blockNumber={idx + 1}
                   editMode={editMode && isOwner}
                   workout={workout}
                   onUpdateBlock={(updated) => onBlocksChange(blocks.map((c) => c.order === updated.order ? updated : c))}
