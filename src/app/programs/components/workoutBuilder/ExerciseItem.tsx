@@ -124,8 +124,10 @@ const ExerciseItem: React.FC<Props> = ({
   });
   // Raw string values while user is mid-edit (key: `${rowIndex}-${field}`)
   const [rawValues, setRawValues] = useState<Record<string, string>>({});
+  const [measureDropdownOpen, setMeasureDropdownOpen] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitializedSetData = useRef(false);
+  const measureDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
 
@@ -140,6 +142,17 @@ const ExerciseItem: React.FC<Props> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editMode, logMode]);
 
+  useEffect(() => {
+    if (!measureDropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (measureDropdownRef.current && !measureDropdownRef.current.contains(e.target as Node)) {
+        setMeasureDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [measureDropdownOpen]);
+
   if (!updateExerciseInBlockPartial || !removeExerciseFromBlock) return null;
 
   const measurementType = exercise.measurement?.measurementType || MeasurementType.REPS;
@@ -148,7 +161,6 @@ const ExerciseItem: React.FC<Props> = ({
   const avatar = getAvatarStyle(exercise.name || 'X');
   const initial = (exercise.name || '?').charAt(0).toUpperCase();
   const hasWeight = measurementType === MeasurementType.REPS;
-  const [measureDropdownOpen, setMeasureDropdownOpen] = useState(false);
 
   const update = (updates: Partial<Exercise>) =>
     updateExerciseInBlockPartial(blockIndex, exerciseIndex, updates);
@@ -508,7 +520,7 @@ const ExerciseItem: React.FC<Props> = ({
               {weightUnit} <span style={{ fontSize: 9 }}>⟳</span>
             </button>
           )}
-          <div style={{ position: 'relative' }}>
+          <div ref={measureDropdownRef} style={{ position: 'relative' }}>
             <button
               className="ex-toggle-chip"
               onClick={() => setMeasureDropdownOpen((o) => !o)}
