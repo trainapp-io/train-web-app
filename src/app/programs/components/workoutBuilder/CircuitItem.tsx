@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { LuX, LuPlus } from 'react-icons/lu';
+import { LuX } from 'react-icons/lu';
 import ExerciseItem from './ExerciseItem';
 import { Block, BlockType, WorkoutRequest, MeasurementType, MeasurementUnit, SetLog } from '@trainapp-io/train-core';
 
@@ -97,9 +97,17 @@ const CircuitItem: React.FC<Props> = ({
 
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
   const restSeconds = (block as any).rest || 0;
-  const isSingle = block.type === BlockType.SINGLE;
 
   const [restUnit, setRestUnit] = useState<'seconds' | 'minutes'>('seconds');
+
+  // ── Group exercise advancement (log mode only) ──
+  // For group blocks, CircuitItem owns which exercise is currently active.
+  // When you check the current set of exercise N:
+  //   - if N+1 exists → advance to it (don't fire rest yet)
+  //   - if N is last  → reset to exercise 0 and fire rest (round complete)
+  const [groupActiveExIdx, setGroupActiveExIdx] = useState(0);
+
+  const isSingle = block.type === BlockType.SINGLE;
 
   const displayGroupRest = () => {
     if (!restSeconds) return '';
@@ -108,15 +116,8 @@ const CircuitItem: React.FC<Props> = ({
 
   const parseGroupRest = (val: string) => {
     const n = parseFloat(val) || 0;
-    return restUnit === 'minutes' ? Math.round(n * 60) : n;
+    return restUnit === 'minutes' ? Math.round(n * 60) : Math.round(n);
   };
-
-  // ── Group exercise advancement (log mode only) ──
-  // For group blocks, CircuitItem owns which exercise is currently active.
-  // When you check the current set of exercise N:
-  //   - if N+1 exists → advance to it (don't fire rest yet)
-  //   - if N is last  → reset to exercise 0 and fire rest (round complete)
-  const [groupActiveExIdx, setGroupActiveExIdx] = useState(0);
 
   // Reset to first exercise whenever this block becomes the active block
   useEffect(() => {
