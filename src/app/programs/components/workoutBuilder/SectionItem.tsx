@@ -84,11 +84,11 @@ const SectionItem: React.FC<Props> = ({
     <div
       className="section-card"
       style={{
-        border: '1.5px solid #bae6fd',
-        borderRadius: 12,
-        marginBottom: 12,
+        border: '2px solid #93c5fd',
+        borderRadius: 14,
+        marginBottom: 14,
         overflow: 'hidden',
-        background: '#fff',
+        background: '#f0f9ff',
       }}
     >
       {/* Section header */}
@@ -96,21 +96,22 @@ const SectionItem: React.FC<Props> = ({
         className="section-card__header"
         style={{
           display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px',
-          background: '#e0f2fe',
-          borderBottom: '1.5px solid #bae6fd',
+          padding: '10px 14px',
+          background: '#dbeafe',
+          borderBottom: '2px solid #93c5fd',
         }}
       >
         {editMode && (
-          <span style={{ color: '#d1d5db', cursor: 'grab', display: 'flex', alignItems: 'center' }}>
+          <span style={{ color: '#93c5fd', cursor: 'grab', display: 'flex', alignItems: 'center' }}>
             <LuGripVertical size={14} />
           </span>
         )}
         <span
           style={{
             fontSize: 10, fontWeight: 800, letterSpacing: '0.08em',
-            padding: '2px 8px', borderRadius: 5,
-            background: '#e0f2fe', color: '#075985',
+            padding: '2px 8px', borderRadius: 20,
+            background: '#fff', color: '#1d4ed8',
+            border: '1px solid #93c5fd',
             textTransform: 'uppercase' as const, flexShrink: 0,
           }}
         >
@@ -120,7 +121,7 @@ const SectionItem: React.FC<Props> = ({
           <input
             style={{
               flex: 1, border: 'none', background: 'transparent',
-              fontSize: 14, fontWeight: 600, color: '#111827',
+              fontSize: 14, fontWeight: 600, color: '#1e3a5f',
               outline: 'none', minWidth: 0,
             }}
             value={section.name}
@@ -132,7 +133,7 @@ const SectionItem: React.FC<Props> = ({
             aria-label="Section name"
           />
         ) : (
-          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#111827' }}>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#1e3a5f' }}>
             {section.name || 'Untitled Section'}
           </span>
         )}
@@ -141,7 +142,7 @@ const SectionItem: React.FC<Props> = ({
             onClick={onRemove}
             aria-label="Remove section"
             type="button"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93c5fd', display: 'flex', alignItems: 'center' }}
           >
             <LuX size={14} />
           </button>
@@ -149,7 +150,7 @@ const SectionItem: React.FC<Props> = ({
       </div>
 
       {/* Section body */}
-      <div style={{ padding: '8px 12px 4px', background: '#f0f9ff' }}>
+      <div style={{ padding: '12px 12px 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {section.blocks.map((block, idx) => (
           <CircuitItem
             key={block.order}
@@ -172,10 +173,10 @@ const SectionItem: React.FC<Props> = ({
             aria-label="Add Exercise to Section"
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
-              width: '100%', padding: '7px 10px',
-              fontSize: 12, fontWeight: 600, color: '#0369a1',
-              background: 'rgba(14,165,233,0.06)', border: '1px dashed #7dd3fc',
-              borderRadius: 8, cursor: 'pointer', marginBottom: 8,
+              width: '100%', padding: '9px 10px',
+              fontSize: 12, fontWeight: 600, color: '#1d4ed8',
+              background: 'rgba(59,130,246,0.06)', border: '1.5px dashed #93c5fd',
+              borderRadius: 10, cursor: 'pointer', marginBottom: 10,
               justifyContent: 'center',
             }}
           >

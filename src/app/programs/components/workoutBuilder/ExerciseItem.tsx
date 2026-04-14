@@ -56,7 +56,7 @@ const MEASUREMENT_TYPES = [
 
 const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.REPS]: 'reps',
-  [MeasurementType.TIME]: 'sec',
+  [MeasurementType.TIME]: 'time',
   [MeasurementType.DISTANCE]: 'dist',
   [MeasurementType.BODYWEIGHT]: 'bw',
   [MeasurementType.CALORIES]: 'cal',
