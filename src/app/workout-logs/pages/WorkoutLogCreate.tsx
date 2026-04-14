@@ -72,7 +72,7 @@ const WorkoutLogCreate: React.FC = () => {
             })),
             order: block.order,
           })),
-          sectionSnapshot: (workout.sections ?? []).map((s) => ({
+          sectionSnapshot: (workout.sections ?? []).map((s): SectionSnapshot => ({
             name: s.name,
             order: s.order,
             blockOrders: s.blocks.map((b) => b.order),
