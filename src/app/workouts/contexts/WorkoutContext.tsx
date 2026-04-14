@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, 
+import { WorkoutRequest, ProfileAccess, WorkoutDifficulty, WorkoutResponse, Exercise, Block, Section,
   MeasurementType, MeasurementUnit } from '@trainapp-io/train-core';
 import { MuscleGroup } from '../../programs/views/types';
 
@@ -11,6 +11,7 @@ function createDefaultWorkoutRequest(): WorkoutRequest {
     difficulty: WorkoutDifficulty.BEGINNER,
     duration: 0,
     blocks: [],
+    sections: [],
     exercises: [],
     accessType: ProfileAccess.Public,
     createdBy: '',
@@ -315,6 +316,8 @@ export const workoutUtils = {
       difficulty: response.difficulty || WorkoutDifficulty.BEGINNER,
       duration: response.duration || 0,
       blocks: response.blocks || [],
+      sections: response.sections || [],
+      workoutType: response.workoutType,
       exercises: response.exercises || [],
       accessType: response.accessType || ProfileAccess.Public,
       createdBy: userId,
