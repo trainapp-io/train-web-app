@@ -150,9 +150,8 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
 
       <div className="wl-body">
         {blocks.map((block, index) => {
-          const blockOrder = workoutSnapshot.blockSnapshot?.[index]?.order ?? index;
           const sectionForBlock = workoutSnapshot.sectionSnapshot?.find(
-            (s) => s.blockOrders[0] === blockOrder
+            (s) => s.blockOrders[0] === index
           );
           return (
             <React.Fragment key={block.order}>

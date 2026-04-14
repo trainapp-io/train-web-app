@@ -37,7 +37,10 @@ const WorkoutLogCreate: React.FC = () => {
         
         console.log('Fetched workout:', workout);
         
-        // Collect all blocks in order: standalone + from sections
+        // Collect all blocks in order: standalone + from sections.
+        // Section blocks have LOCAL order values (0, 1, 2 within the section) which can
+        // collide with standalone block orders. We normalize to global position indices
+        // (0, 1, 2, … across the merged array) so every block has a unique order.
         const standaloneBlocks = workout.blocks ?? [];
         const sectionBlocks = (workout.sections ?? []).flatMap((s) => s.blocks);
         const allBlocks = [...standaloneBlocks, ...sectionBlocks].sort((a, b) => a.order - b.order);
@@ -48,7 +51,7 @@ const WorkoutLogCreate: React.FC = () => {
           category: workout.category,
           difficulty: workout.difficulty,
           duration: workout.duration,
-          blockSnapshot: allBlocks.map((block): BlockSnapshot => ({
+          blockSnapshot: allBlocks.map((block, idx): BlockSnapshot => ({
             type: block.type,
             name: block.name,
             targetSets: block.targetSets,
@@ -70,12 +73,14 @@ const WorkoutLogCreate: React.FC = () => {
               setData: exercise.setData,
               restUnit: exercise.restUnit,
             })),
-            order: block.order,
+            order: idx,  // normalized global index — guarantees uniqueness across standalone + section blocks
           })),
           sectionSnapshot: (workout.sections ?? []).map((s): SectionSnapshot => ({
             name: s.name,
             order: s.order,
-            blockOrders: s.blocks.map((b) => b.order),
+            // Store the position of each section block in allBlocks (not block.order),
+            // so sectionSnapshot.blockOrders contains globally unique indices.
+            blockOrders: s.blocks.map((b) => allBlocks.indexOf(b)),
           })),
           accessType: workout.accessType,
           createdBy: workout.createdBy,
