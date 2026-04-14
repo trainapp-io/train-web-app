@@ -48,9 +48,10 @@ const SectionItem: React.FC<Props> = ({
       targetSets: 3,
       rest: 0,
       exercises: [createEmptyExercise(0)],
-      order: section.blocks.length,
+      order: section.blocks.length === 0 ? 0 : Math.max(...section.blocks.map(b => b.order)) + 1,
     };
     onUpdate({ ...section, blocks: [...section.blocks, newBlock] });
+    onSetHasUnsavedChanges(true);
   };
 
   const handleUpdateBlock = (updated: Block) => {
@@ -70,6 +71,10 @@ const SectionItem: React.FC<Props> = ({
   };
 
   // Build a workout shell so CircuitItem can resolve blockIndex within the section
+  // NOTE: CircuitItem derives blockIndex by finding block.order in workout.blocks.
+  // By passing section.blocks here, blockIndex becomes the position within the section.
+  // The parent (WorkoutBuilderBlocks) must supply section-scoped versions of
+  // updateExerciseInBlockPartial and removeExerciseFromBlock that operate on section.blocks.
   const sectionWorkoutShell: WorkoutRequest = {
     ...workout,
     blocks: section.blocks,
