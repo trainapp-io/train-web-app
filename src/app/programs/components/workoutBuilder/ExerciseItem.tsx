@@ -26,6 +26,7 @@ interface Props {
   onSetCompleted?: (restSeconds: number) => void;
   /** Column label for set number — "Rnd" inside circuits */
   setColumnLabel?: string;
+  onGroupExercise?: () => void;
 }
 
 const AVATAR_COLORS = [
@@ -44,12 +45,31 @@ function getAvatarStyle(name: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-const MEASUREMENT_TYPES = [MeasurementType.REPS, MeasurementType.TIME, MeasurementType.DISTANCE];
+const MEASUREMENT_TYPES = [
+  MeasurementType.REPS,
+  MeasurementType.TIME,
+  MeasurementType.DISTANCE,
+  MeasurementType.BODYWEIGHT,
+  MeasurementType.CALORIES,
+  MeasurementType.PERCENTAGE,
+];
+
 const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.REPS]: 'reps',
   [MeasurementType.TIME]: 'sec',
   [MeasurementType.DISTANCE]: 'dist',
   [MeasurementType.BODYWEIGHT]: 'bw',
+  [MeasurementType.CALORIES]: 'cal',
+  [MeasurementType.PERCENTAGE]: '%',
+};
+
+const MEASUREMENT_DISPLAY: Record<MeasurementType, string> = {
+  [MeasurementType.REPS]: 'Reps',
+  [MeasurementType.TIME]: 'Time',
+  [MeasurementType.DISTANCE]: 'Distance',
+  [MeasurementType.BODYWEIGHT]: 'Bodyweight',
+  [MeasurementType.CALORIES]: 'Calories',
+  [MeasurementType.PERCENTAGE]: '% Effort',
 };
 
 /** Build initial setData from exercise, falling back to single-value fields */
@@ -92,6 +112,7 @@ const ExerciseItem: React.FC<Props> = ({
   onAddSuperset: _onAddSuperset,
   onSetCompleted,
   setColumnLabel = 'Set',
+  onGroupExercise,
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useSortable({ id: exercise.order });
   const style = { transform: CSS.Transform.toString(transform) };
@@ -126,15 +147,11 @@ const ExerciseItem: React.FC<Props> = ({
   const restUnit: 'seconds' | 'minutes' = exercise.restUnit || 'seconds';
   const avatar = getAvatarStyle(exercise.name || 'X');
   const initial = (exercise.name || '?').charAt(0).toUpperCase();
-  const hasWeight = measurementType === MeasurementType.REPS || measurementType === MeasurementType.DISTANCE;
+  const hasWeight = measurementType === MeasurementType.REPS;
+  const [measureDropdownOpen, setMeasureDropdownOpen] = useState(false);
 
   const update = (updates: Partial<Exercise>) =>
     updateExerciseInBlockPartial(blockIndex, exerciseIndex, updates);
-
-  const cycleMeasurement = () => {
-    const next = MEASUREMENT_TYPES[(MEASUREMENT_TYPES.indexOf(measurementType) + 1) % MEASUREMENT_TYPES.length];
-    update({ measurement: { ...exercise.measurement, measurementType: next } });
-  };
 
   const cycleWeight = () => {
     const next = (exercise as any).weightUnit === Unit.KILOGRAM ? Unit.POUND : Unit.KILOGRAM;
@@ -491,9 +508,46 @@ const ExerciseItem: React.FC<Props> = ({
               {weightUnit} <span style={{ fontSize: 9 }}>⟳</span>
             </button>
           )}
-          <button className="ex-toggle-chip" onClick={cycleMeasurement} type="button">
-            {MEASUREMENT_LABELS[measurementType]} <span style={{ fontSize: 9 }}>⟳</span>
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button
+              className="ex-toggle-chip"
+              onClick={() => setMeasureDropdownOpen((o) => !o)}
+              type="button"
+              aria-label={`Measurement type: ${MEASUREMENT_DISPLAY[measurementType]}`}
+            >
+              {MEASUREMENT_LABELS[measurementType]} <span style={{ fontSize: 9 }}>▾</span>
+            </button>
+            {measureDropdownOpen && (
+              <div
+                className="ex-measure-dropdown"
+                style={{
+                  position: 'absolute', right: 0, top: '110%', zIndex: 100,
+                  background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)', minWidth: 160, padding: '4px 0',
+                }}
+              >
+                {MEASUREMENT_TYPES.map((mt) => (
+                  <button
+                    key={mt}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '7px 14px', background: 'none', border: 'none',
+                      cursor: 'pointer', fontSize: 13,
+                      fontWeight: mt === measurementType ? 700 : 400,
+                      color: mt === measurementType ? '#6d28d9' : '#111827',
+                    }}
+                    onClick={() => {
+                      update({ measurement: { ...exercise.measurement, measurementType: mt } });
+                      setMeasureDropdownOpen(false);
+                    }}
+                    type="button"
+                  >
+                    {mt === measurementType && '✓ '}{MEASUREMENT_DISPLAY[mt]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <button
@@ -513,7 +567,11 @@ const ExerciseItem: React.FC<Props> = ({
             <tr>
               <th>{setColumnLabel}</th>
               {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
-              <th>{MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+              <th>
+                {measurementType === MeasurementType.CALORIES ? 'CAL'
+                  : measurementType === MeasurementType.PERCENTAGE ? '%'
+                  : MEASUREMENT_LABELS[measurementType].toUpperCase()}
+              </th>
               <th>REST</th>
               <th aria-label="Notes">📝</th>
               <th></th>
@@ -613,6 +671,27 @@ const ExerciseItem: React.FC<Props> = ({
         <button className="ex-add-set" onClick={addSet} type="button">
           + Add Set
         </button>
+        {onGroupExercise && (
+          <button
+            className="ex-group-ex-btn"
+            onClick={onGroupExercise}
+            type="button"
+            aria-label="Group Exercise"
+            style={{
+              marginLeft: 'auto',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#6d28d9',
+              background: 'none',
+              border: '1px solid #ede9fe',
+              borderRadius: 6,
+              padding: '4px 10px',
+              cursor: 'pointer',
+            }}
+          >
+            + Group Exercise
+          </button>
+        )}
       </div>
 
       {/* Note dialog */}
