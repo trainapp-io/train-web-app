@@ -88,7 +88,7 @@ const SectionItem: React.FC<Props> = ({
         borderRadius: 12,
         marginBottom: 12,
         overflow: 'hidden',
-        background: '#f0f9ff',
+        background: '#fff',
       }}
     >
       {/* Section header */}
@@ -98,7 +98,7 @@ const SectionItem: React.FC<Props> = ({
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '8px 12px',
           background: '#e0f2fe',
-          borderBottom: '1px solid #bae6fd',
+          borderBottom: '1.5px solid #bae6fd',
         }}
       >
         {editMode && (
@@ -149,7 +149,7 @@ const SectionItem: React.FC<Props> = ({
       </div>
 
       {/* Section body */}
-      <div style={{ padding: '8px 12px 4px' }}>
+      <div style={{ padding: '8px 12px 4px', background: '#f0f9ff' }}>
         {section.blocks.map((block, idx) => (
           <CircuitItem
             key={block.order}

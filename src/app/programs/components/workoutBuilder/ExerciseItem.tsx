@@ -187,18 +187,6 @@ const ExerciseItem: React.FC<Props> = ({
   const currentDistUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.METER;
   const currentTimeUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.SECOND;
 
-  const cycleDistUnit = () => {
-    const idx = DISTANCE_UNITS.indexOf(currentDistUnit as MeasurementUnit);
-    const next = DISTANCE_UNITS[(idx === -1 ? 0 : idx + 1) % DISTANCE_UNITS.length];
-    update({ measurement: { ...exercise.measurement, measurementUnit: next } });
-  };
-
-  const cycleTimeUnit = () => {
-    const idx = TIME_UNITS.indexOf(currentTimeUnit as MeasurementUnit);
-    const next = TIME_UNITS[(idx === -1 ? 0 : idx + 1) % TIME_UNITS.length];
-    update({ measurement: { ...exercise.measurement, measurementUnit: next } });
-  };
-
   const toggleRestUnit = () => {
     update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
   };
@@ -668,16 +656,30 @@ const ExerciseItem: React.FC<Props> = ({
 
                 {measurementType === MeasurementType.DISTANCE && (
                   <td>
-                    <button className="ex-rest-unit" onClick={cycleDistUnit} type="button" aria-label="Toggle distance unit">
-                      {currentDistUnit} ⟳
-                    </button>
+                    <select
+                      className="ex-unit-select"
+                      value={currentDistUnit}
+                      onChange={(e) => update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })}
+                      aria-label="Distance unit"
+                    >
+                      {DISTANCE_UNITS.map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
+                    </select>
                   </td>
                 )}
                 {measurementType === MeasurementType.TIME && (
                   <td>
-                    <button className="ex-rest-unit" onClick={cycleTimeUnit} type="button" aria-label="Toggle time unit">
-                      {currentTimeUnit} ⟳
-                    </button>
+                    <select
+                      className="ex-unit-select"
+                      value={currentTimeUnit}
+                      onChange={(e) => update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })}
+                      aria-label="Time unit"
+                    >
+                      {TIME_UNITS.map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
+                    </select>
                   </td>
                 )}
 
