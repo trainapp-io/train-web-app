@@ -601,6 +601,7 @@ const ExerciseItem: React.FC<Props> = ({
                   : measurementType === MeasurementType.TIME ? 'TIME'
                   : measurementType === MeasurementType.CALORIES ? 'CAL'
                   : measurementType === MeasurementType.PERCENTAGE ? '%'
+                  : measurementType === MeasurementType.BODYWEIGHT ? 'REPS'
                   : MEASUREMENT_LABELS[measurementType].toUpperCase()}
               </th>
               {(measurementType === MeasurementType.DISTANCE || measurementType === MeasurementType.TIME) && (
