@@ -147,6 +147,7 @@ const WorkoutView: React.FC = () => {
         editMode={state.editMode}
         isOwner={state.isOwner}
         onBlocksChange={(blocks) => updateWorkoutRequest({ blocks })}
+        onSectionsChange={(sections) => updateWorkoutRequest({ sections })}
         onSetHasUnsavedChanges={setHasUnsavedChanges}
         updateExerciseInBlockPartial={updateExerciseInBlockPartial}
         removeExerciseFromBlock={removeExerciseFromBlock}
