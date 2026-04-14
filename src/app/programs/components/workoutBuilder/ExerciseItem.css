@@ -117,7 +117,11 @@
 .ex-remove-set:hover { background: #fee2e2; color: #ef4444; }
 
 /* Footer */
-.ex-card-v2__footer { padding: 8px 14px 12px; }
+.ex-card-v2__footer {
+  padding: 8px 14px 12px;
+  display: flex;
+  align-items: center;
+}
 .ex-add-set {
   display: flex; align-items: center; gap: 4px;
   color: #7c3aed; font-size: 12px; font-weight: 600;
@@ -125,6 +129,21 @@
   padding: 0; font-family: inherit;
 }
 .ex-add-set:hover { color: #5b21b6; }
+
+.ex-group-ex-btn {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6d28d9;
+  background: none;
+  border: 1px solid #ddd6fe;
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+}
+.ex-group-ex-btn:hover { background: #ede9fe; border-color: #c4b5fd; }
 
 /* ── Log mode ── */
 .ex-card-v2--log .ex-log-row--active td { background: #faf5ff; }

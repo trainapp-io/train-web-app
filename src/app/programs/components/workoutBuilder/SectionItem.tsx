@@ -84,11 +84,11 @@ const SectionItem: React.FC<Props> = ({
     <div
       className="section-card"
       style={{
-        border: '1.5px solid #e5e7eb',
+        border: '1.5px solid #bae6fd',
         borderRadius: 12,
         marginBottom: 12,
         overflow: 'hidden',
-        background: '#fafafa',
+        background: '#f0f9ff',
       }}
     >
       {/* Section header */}
@@ -97,8 +97,8 @@ const SectionItem: React.FC<Props> = ({
         style={{
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '8px 12px',
-          background: '#f3f4f6',
-          borderBottom: '1px solid #e5e7eb',
+          background: '#e0f2fe',
+          borderBottom: '1px solid #bae6fd',
         }}
       >
         {editMode && (
@@ -173,8 +173,8 @@ const SectionItem: React.FC<Props> = ({
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
               width: '100%', padding: '7px 10px',
-              fontSize: 12, fontWeight: 600, color: '#075985',
-              background: 'none', border: '1px dashed #bae6fd',
+              fontSize: 12, fontWeight: 600, color: '#0369a1',
+              background: 'rgba(14,165,233,0.06)', border: '1px dashed #7dd3fc',
               borderRadius: 8, cursor: 'pointer', marginBottom: 8,
               justifyContent: 'center',
             }}

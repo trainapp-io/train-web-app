@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { LuGripVertical, LuX } from 'react-icons/lu';
-import { Exercise, MeasurementType, Unit, SetTarget, SetLog } from '@trainapp-io/train-core';
+import { Exercise, MeasurementType, MeasurementUnit, Unit, SetTarget, SetLog } from '@trainapp-io/train-core';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -71,6 +71,20 @@ const MEASUREMENT_DISPLAY: Record<MeasurementType, string> = {
   [MeasurementType.CALORIES]: 'Calories',
   [MeasurementType.PERCENTAGE]: '% Effort',
 };
+
+const DISTANCE_UNITS: MeasurementUnit[] = [
+  MeasurementUnit.METER,
+  MeasurementUnit.YARD,
+  MeasurementUnit.KILOMETER,
+  MeasurementUnit.MILE,
+  MeasurementUnit.FOOT,
+];
+
+const TIME_UNITS: MeasurementUnit[] = [
+  MeasurementUnit.SECOND,
+  MeasurementUnit.MINUTE,
+  MeasurementUnit.HOUR,
+];
 
 /** Build initial setData from exercise, falling back to single-value fields */
 function getSetData(exercise: Exercise): SetTarget[] {
@@ -168,6 +182,21 @@ const ExerciseItem: React.FC<Props> = ({
   const cycleWeight = () => {
     const next = (exercise as any).weightUnit === Unit.KILOGRAM ? Unit.POUND : Unit.KILOGRAM;
     update({ weightUnit: next } as any);
+  };
+
+  const currentDistUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.METER;
+  const currentTimeUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.SECOND;
+
+  const cycleDistUnit = () => {
+    const idx = DISTANCE_UNITS.indexOf(currentDistUnit as MeasurementUnit);
+    const next = DISTANCE_UNITS[(idx === -1 ? 0 : idx + 1) % DISTANCE_UNITS.length];
+    update({ measurement: { ...exercise.measurement, measurementUnit: next } });
+  };
+
+  const cycleTimeUnit = () => {
+    const idx = TIME_UNITS.indexOf(currentTimeUnit as MeasurementUnit);
+    const next = TIME_UNITS[(idx === -1 ? 0 : idx + 1) % TIME_UNITS.length];
+    update({ measurement: { ...exercise.measurement, measurementUnit: next } });
   };
 
   const toggleRestUnit = () => {
@@ -560,6 +589,16 @@ const ExerciseItem: React.FC<Props> = ({
               </div>
             )}
           </div>
+          {measurementType === MeasurementType.DISTANCE && (
+            <button className="ex-toggle-chip" onClick={cycleDistUnit} type="button" aria-label="Toggle distance unit">
+              {currentDistUnit} <span style={{ fontSize: 9 }}>⟳</span>
+            </button>
+          )}
+          {measurementType === MeasurementType.TIME && (
+            <button className="ex-toggle-chip" onClick={cycleTimeUnit} type="button" aria-label="Toggle time unit">
+              {currentTimeUnit} <span style={{ fontSize: 9 }}>⟳</span>
+            </button>
+          )}
         </div>
 
         <button
@@ -580,7 +619,9 @@ const ExerciseItem: React.FC<Props> = ({
               <th>{setColumnLabel}</th>
               {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
               <th>
-                {measurementType === MeasurementType.CALORIES ? 'CAL'
+                {measurementType === MeasurementType.DISTANCE ? currentDistUnit.toUpperCase()
+                  : measurementType === MeasurementType.TIME ? currentTimeUnit.toUpperCase()
+                  : measurementType === MeasurementType.CALORIES ? 'CAL'
                   : measurementType === MeasurementType.PERCENTAGE ? '%'
                   : MEASUREMENT_LABELS[measurementType].toUpperCase()}
               </th>
@@ -689,17 +730,6 @@ const ExerciseItem: React.FC<Props> = ({
             onClick={onGroupExercise}
             type="button"
             aria-label="Group Exercise"
-            style={{
-              marginLeft: 'auto',
-              fontSize: 12,
-              fontWeight: 600,
-              color: '#6d28d9',
-              background: 'none',
-              border: '1px solid #ede9fe',
-              borderRadius: 6,
-              padding: '4px 10px',
-              cursor: 'pointer',
-            }}
           >
             + Group Exercise
           </button>
