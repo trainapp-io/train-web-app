@@ -4,6 +4,13 @@ import { WorkoutRequest } from '@trainapp-io/train-core';
 
 type DurationUnit = 'min' | 'hr';
 
+const WORKOUT_TYPES = [
+  { value: 'strength', label: 'Strength' },
+  { value: 'swimming', label: 'Swimming' },
+  { value: 'crossfit', label: 'CrossFit' },
+  { value: 'track', label: 'Track' },
+];
+
 interface Props {
   workout: WorkoutRequest;
   editMode: boolean;
@@ -29,6 +36,11 @@ const WorkoutDetailsSection: React.FC<Props> = ({ workout, editMode, onUpdate, o
             <span className="wd-view__duration">
               <LuClock aria-hidden="true" />
               {storedMinutes} min
+            </span>
+          )}
+          {workout.workoutType && (
+            <span className="wd-view__type-pill">
+              {WORKOUT_TYPES.find((t) => t.value === workout.workoutType)?.label}
             </span>
           )}
         </div>
@@ -75,6 +87,35 @@ const WorkoutDetailsSection: React.FC<Props> = ({ workout, editMode, onUpdate, o
             {unit}<LuRefreshCw size={9} />
           </button>
         </div>
+      </div>
+
+      {/* Workout type pills */}
+      <div className="wd-edit__type-row" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+        {WORKOUT_TYPES.map((t) => {
+          const isSelected = workout.workoutType === t.value;
+          return (
+            <button
+              key={t.value}
+              type="button"
+              aria-label={`Workout type: ${t.label}`}
+              aria-pressed={isSelected}
+              onClick={() => {
+                onUpdate({ workoutType: isSelected ? undefined : t.value });
+                onSetHasUnsavedChanges(true);
+              }}
+              style={{
+                fontSize: 12, fontWeight: 600,
+                padding: '4px 12px', borderRadius: 20,
+                border: isSelected ? '1.5px solid #6d28d9' : '1.5px solid #e5e7eb',
+                background: isSelected ? '#ede9fe' : '#fff',
+                color: isSelected ? '#6d28d9' : '#6b7280',
+                cursor: 'pointer',
+              }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
