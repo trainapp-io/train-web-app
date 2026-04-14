@@ -41,8 +41,6 @@ interface SectionItemWrapperProps {
   editMode: boolean;
   isOwner: boolean;
   workout: WorkoutRequest;
-  updateExerciseInBlockPartial: (blockIndex: number, exerciseIndex: number, updates: Partial<Exercise>) => void;
-  removeExerciseFromBlock: (blockIndex: number, exerciseIndex: number) => void;
 }
 
 const SectionItemWrapper: React.FC<SectionItemWrapperProps> = ({
@@ -53,8 +51,6 @@ const SectionItemWrapper: React.FC<SectionItemWrapperProps> = ({
   editMode,
   isOwner,
   workout,
-  updateExerciseInBlockPartial,
-  removeExerciseFromBlock,
 }) => {
   const updateExerciseInSection = (
     blockIndex: number,
@@ -201,8 +197,6 @@ const WorkoutBuilderBlocks: React.FC<Props> = ({
                     editMode={editMode}
                     isOwner={isOwner}
                     workout={workout}
-                    updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-                    removeExerciseFromBlock={removeExerciseFromBlock}
                   />
                 );
               }
