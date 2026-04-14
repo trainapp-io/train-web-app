@@ -64,20 +64,33 @@ const CircuitItem: React.FC<Props> = ({
       ...block,
       exercises: [
         ...block.exercises,
-        {
-          name: '',
-          rest: 0,
-          targetReps: 10,
-          targetDurationSec: 0,
-          targetWeight: 0,
-          targetDistance: 0,
-          measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
-          notes: '',
-          order: block.exercises.length,
-          sets: 3,
-          hasSuperset: false,
-          setData: Array.from({ length: 3 }, () => ({ reps: 10, weight: 0, rest: 0 })),
-        },
+        createEmptyExercise(block.exercises.length),
+      ],
+    });
+  };
+
+  const createEmptyExercise = (order: number) => ({
+    name: '',
+    rest: 0,
+    targetReps: 10,
+    targetDurationSec: 0,
+    targetWeight: 0,
+    targetDistance: 0,
+    measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
+    notes: '',
+    order,
+    sets: 3,
+    hasSuperset: false,
+    setData: Array.from({ length: 3 }, () => ({ reps: 10, weight: 0, rest: 0 })),
+  });
+
+  const promoteToGroup = () => {
+    onUpdateBlock({
+      ...block,
+      type: BlockType.CIRCUIT,
+      exercises: [
+        ...block.exercises,
+        createEmptyExercise(block.exercises.length),
       ],
     });
   };
@@ -85,6 +98,18 @@ const CircuitItem: React.FC<Props> = ({
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
   const restSeconds = (block as any).rest || 0;
   const isSingle = block.type === BlockType.SINGLE;
+
+  const [restUnit, setRestUnit] = useState<'seconds' | 'minutes'>('seconds');
+
+  const displayGroupRest = () => {
+    if (!restSeconds) return '';
+    return restUnit === 'minutes' ? String(+(restSeconds / 60).toFixed(1)) : String(restSeconds);
+  };
+
+  const parseGroupRest = (val: string) => {
+    const n = parseFloat(val) || 0;
+    return restUnit === 'minutes' ? Math.round(n * 60) : n;
+  };
 
   // ── Group exercise advancement (log mode only) ──
   // For group blocks, CircuitItem owns which exercise is currently active.
@@ -195,6 +220,7 @@ const CircuitItem: React.FC<Props> = ({
                 isActive={logMode ? (isBlockActive && activeExerciseIndex === exerciseIndex) : undefined}
                 onSelect={logMode ? onJumpTo : undefined}
                 onSetCompleted={onSetCompleted}
+                onGroupExercise={editMode && !logMode ? promoteToGroup : undefined}
                 setColumnLabel="Set"
               />
             ))}
@@ -242,12 +268,22 @@ const CircuitItem: React.FC<Props> = ({
               <input
                 className="ex-m__input"
                 type="number" min={0}
-                value={restSeconds || ''}
-                onChange={(e) => onUpdateBlock({ ...block, rest: parseInt(e.target.value) || 0 } as any)}
+                value={displayGroupRest()}
+                onChange={(e) => {
+                  const stored = parseGroupRest(e.target.value);
+                  onUpdateBlock({ ...block, rest: stored } as any);
+                }}
                 placeholder="0"
-                aria-label="Rest seconds"
+                aria-label="Rest between rounds"
               />
-              <span className="ex-m__label">s rest</span>
+              <button
+                className="ex-rest-unit"
+                onClick={() => setRestUnit((u) => u === 'seconds' ? 'minutes' : 'seconds')}
+                type="button"
+                aria-label={restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
+              >
+                {restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
+              </button>
             </div>
 
             {!logMode && (
@@ -302,6 +338,7 @@ const CircuitItem: React.FC<Props> = ({
                       onSetCompleted?.(restSecs);
                     }
                   } : onSetCompleted}
+                  onGroupExercise={editMode && !logMode ? addExercise : undefined}
                   setColumnLabel="Rnd"
                 />
               </React.Fragment>
@@ -310,14 +347,7 @@ const CircuitItem: React.FC<Props> = ({
         </DndContext>
       </div>
 
-      {/* Add exercise inside group */}
-      {editMode && !logMode && (
-        <div style={{ padding: '6px 12px 12px' }}>
-          <button className="block-card__add-ex" onClick={addExercise} style={{ borderColor: `${color}55`, color }}>
-            <LuPlus aria-hidden="true" /> Add Exercise
-          </button>
-        </div>
-      )}
+
     </div>
   );
 };

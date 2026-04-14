@@ -516,7 +516,7 @@ const ExerciseItem: React.FC<Props> = ({
 
         <div className="ex-card-v2__toggles">
           {hasWeight && (
-            <button className="ex-toggle-chip" onClick={cycleWeight} type="button">
+            <button className="ex-toggle-chip" onClick={cycleWeight} type="button" aria-label="Toggle weight unit">
               {weightUnit} <span style={{ fontSize: 9 }}>⟳</span>
             </button>
           )}
@@ -645,7 +645,7 @@ const ExerciseItem: React.FC<Props> = ({
                       onFocus={(e) => e.target.select()}
                       aria-label={`Set ${i + 1} rest`}
                     />
-                    <button className="ex-rest-unit" onClick={toggleRestUnit} type="button">
+                    <button className="ex-rest-unit" onClick={toggleRestUnit} type="button" aria-label="Toggle rest unit">
                       {restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
                     </button>
                   </div>
