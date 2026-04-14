@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot } from '@trainapp-io/train-core';
+import { WorkoutLogRequest, WorkoutSnapshot, BlockSnapshot, ExerciseSnapshot, SectionSnapshot } from '@trainapp-io/train-core';
 import { useCreateWorkoutLog } from '../../../services/apiHooks';
 import { programService } from '../../programs/services/programService';
 import { workoutService } from '../../workouts/services/workoutService';
@@ -37,14 +37,18 @@ const WorkoutLogCreate: React.FC = () => {
         
         console.log('Fetched workout:', workout);
         
-        // Create workout snapshot from workout response
+        // Collect all blocks in order: standalone + from sections
+        const standaloneBlocks = workout.blocks ?? [];
+        const sectionBlocks = (workout.sections ?? []).flatMap((s) => s.blocks);
+        const allBlocks = [...standaloneBlocks, ...sectionBlocks].sort((a, b) => a.order - b.order);
+
         const snapshot: WorkoutSnapshot = {
           name: workout.name,
           description: workout.description,
           category: workout.category,
           difficulty: workout.difficulty,
           duration: workout.duration,
-          blockSnapshot: workout.blocks?.map((block): BlockSnapshot => ({
+          blockSnapshot: allBlocks.map((block): BlockSnapshot => ({
             type: block.type,
             name: block.name,
             targetSets: block.targetSets,
@@ -67,7 +71,12 @@ const WorkoutLogCreate: React.FC = () => {
               restUnit: exercise.restUnit,
             })),
             order: block.order,
-          })) || [],
+          })),
+          sectionSnapshot: (workout.sections ?? []).map((s) => ({
+            name: s.name,
+            order: s.order,
+            blockOrders: s.blocks.map((b) => b.order),
+          })),
           accessType: workout.accessType,
           createdBy: workout.createdBy,
           startDate: workout.startDate,
