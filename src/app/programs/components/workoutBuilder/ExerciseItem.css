@@ -65,11 +65,11 @@
   padding: 5px 4px; text-align: center;
   border-bottom: 1px solid var(--border-color, #f3f4f6);
 }
-/* Column widths — SET · metric · weight · REST · note · remove */
+/* Column widths — SET · metric · [unit] · REST · note · remove */
 .ex-set-table th:nth-child(1) { text-align: left; width: 32px; }
 .ex-set-table th:nth-child(2) { width: 72px; }
-.ex-set-table th:nth-child(3) { width: 72px; }
-.ex-set-table th:nth-child(4) { width: 120px; }
+.ex-set-table th:nth-child(3) { width: 60px; }
+.ex-set-table th:nth-child(4) { width: 110px; }
 .ex-set-table th:nth-child(5) { width: 32px; }
 .ex-set-table th:nth-child(6) { width: 28px; }
 .ex-set-table td { padding: 6px 4px; border-bottom: 1px solid #f9fafb; vertical-align: middle; text-align: center; }

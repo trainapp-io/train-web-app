@@ -589,16 +589,6 @@ const ExerciseItem: React.FC<Props> = ({
               </div>
             )}
           </div>
-          {measurementType === MeasurementType.DISTANCE && (
-            <button className="ex-toggle-chip" onClick={cycleDistUnit} type="button" aria-label="Toggle distance unit">
-              {currentDistUnit} <span style={{ fontSize: 9 }}>⟳</span>
-            </button>
-          )}
-          {measurementType === MeasurementType.TIME && (
-            <button className="ex-toggle-chip" onClick={cycleTimeUnit} type="button" aria-label="Toggle time unit">
-              {currentTimeUnit} <span style={{ fontSize: 9 }}>⟳</span>
-            </button>
-          )}
         </div>
 
         <button
@@ -619,12 +609,15 @@ const ExerciseItem: React.FC<Props> = ({
               <th>{setColumnLabel}</th>
               {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
               <th>
-                {measurementType === MeasurementType.DISTANCE ? currentDistUnit.toUpperCase()
-                  : measurementType === MeasurementType.TIME ? currentTimeUnit.toUpperCase()
+                {measurementType === MeasurementType.DISTANCE ? 'DIST'
+                  : measurementType === MeasurementType.TIME ? 'TIME'
                   : measurementType === MeasurementType.CALORIES ? 'CAL'
                   : measurementType === MeasurementType.PERCENTAGE ? '%'
                   : MEASUREMENT_LABELS[measurementType].toUpperCase()}
               </th>
+              {(measurementType === MeasurementType.DISTANCE || measurementType === MeasurementType.TIME) && (
+                <th>UNIT</th>
+              )}
               <th>REST</th>
               <th aria-label="Notes">📝</th>
               <th></th>
@@ -672,6 +665,21 @@ const ExerciseItem: React.FC<Props> = ({
                     aria-label={`Set ${i + 1} ${MEASUREMENT_LABELS[measurementType]}`}
                   />
                 </td>
+
+                {measurementType === MeasurementType.DISTANCE && (
+                  <td>
+                    <button className="ex-rest-unit" onClick={cycleDistUnit} type="button" aria-label="Toggle distance unit">
+                      {currentDistUnit} ⟳
+                    </button>
+                  </td>
+                )}
+                {measurementType === MeasurementType.TIME && (
+                  <td>
+                    <button className="ex-rest-unit" onClick={cycleTimeUnit} type="button" aria-label="Toggle time unit">
+                      {currentTimeUnit} ⟳
+                    </button>
+                  </td>
+                )}
 
                 <td>
                   <div className="ex-rest-cell">
