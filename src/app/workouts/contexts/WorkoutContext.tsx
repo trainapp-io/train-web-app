@@ -335,6 +335,7 @@ export const workoutUtils = {
       difficulty: WorkoutDifficulty.BEGINNER,
       duration,
       blocks: [],
+      sections: [],
       exercises: [],
       accessType: ProfileAccess.Public,
       createdBy: userId,
