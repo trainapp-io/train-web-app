@@ -149,25 +149,37 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       />
 
       <div className="wl-body">
-        {blocks.map((block, index) => (
-          <CircuitItem
-            key={block.order}
-            block={block}
-            blockNumber={index + 1}
-            editMode={true}
-            logMode={true}
-            workout={workoutShell}
-            onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
-            onRemoveBlock={() => {}}
-            onSetHasUnsavedChanges={() => {}}
-            updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-            removeExerciseFromBlock={() => {}}
-            onSetCompleted={handleSetCompleted}
-            isBlockActive={activeBlockIndex === index}
-            onJumpTo={() => handleJumpTo(index)}
-            activeExerciseIndex={0}
-          />
-        ))}
+        {blocks.map((block, index) => {
+          const blockOrder = workoutSnapshot.blockSnapshot?.[index]?.order ?? index;
+          const sectionForBlock = workoutSnapshot.sectionSnapshot?.find(
+            (s) => s.blockOrders[0] === blockOrder
+          );
+          return (
+            <React.Fragment key={block.order}>
+              {sectionForBlock && (
+                <div className="wl-section-header">
+                  {sectionForBlock.name}
+                </div>
+              )}
+              <CircuitItem
+                block={block}
+                blockNumber={index + 1}
+                editMode={true}
+                logMode={true}
+                workout={workoutShell}
+                onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
+                onRemoveBlock={() => {}}
+                onSetHasUnsavedChanges={() => {}}
+                updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                removeExerciseFromBlock={() => {}}
+                onSetCompleted={handleSetCompleted}
+                isBlockActive={activeBlockIndex === index}
+                onJumpTo={() => handleJumpTo(index)}
+                activeExerciseIndex={0}
+              />
+            </React.Fragment>
+          );
+        })}
       </div>
 
       <CompletionFooter

@@ -184,6 +184,17 @@
   color: var(--text-secondary, #6b7280);
 }
 
+.wl-section-header {
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: 8px 4px 4px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 6px;
+}
+
 /* ── Scrollable body ── */
 .wl-body {
   padding: 12px 14px 160px;
