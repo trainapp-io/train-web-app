@@ -39,11 +39,16 @@ const WorkoutLogCreate: React.FC = () => {
         
         // Collect all blocks in order: standalone + from sections.
         // Section blocks have LOCAL order values (0, 1, 2 within the section) which can
-        // collide with standalone block orders. We normalize to global position indices
-        // (0, 1, 2, … across the merged array) so every block has a unique order.
-        const standaloneBlocks = workout.blocks ?? [];
-        const sectionBlocks = (workout.sections ?? []).flatMap((s) => s.blocks);
-        const allBlocks = [...standaloneBlocks, ...sectionBlocks].sort((a, b) => a.order - b.order);
+        // collide with each other and with standalone block orders. We must NOT sort all
+        // blocks together — instead sort standalone blocks, sort sections by section order,
+        // sort blocks within each section, then concatenate. This preserves section grouping
+        // and avoids cross-section order collisions that would misplace section headers.
+        const standaloneBlocks = (workout.blocks ?? []).slice().sort((a, b) => a.order - b.order);
+        const sortedSections = (workout.sections ?? []).slice().sort((a, b) => a.order - b.order);
+        const allBlocks = [
+          ...standaloneBlocks,
+          ...sortedSections.flatMap((s) => s.blocks.slice().sort((a, b) => a.order - b.order)),
+        ];
 
         const snapshot: WorkoutSnapshot = {
           name: workout.name,

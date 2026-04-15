@@ -65,7 +65,7 @@ const WorkoutView: React.FC = () => {
         const userIsOwner = !response.createdBy || response.createdBy === user.userId;
         setIsOwner(userIsOwner);
 
-        if (userIsOwner && (!workoutRequest.blocks || workoutRequest.blocks.length === 0)) {
+        if (userIsOwner && (!workoutRequest.blocks || workoutRequest.blocks.length === 0) && (!workoutRequest.sections || workoutRequest.sections.length === 0)) {
           setEditMode(true);
         }
       } catch (error) {
