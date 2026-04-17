@@ -584,7 +584,7 @@ const ExerciseItem: React.FC<Props> = ({
                     onClick={() => {
                       const updates: Partial<Exercise> = { measurement: { ...exercise.measurement, measurementType: mt } };
                       if (mt === MeasurementType.DISTANCE && exercise.showTime === undefined) {
-                        (updates as any).showTime = true;
+                        updates.showTime = true;
                       }
                       update(updates);
                       setMeasureDropdownOpen(false);
@@ -659,7 +659,7 @@ const ExerciseItem: React.FC<Props> = ({
                       <span>TIME (s)</span>
                       <button
                         className="ex-col-icon-btn"
-                        onClick={() => update({ showTime: false } as any)}
+                        onClick={() => update({ showTime: false })}
                         type="button"
                         aria-label="Hide time column"
                       >
@@ -671,7 +671,7 @@ const ExerciseItem: React.FC<Props> = ({
                   <th className="ex-col-hdr-rest ex-col-hdr--hidden">
                     <button
                       className="ex-col-icon-btn"
-                      onClick={() => update({ showTime: true } as any)}
+                      onClick={() => update({ showTime: true })}
                       type="button"
                       aria-label="Show time column"
                     >
