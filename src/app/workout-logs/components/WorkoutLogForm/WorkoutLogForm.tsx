@@ -153,13 +153,54 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
           const sectionForBlock = workoutSnapshot.sectionSnapshot?.find(
             (s) => s.blockOrders[0] === index
           );
+
+          const completedInSection = sectionForBlock
+            ? blocks
+                .filter((_, bi) => sectionForBlock.blockOrders.includes(bi))
+                .flatMap((b) => b.exercises)
+                .filter((ex) => {
+                  const logs = (ex as any).setLogs as any[] | undefined;
+                  return logs && logs.length > 0 && logs.every((s: any) => s.isCompleted);
+                }).length
+            : 0;
+          const totalInSection = sectionForBlock
+            ? blocks
+                .filter((_, bi) => sectionForBlock.blockOrders.includes(bi))
+                .flatMap((b) => b.exercises).length
+            : 0;
+
+          if (sectionForBlock) {
+            return (
+              <div key={block.order} className="wl-section-card">
+                <div className="wl-section-card__header">
+                  <span className="wl-section-badge">SECTION</span>
+                  <span className="wl-section-card__name">{sectionForBlock.name}</span>
+                  <span className="wl-section-card__count">{completedInSection} / {totalInSection}</span>
+                </div>
+                <div className="wl-section-card__body">
+                  <CircuitItem
+                    block={block}
+                    blockNumber={index + 1}
+                    editMode={true}
+                    logMode={true}
+                    workout={workoutShell}
+                    onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
+                    onRemoveBlock={() => {}}
+                    onSetHasUnsavedChanges={() => {}}
+                    updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                    removeExerciseFromBlock={() => {}}
+                    onSetCompleted={handleSetCompleted}
+                    isBlockActive={activeBlockIndex === index}
+                    onJumpTo={() => handleJumpTo(index)}
+                    activeExerciseIndex={0}
+                  />
+                </div>
+              </div>
+            );
+          }
+
           return (
             <React.Fragment key={block.order}>
-              {sectionForBlock && (
-                <div className="wl-section-header">
-                  {sectionForBlock.name}
-                </div>
-              )}
               <CircuitItem
                 block={block}
                 blockNumber={index + 1}

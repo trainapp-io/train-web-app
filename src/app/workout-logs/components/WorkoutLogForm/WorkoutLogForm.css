@@ -195,6 +195,50 @@
   margin-bottom: 6px;
 }
 
+/* ── Section card (matches builder section-card style) ── */
+.wl-section-card {
+  border: 2px solid #93c5fd;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: #f0f9ff;
+}
+.wl-section-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #dbeafe;
+  border-bottom: 2px solid #93c5fd;
+}
+.wl-section-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #fff;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+  flex-shrink: 0;
+}
+.wl-section-card__name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e3a5f;
+}
+.wl-section-card__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+.wl-section-card__body {
+  padding: 12px 12px 4px;
+}
+
 /* ── Scrollable body ── */
 .wl-body {
   padding: 12px 14px 160px;
