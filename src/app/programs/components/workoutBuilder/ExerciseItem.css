@@ -162,6 +162,20 @@
 }
 .ex-unit-select:focus { border-color: #7c3aed; }
 
+/* Clickable column header toggle */
+.ex-col-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6d28d9;
+  padding: 0;
+  text-transform: uppercase;
+}
+.ex-col-toggle:hover { text-decoration: underline; }
+
 /* ── Log mode ── */
 .ex-card-v2--log .ex-log-row--active td { background: #faf5ff; }
 .ex-card-v2--log .ex-log-row--active .ex-set-num { color: #7c3aed; }

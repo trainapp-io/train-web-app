@@ -163,6 +163,42 @@ describe('ExerciseItem — column visibility', () => {
   });
 });
 
+describe('ExerciseItem — hybrid toggle placement', () => {
+  it('does NOT render a lbs/kg chip in the card header', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise()}
+        editMode={true}
+        blockIndex={0}
+        exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    // The header should not contain a lbs toggle chip (it moves to column header)
+    expect(screen.queryByRole('button', { name: /toggle weight unit/i })).not.toBeInTheDocument();
+  });
+
+  it('renders a clickable LBS column header that cycles weight unit', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise()}
+        editMode={true}
+        blockIndex={0}
+        exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    const lbsHeader = screen.getByRole('button', { name: /toggle lbs\/kg/i });
+    expect(lbsHeader).toBeInTheDocument();
+    fireEvent.click(lbsHeader);
+    expect(update).toHaveBeenCalledWith(0, 0, expect.objectContaining({ weightUnit: expect.any(String) }));
+  });
+});
+
 describe('ExerciseItem — Group Exercise button', () => {
   it('renders + Group Exercise button when onGroupExercise prop is provided', () => {
     const update = vi.fn();

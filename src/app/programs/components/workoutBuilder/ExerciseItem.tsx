@@ -532,11 +532,7 @@ const ExerciseItem: React.FC<Props> = ({
         </div>
 
         <div className="ex-card-v2__toggles">
-          {hasWeight && (
-            <button className="ex-toggle-chip" onClick={cycleWeight} type="button" aria-label="Toggle weight unit">
-              {weightUnit} <span style={{ fontSize: 9 }}>⟳</span>
-            </button>
-          )}
+          {/* lbs/kg chip removed — now lives on the column header */}
           <div ref={measureDropdownRef} style={{ position: 'relative' }}>
             <button
               className="ex-toggle-chip"
@@ -566,7 +562,11 @@ const ExerciseItem: React.FC<Props> = ({
                       color: mt === measurementType ? '#6d28d9' : '#111827',
                     }}
                     onClick={() => {
-                      update({ measurement: { ...exercise.measurement, measurementType: mt } });
+                      const updates: Partial<Exercise> = { measurement: { ...exercise.measurement, measurementType: mt } };
+                      if (mt === MeasurementType.DISTANCE && exercise.showTime === undefined) {
+                        (updates as any).showTime = true;
+                      }
+                      update(updates);
                       setMeasureDropdownOpen(false);
                     }}
                     type="button"
@@ -595,7 +595,18 @@ const ExerciseItem: React.FC<Props> = ({
           <thead>
             <tr>
               <th>{setColumnLabel}</th>
-              {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
+              {hasWeight && (
+                <th>
+                  <button
+                    className="ex-col-toggle"
+                    onClick={cycleWeight}
+                    type="button"
+                    aria-label="Toggle lbs/kg"
+                  >
+                    {weightUnit.toUpperCase()} ⟳
+                  </button>
+                </th>
+              )}
               <th>
                 {measurementType === MeasurementType.DISTANCE ? 'DIST'
                   : measurementType === MeasurementType.TIME ? 'TIME'
