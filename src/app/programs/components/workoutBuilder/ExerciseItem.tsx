@@ -58,7 +58,7 @@ const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.REPS]: 'reps',
   [MeasurementType.TIME]: 'time',
   [MeasurementType.DISTANCE]: 'dist',
-  [MeasurementType.BODYWEIGHT]: 'bw',
+  [MeasurementType.BODYWEIGHT]: 'reps',
   [MeasurementType.CALORIES]: 'cal',
   [MeasurementType.PERCENTAGE]: '%',
 };
@@ -364,11 +364,11 @@ const ExerciseItem: React.FC<Props> = ({
           <table className="ex-set-table">
             <thead>
               <tr>
-                <th>{setColumnLabel}</th>
-                {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
-                <th>{measurementType === MeasurementType.DISTANCE ? 'DIST' : MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
-                {measurementType === MeasurementType.DISTANCE && <th>TIME</th>}
-                <th></th>
+                <th className="ex-th-set">{setColumnLabel}</th>
+                {hasWeight && <th className="ex-th-weight">{weightUnit.toUpperCase()}</th>}
+                <th className="ex-th-metric">{measurementType === MeasurementType.DISTANCE ? 'DIST' : MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+                {measurementType === MeasurementType.DISTANCE && <th className="ex-th-rest-col">TIME</th>}
+                <th className="ex-th-remove"></th>
               </tr>
             </thead>
             <tbody>
@@ -656,9 +656,9 @@ const ExerciseItem: React.FC<Props> = ({
         <table className="ex-set-table">
           <thead>
             <tr>
-              <th>{setColumnLabel}</th>
+              <th className="ex-th-set">{setColumnLabel}</th>
               {hasWeight && (
-                <th>
+                <th className="ex-th-weight">
                   <button
                     className="ex-col-toggle"
                     onClick={cycleWeight}
@@ -670,7 +670,7 @@ const ExerciseItem: React.FC<Props> = ({
                 </th>
               )}
               {/* Measurement column header — DIST gets an inline unit selector */}
-              <th>
+              <th className="ex-th-metric">
                 {measurementType === MeasurementType.DISTANCE ? (
                   <span className="ex-col-dist-hdr">
                     <span>DIST</span>
@@ -692,11 +692,11 @@ const ExerciseItem: React.FC<Props> = ({
                 )}
               </th>
               {measurementType === MeasurementType.TIME && (
-                <th>UNIT</th>
+                <th className="ex-th-weight">UNIT</th>
               )}
               {measurementType === MeasurementType.DISTANCE && (
                 showTimeCol ? (
-                  <th className="ex-col-hdr-rest">
+                  <th className="ex-col-hdr-rest ex-th-rest-col">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                       <span>TIME (s)</span>
                       <button
@@ -710,7 +710,7 @@ const ExerciseItem: React.FC<Props> = ({
                     </div>
                   </th>
                 ) : (
-                  <th className="ex-col-hdr-rest ex-col-hdr--hidden">
+                  <th className="ex-col-hdr-rest ex-col-hdr--hidden ex-th-rest-col">
                     <button
                       className="ex-col-icon-btn"
                       onClick={() => update({ showTime: true })}
@@ -723,7 +723,7 @@ const ExerciseItem: React.FC<Props> = ({
                 )
               )}
               {!hideRest ? (
-                <th className="ex-col-hdr-rest">
+                <th className="ex-col-hdr-rest ex-th-rest-col">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                     <button
                       className="ex-col-toggle"
@@ -744,7 +744,7 @@ const ExerciseItem: React.FC<Props> = ({
                   </div>
                 </th>
               ) : (
-                <th className="ex-col-hdr-rest ex-col-hdr--hidden">
+                <th className="ex-col-hdr-rest ex-col-hdr--hidden ex-th-rest-col">
                   <button
                     className="ex-col-icon-btn"
                     onClick={() => update({ hideRest: false })}
@@ -755,8 +755,8 @@ const ExerciseItem: React.FC<Props> = ({
                   </button>
                 </th>
               )}
-              <th aria-label="Notes">📝</th>
-              <th></th>
+              <th className="ex-th-notes" aria-label="Notes">📝</th>
+              <th className="ex-th-remove"></th>
             </tr>
           </thead>
           <tbody>

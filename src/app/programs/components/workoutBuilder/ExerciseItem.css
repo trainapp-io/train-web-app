@@ -65,13 +65,13 @@
   padding: 5px 4px; text-align: center;
   border-bottom: 1px solid var(--border-color, #f3f4f6);
 }
-/* Column widths — SET · metric · [unit] · REST · note · remove */
-.ex-set-table th:nth-child(1) { text-align: left; width: 32px; }
-.ex-set-table th:nth-child(2) { width: 72px; }
-.ex-set-table th:nth-child(3) { width: 60px; }
-.ex-set-table th:nth-child(4) { width: 110px; }
-.ex-set-table th:nth-child(5) { width: 32px; }
-.ex-set-table th:nth-child(6) { width: 28px; }
+/* Column widths — class-based so widths don't shift when optional columns are absent */
+.ex-th-set  { text-align: left !important; width: 32px; }
+.ex-th-weight { width: 72px; }
+.ex-th-metric { width: 60px; }
+.ex-th-rest-col { width: 110px; }
+.ex-th-notes { width: 32px; }
+.ex-th-remove { width: 28px; }
 .ex-set-table td { padding: 6px 4px; border-bottom: 1px solid #f9fafb; vertical-align: middle; text-align: center; }
 .ex-set-table td:first-child { text-align: left; }
 .ex-set-table tr:last-child td { border-bottom: none; }
