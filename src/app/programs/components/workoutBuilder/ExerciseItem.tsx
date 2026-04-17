@@ -471,7 +471,7 @@ const ExerciseItem: React.FC<Props> = ({
   };
 
   const displayRest = (rest: number | undefined, unit: 'seconds' | 'minutes') => {
-    if (!rest) return '';
+    if (rest == null) return '';
     return unit === 'minutes' ? String(+(rest / 60).toFixed(1)) : String(rest);
   };
 
@@ -481,7 +481,7 @@ const ExerciseItem: React.FC<Props> = ({
   };
 
   // Effective REST unit for a specific row
-  const getRowRestUnit = (set: SetTarget): 'seconds' | 'minutes' => (set as any).restUnit ?? restUnit;
+  const getRowRestUnit = (set: SetTarget): 'seconds' | 'minutes' => set.restUnit ?? restUnit;
 
   // Cycle the column-level default
   const cycleRestUnit = () => {
@@ -490,14 +490,14 @@ const ExerciseItem: React.FC<Props> = ({
 
   // Toggle a row-level override; if the new unit matches the column default, clear the override
   const toggleRowRestUnit = (index: number) => {
-    const current = (setData[index] as any).restUnit;
+    const current = setData[index].restUnit;
     if (current === undefined) {
       // No override yet — create one opposite to column default
-      updateSet(index, 'restUnit' as keyof SetTarget, restUnit === 'seconds' ? 'minutes' : 'seconds');
+      updateSet(index, 'restUnit', restUnit === 'seconds' ? 'minutes' : 'seconds');
     } else {
       const next: 'seconds' | 'minutes' = current === 'seconds' ? 'minutes' : 'seconds';
       // If cycling back to column default, clear the override
-      updateSet(index, 'restUnit' as keyof SetTarget, next === restUnit ? undefined : next);
+      updateSet(index, 'restUnit', next === restUnit ? undefined : next);
     }
   };
 
@@ -741,7 +741,7 @@ const ExerciseItem: React.FC<Props> = ({
                       aria-label={`Set ${i + 1} rest`}
                     />
                     <button
-                      className={`ex-rest-unit-btn${(set as any).restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
+                      className={`ex-rest-unit-btn${set.restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
                       onClick={() => toggleRowRestUnit(i)}
                       type="button"
                       aria-label="Toggle rest unit for this set"
