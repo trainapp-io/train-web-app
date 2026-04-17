@@ -175,11 +175,8 @@
 }
 .ex-unit-select:focus { border-color: #7c3aed; }
 
-/* REST column header — flex layout for toggle + hide/show icon */
+/* REST column header */
 .ex-col-hdr-rest {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   white-space: nowrap;
 }
 .ex-col-icon-btn {
@@ -192,7 +189,7 @@
   align-items: center;
 }
 .ex-col-icon-btn:hover { color: #9ca3af; }
-.ex-col-hdr--hidden .ex-col-icon-btn { color: #9ca3af; font-size: 9px; font-weight: 700; }
+.ex-col-hdr--hidden .ex-col-icon-btn { color: #9ca3af; }
 
 /* Clickable column header toggle */
 .ex-col-toggle {

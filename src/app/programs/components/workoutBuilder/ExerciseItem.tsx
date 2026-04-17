@@ -639,22 +639,24 @@ const ExerciseItem: React.FC<Props> = ({
               )}
               {!hideRest ? (
                 <th className="ex-col-hdr-rest">
-                  <button
-                    className="ex-col-toggle"
-                    onClick={cycleRestUnit}
-                    type="button"
-                    aria-label="Toggle rest unit"
-                  >
-                    REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
-                  </button>
-                  <button
-                    className="ex-col-icon-btn"
-                    onClick={() => update({ hideRest: true })}
-                    type="button"
-                    aria-label="Hide rest column"
-                  >
-                    <LuEyeOff size={10} />
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <button
+                      className="ex-col-toggle"
+                      onClick={cycleRestUnit}
+                      type="button"
+                      aria-label="Toggle rest unit"
+                    >
+                      REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
+                    </button>
+                    <button
+                      className="ex-col-icon-btn"
+                      onClick={() => update({ hideRest: true })}
+                      type="button"
+                      aria-label="Hide rest column"
+                    >
+                      <LuEyeOff size={10} />
+                    </button>
+                  </div>
                 </th>
               ) : (
                 <th className="ex-col-hdr-rest ex-col-hdr--hidden">

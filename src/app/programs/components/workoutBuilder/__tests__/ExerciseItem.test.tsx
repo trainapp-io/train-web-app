@@ -353,4 +353,19 @@ describe('ExerciseItem — REST column hide/show', () => {
     fireEvent.click(screen.getByRole('button', { name: /hide rest column/i }));
     expect(update).toHaveBeenCalledWith(0, 0, expect.objectContaining({ hideRest: true }));
   });
+
+  it('clicking show restores hideRest to false', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise({ hideRest: true })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /show rest column/i }));
+    expect(update).toHaveBeenCalledWith(0, 0, expect.objectContaining({ hideRest: false }));
+  });
 });
