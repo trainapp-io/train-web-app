@@ -249,3 +249,63 @@ describe('ExerciseItem — Group Exercise button', () => {
     expect(onGroup).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ExerciseItem — REST column default + row override', () => {
+  it('renders a clickable REST column header that shows the current unit', () => {
+    render(
+      <ExerciseItem
+        exercise={makeExercise({ restUnit: 'seconds' })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /^toggle rest unit$/i })).toHaveTextContent(/REST \(s\)/i);
+  });
+
+  it('clicking REST header calls update with toggled restUnit', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise({ restUnit: 'seconds' })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /^toggle rest unit$/i }));
+    expect(update).toHaveBeenCalledWith(0, 0, expect.objectContaining({ restUnit: 'minutes' }));
+  });
+
+  it('shows an amber override badge when a row has its own restUnit', () => {
+    render(
+      <ExerciseItem
+        exercise={makeExercise({
+          restUnit: 'minutes',
+          setData: [{ reps: 8, weight: 100, rest: 90, restUnit: 'seconds' }],
+        })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /toggle rest unit for this set/i })).toHaveClass('ex-rest-unit-btn--override');
+  });
+
+  it('shows no amber badge when a row has no restUnit override', () => {
+    render(
+      <ExerciseItem
+        exercise={makeExercise({ restUnit: 'seconds', setData: [{ reps: 8, weight: 100, rest: 90 }] })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /toggle rest unit for this set/i }))
+      .not.toHaveClass('ex-rest-unit-btn--override');
+  });
+});

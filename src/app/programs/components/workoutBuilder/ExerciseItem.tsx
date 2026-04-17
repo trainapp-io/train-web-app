@@ -187,10 +187,6 @@ const ExerciseItem: React.FC<Props> = ({
   const currentDistUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.METER;
   const currentTimeUnit = exercise.measurement?.measurementUnit ?? MeasurementUnit.SECOND;
 
-  const toggleRestUnit = () => {
-    update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
-  };
-
   const handleNameChange = (value: string) => {
     update({ name: value });
     if (!value || value.length < 2) {
@@ -474,14 +470,35 @@ const ExerciseItem: React.FC<Props> = ({
     setNoteDialog((d) => ({ ...d, open: false }));
   };
 
-  const displayRest = (rest: number | undefined) => {
+  const displayRest = (rest: number | undefined, unit: 'seconds' | 'minutes') => {
     if (!rest) return '';
-    return restUnit === 'minutes' ? String(+(rest / 60).toFixed(1)) : String(rest);
+    return unit === 'minutes' ? String(+(rest / 60).toFixed(1)) : String(rest);
   };
 
-  const parseRest = (val: string) => {
+  const parseRest = (val: string, unit: 'seconds' | 'minutes') => {
     const n = parseFloat(val) || 0;
-    return restUnit === 'minutes' ? Math.round(n * 60) : n;
+    return unit === 'minutes' ? Math.round(n * 60) : n;
+  };
+
+  // Effective REST unit for a specific row
+  const getRowRestUnit = (set: SetTarget): 'seconds' | 'minutes' => (set as any).restUnit ?? restUnit;
+
+  // Cycle the column-level default
+  const cycleRestUnit = () => {
+    update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
+  };
+
+  // Toggle a row-level override; if the new unit matches the column default, clear the override
+  const toggleRowRestUnit = (index: number) => {
+    const current = (setData[index] as any).restUnit;
+    if (current === undefined) {
+      // No override yet — create one opposite to column default
+      updateSet(index, 'restUnit' as keyof SetTarget, restUnit === 'seconds' ? 'minutes' : 'seconds');
+    } else {
+      const next: 'seconds' | 'minutes' = current === 'seconds' ? 'minutes' : 'seconds';
+      // If cycling back to column default, clear the override
+      updateSet(index, 'restUnit' as keyof SetTarget, next === restUnit ? undefined : next);
+    }
   };
 
   const rawVal = (row: number, field: string, stored: number | undefined) =>
@@ -618,7 +635,16 @@ const ExerciseItem: React.FC<Props> = ({
               {(measurementType === MeasurementType.DISTANCE || measurementType === MeasurementType.TIME) && (
                 <th>UNIT</th>
               )}
-              <th>REST</th>
+              <th className="ex-col-hdr-rest">
+                <button
+                  className="ex-col-toggle"
+                  onClick={cycleRestUnit}
+                  type="button"
+                  aria-label="Toggle rest unit"
+                >
+                  REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
+                </button>
+              </th>
               <th aria-label="Notes">📝</th>
               <th></th>
             </tr>
@@ -697,19 +723,30 @@ const ExerciseItem: React.FC<Props> = ({
 
                 <td>
                   <div className="ex-rest-cell">
-                    <input className="ex-set-input" type="number" min={0}
+                    <input
+                      className="ex-set-input"
+                      type="number" min={0}
                       style={{ width: 44 }}
-                      value={rawKey(i, 'rest') in rawValues ? rawValues[rawKey(i, 'rest')] : displayRest(set.rest)}
+                      value={
+                        rawKey(i, 'rest') in rawValues
+                          ? rawValues[rawKey(i, 'rest')]
+                          : displayRest(set.rest, getRowRestUnit(set))
+                      }
                       onChange={(e) => onRawChange(i, 'rest', e.target.value)}
                       onBlur={(e) => {
-                        updateSet(i, 'rest', parseRest(e.target.value));
+                        updateSet(i, 'rest', parseRest(e.target.value, getRowRestUnit(set)));
                         setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
                       }}
                       onFocus={(e) => e.target.select()}
                       aria-label={`Set ${i + 1} rest`}
                     />
-                    <button className="ex-rest-unit" onClick={toggleRestUnit} type="button" aria-label="Toggle rest unit">
-                      {restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
+                    <button
+                      className={`ex-rest-unit-btn${(set as any).restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
+                      onClick={() => toggleRowRestUnit(i)}
+                      type="button"
+                      aria-label="Toggle rest unit for this set"
+                    >
+                      {getRowRestUnit(set) === 'seconds' ? 's' : 'min'} ⟳
                     </button>
                   </div>
                 </td>

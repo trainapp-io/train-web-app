@@ -98,6 +98,26 @@
 }
 .ex-rest-unit:hover { background: #ede9fe; }
 
+/* Per-row REST unit button — grey by default, amber when overriding column */
+.ex-rest-unit-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+  color: #9ca3af;
+  padding: 1px 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ex-rest-unit-btn:hover { border-color: #d1d5db; color: #6b7280; }
+.ex-rest-unit-btn--override {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
 /* Note button */
 .ex-note-btn {
   width: 24px; height: 24px; border-radius: 5px; border: none;
