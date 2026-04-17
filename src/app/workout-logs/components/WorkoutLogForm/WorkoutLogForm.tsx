@@ -82,8 +82,8 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
     const current = blocks[activeBlockIndex];
     if (!current) return;
     const allDone = current.exercises.every((ex) => {
-      const logs = (ex as any).setLogs as any[] | undefined;
-      return logs && logs.length > 0 && logs.every((s: any) => s.isCompleted);
+      const logs = ex.setLogs;
+      return logs != null && logs.length > 0 && logs.every((s) => s.isCompleted);
     });
     if (allDone && activeBlockIndex < blocks.length - 1) {
       setActiveBlockIndex(activeBlockIndex + 1);
@@ -159,8 +159,8 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
                 .filter((_, bi) => sectionForBlock.blockOrders.includes(bi))
                 .flatMap((b) => b.exercises)
                 .filter((ex) => {
-                  const logs = (ex as any).setLogs as any[] | undefined;
-                  return logs && logs.length > 0 && logs.every((s: any) => s.isCompleted);
+                  const logs = ex.setLogs;
+                  return logs != null && logs.length > 0 && logs.every((s) => s.isCompleted);
                 }).length
             : 0;
           const totalInSection = sectionForBlock

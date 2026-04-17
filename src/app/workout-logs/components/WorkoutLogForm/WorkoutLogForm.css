@@ -184,17 +184,6 @@
   color: var(--text-secondary, #6b7280);
 }
 
-.wl-section-header {
-  font-size: 0.69rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary, #6b7280);
-  text-transform: uppercase;
-  padding: 8px 4px 4px;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  margin-bottom: 6px;
-}
-
 /* ── Section card (matches builder section-card style) ── */
 .wl-section-card {
   border: 2px solid #93c5fd;
