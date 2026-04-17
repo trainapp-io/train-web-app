@@ -310,6 +310,80 @@ describe('ExerciseItem — REST column default + row override', () => {
   });
 });
 
+function makeDistanceExercise(overrides = {}) {
+  return makeExercise({
+    measurement: { measurementType: MeasurementType.DISTANCE, measurementUnit: MeasurementUnit.METER },
+    setData: [{ distance: 25, rest: 0 }],
+    ...overrides,
+  });
+}
+
+describe('ExerciseItem — Distance + Time column (builder)', () => {
+  it('shows a TIME column by default when measurement is DISTANCE', () => {
+    render(
+      <ExerciseItem
+        exercise={makeDistanceExercise()}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /hide time column/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/duration in seconds/i)).toBeInTheDocument();
+  });
+
+  it('hides TIME inputs when showTime is false', () => {
+    render(
+      <ExerciseItem
+        exercise={makeDistanceExercise({ showTime: false })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.queryByLabelText(/duration in seconds/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show time column/i })).toBeInTheDocument();
+  });
+
+  it('distance unit selector is in the DIST column header, not per row', () => {
+    render(
+      <ExerciseItem
+        exercise={makeDistanceExercise()}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    // The unit select should appear exactly once (in the column header, not duplicated per row)
+    const selects = screen.getAllByRole('combobox');
+    expect(selects).toHaveLength(1);
+  });
+
+  it('changing measurement to DISTANCE sets showTime true via update', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise()}  // starts as REPS
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    // Open measurement dropdown
+    fireEvent.click(screen.getByRole('button', { name: /measurement type/i }));
+    // Click Distance option
+    fireEvent.click(screen.getByRole('button', { name: /distance/i }));
+    expect(update).toHaveBeenCalledWith(
+      0, 0,
+      expect.objectContaining({ showTime: true })
+    );
+  });
+});
+
 describe('ExerciseItem — REST column hide/show', () => {
   it('shows the REST column by default', () => {
     render(

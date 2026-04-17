@@ -489,6 +489,7 @@ const ExerciseItem: React.FC<Props> = ({
   };
 
   const hideRest = exercise.hideRest ?? false;
+  const showTimeCol = measurementType === MeasurementType.DISTANCE && (exercise.showTime ?? true);
 
   // Toggle a row-level override; if the new unit matches the column default, clear the override
   const toggleRowRestUnit = (index: number) => {
@@ -626,16 +627,58 @@ const ExerciseItem: React.FC<Props> = ({
                   </button>
                 </th>
               )}
+              {/* Measurement column header — DIST gets an inline unit selector */}
               <th>
-                {measurementType === MeasurementType.DISTANCE ? 'DIST'
-                  : measurementType === MeasurementType.TIME ? 'TIME'
-                  : measurementType === MeasurementType.CALORIES ? 'CAL'
-                  : measurementType === MeasurementType.PERCENTAGE ? '%'
-                  : measurementType === MeasurementType.BODYWEIGHT ? 'REPS'
-                  : MEASUREMENT_LABELS[measurementType].toUpperCase()}
+                {measurementType === MeasurementType.DISTANCE ? (
+                  <span className="ex-col-dist-hdr">
+                    <span>DIST</span>
+                    <select
+                      className="ex-unit-select"
+                      value={currentDistUnit}
+                      onChange={(e) =>
+                        update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })
+                      }
+                      aria-label="Distance unit"
+                    >
+                      {DISTANCE_UNITS.map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
+                    </select>
+                  </span>
+                ) : (
+                  MEASUREMENT_LABELS[measurementType]?.toUpperCase() ?? measurementType.toUpperCase()
+                )}
               </th>
-              {(measurementType === MeasurementType.DISTANCE || measurementType === MeasurementType.TIME) && (
+              {measurementType === MeasurementType.TIME && (
                 <th>UNIT</th>
+              )}
+              {measurementType === MeasurementType.DISTANCE && (
+                showTimeCol ? (
+                  <th className="ex-col-hdr-rest">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span>TIME (s)</span>
+                      <button
+                        className="ex-col-icon-btn"
+                        onClick={() => update({ showTime: false } as any)}
+                        type="button"
+                        aria-label="Hide time column"
+                      >
+                        <LuEyeOff size={10} />
+                      </button>
+                    </div>
+                  </th>
+                ) : (
+                  <th className="ex-col-hdr-rest ex-col-hdr--hidden">
+                    <button
+                      className="ex-col-icon-btn"
+                      onClick={() => update({ showTime: true } as any)}
+                      type="button"
+                      aria-label="Show time column"
+                    >
+                      TIME <LuEye size={10} />
+                    </button>
+                  </th>
+                )
               )}
               {!hideRest ? (
                 <th className="ex-col-hdr-rest">
@@ -717,20 +760,23 @@ const ExerciseItem: React.FC<Props> = ({
                   />
                 </td>
 
-                {measurementType === MeasurementType.DISTANCE && (
+                {/* TIME cell for DISTANCE exercises */}
+                {measurementType === MeasurementType.DISTANCE && showTimeCol && (
                   <td>
-                    <select
-                      className="ex-unit-select"
-                      value={currentDistUnit}
-                      onChange={(e) => update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })}
-                      aria-label="Distance unit"
-                    >
-                      {DISTANCE_UNITS.map((u) => (
-                        <option key={u} value={u}>{u}</option>
-                      ))}
-                    </select>
+                    <input
+                      className="ex-set-input"
+                      type="number" min={0}
+                      value={rawKey(i, 'durationSec') in rawValues
+                        ? rawValues[rawKey(i, 'durationSec')]
+                        : (set.durationSec ?? 0).toString()}
+                      onChange={(e) => onRawChange(i, 'durationSec', e.target.value)}
+                      onBlur={(e) => onRawBlur(i, 'durationSec' as keyof SetTarget, e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      aria-label={`Set ${i + 1} duration in seconds`}
+                    />
                   </td>
                 )}
+                {measurementType === MeasurementType.DISTANCE && !showTimeCol && <td />}
                 {measurementType === MeasurementType.TIME && (
                   <td>
                     <select

@@ -159,6 +159,21 @@
 }
 .ex-group-ex-btn:hover { background: #dcfce7; border-color: #4ade80; }
 
+.ex-col-dist-hdr {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ex-col-dist-hdr .ex-unit-select {
+  font-size: 9px;
+  font-weight: 700;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #6d28d9;
+  padding: 0;
+}
+
 /* Unit select in DIST/TIME rows */
 .ex-unit-select {
   font-size: 11px;
