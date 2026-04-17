@@ -697,7 +697,7 @@ const ExerciseItem: React.FC<Props> = ({
               {measurementType === MeasurementType.DISTANCE && (
                 showTimeCol ? (
                   <th className="ex-col-hdr-rest">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                       <span>TIME (s)</span>
                       <button
                         className="ex-col-icon-btn"
@@ -724,7 +724,7 @@ const ExerciseItem: React.FC<Props> = ({
               )}
               {!hideRest ? (
                 <th className="ex-col-hdr-rest">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                     <button
                       className="ex-col-toggle"
                       onClick={cycleRestUnit}
