@@ -384,6 +384,58 @@ describe('ExerciseItem — Distance + Time column (builder)', () => {
   });
 });
 
+describe('ExerciseItem — log mode Distance + Time column', () => {
+  it('shows DIST and TIME columns in active log card for Distance exercises', () => {
+    const update = vi.fn();
+    const distExercise = {
+      ...makeExercise({
+        measurement: { measurementType: MeasurementType.DISTANCE, measurementUnit: MeasurementUnit.METER },
+        setData: [{ distance: 25, rest: 0 }],
+      }),
+      setLogs: [{ actualDistance: 25, actualDurationSec: 0, isCompleted: false }],
+    };
+    render(
+      <ExerciseItem
+        exercise={distExercise as any}
+        editMode={true}
+        logMode={true}
+        isActive={true}
+        blockIndex={0}
+        exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByText('DIST')).toBeInTheDocument();
+    expect(screen.getByText('TIME')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Set 1 duration/i)).toBeInTheDocument();
+  });
+
+  it('shows time in m:ss format in the done compact row', () => {
+    const distExercise = {
+      ...makeExercise({
+        measurement: { measurementType: MeasurementType.DISTANCE, measurementUnit: MeasurementUnit.METER },
+        setData: [{ distance: 25, rest: 0 }],
+      }),
+      setLogs: [{ actualDistance: 25, actualDurationSec: 82, isCompleted: true }],
+    };
+    render(
+      <ExerciseItem
+        exercise={distExercise as any}
+        editMode={true}
+        logMode={true}
+        isActive={false}
+        blockIndex={0}
+        exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    // 82 seconds → 1:22
+    expect(screen.getByText(/1:22/)).toBeInTheDocument();
+  });
+});
+
 describe('ExerciseItem — REST column hide/show', () => {
   it('shows the REST column by default', () => {
     render(

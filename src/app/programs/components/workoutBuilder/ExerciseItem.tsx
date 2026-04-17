@@ -113,6 +113,13 @@ function getSetLogs(exercise: Exercise): SetLog[] {
   }));
 }
 
+/** Format seconds as m:ss */
+function formatDuration(totalSec: number): string {
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 const ExerciseItem: React.FC<Props> = ({
   exercise,
   editMode,
@@ -251,15 +258,24 @@ const ExerciseItem: React.FC<Props> = ({
 
     // ── Completed row ──
     if (logState === 'done') {
-      const weights = setLogs.map((s) => s.actualWeight).filter((w): w is number => w != null && w > 0);
-      const weightStr = weights.length === 0 ? ''
-        : weights.length === 1 || Math.min(...weights) === Math.max(...weights)
-          ? `${weights[0]} lbs`
-          : `${Math.min(...weights)}–${Math.max(...weights)} lbs`;
-      const summary = [
-        `${setLogs.length} ×`,
-        weightStr,
-      ].filter(Boolean).join(' ');
+      let summary: string;
+      if (measurementType === MeasurementType.DISTANCE) {
+        const distances = setLogs.map((s) => s.actualDistance).filter((d): d is number => d != null);
+        const times = setLogs.map((s) => s.actualDurationSec).filter((t): t is number => t != null && t > 0);
+        const distStr = distances.length ? `${distances[0]} m` : '';
+        const timeStr = times.length ? formatDuration(times[0]) : '—';
+        summary = [`${setLogs.length} ×`, distStr, timeStr ? `· ${timeStr}` : ''].filter(Boolean).join(' ');
+      } else {
+        const weights = setLogs.map((s) => s.actualWeight).filter((w): w is number => w != null && w > 0);
+        const weightStr = weights.length === 0 ? ''
+          : weights.length === 1 || Math.min(...weights) === Math.max(...weights)
+            ? `${weights[0]} lbs`
+            : `${Math.min(...weights)}–${Math.max(...weights)} lbs`;
+        summary = [
+          `${setLogs.length} ×`,
+          weightStr,
+        ].filter(Boolean).join(' ');
+      }
 
       return (
         <div ref={setNodeRef} style={style} className="ex-log-done" onClick={onSelect}>
@@ -349,7 +365,8 @@ const ExerciseItem: React.FC<Props> = ({
               <tr>
                 <th>{setColumnLabel}</th>
                 {hasWeight && <th>{weightUnit.toUpperCase()}</th>}
-                <th>{MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+                <th>{measurementType === MeasurementType.DISTANCE ? 'DIST' : MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+                {measurementType === MeasurementType.DISTANCE && <th>TIME</th>}
                 <th></th>
               </tr>
             </thead>
@@ -416,6 +433,30 @@ const ExerciseItem: React.FC<Props> = ({
                       aria-label={`Set ${i + 1} ${MEASUREMENT_LABELS[measurementType]}`}
                     />
                   </td>
+                  {measurementType === MeasurementType.DISTANCE && (
+                    <td>
+                      <input
+                        className="ex-set-input"
+                        type="number" min={0}
+                        value={
+                          rawKey(i, 'dur') in rawValues
+                            ? rawValues[rawKey(i, 'dur')]
+                            : (sl.actualDurationSec ?? 0).toString()
+                        }
+                        onChange={(e) => onRawChange(i, 'dur', e.target.value)}
+                        onBlur={(e) => {
+                          const parsed = parseFloat(e.target.value);
+                          const next = setLogs.map((s, idx) =>
+                            idx === i ? { ...s, actualDurationSec: isNaN(parsed) ? 0 : parsed } : s
+                          );
+                          update({ setLogs: next } as any);
+                          setRawValues((prev) => { const n = { ...prev }; delete n[rawKey(i, 'dur')]; return n; });
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        aria-label={`Set ${i + 1} duration in seconds`}
+                      />
+                    </td>
+                  )}
                   <td>
                     <button
                       className={`ex-check-btn${sl.isCompleted ? ' ex-check-btn--done' : ''}`}
