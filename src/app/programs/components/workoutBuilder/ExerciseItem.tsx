@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LuGripVertical, LuX } from 'react-icons/lu';
+import { LuGripVertical, LuX, LuEyeOff, LuEye } from 'react-icons/lu';
 import { Exercise, MeasurementType, MeasurementUnit, Unit, SetTarget, SetLog } from '@trainapp-io/train-core';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -488,6 +488,8 @@ const ExerciseItem: React.FC<Props> = ({
     update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
   };
 
+  const hideRest = exercise.hideRest ?? false;
+
   // Toggle a row-level override; if the new unit matches the column default, clear the override
   const toggleRowRestUnit = (index: number) => {
     const current = setData[index].restUnit;
@@ -635,16 +637,37 @@ const ExerciseItem: React.FC<Props> = ({
               {(measurementType === MeasurementType.DISTANCE || measurementType === MeasurementType.TIME) && (
                 <th>UNIT</th>
               )}
-              <th className="ex-col-hdr-rest">
-                <button
-                  className="ex-col-toggle"
-                  onClick={cycleRestUnit}
-                  type="button"
-                  aria-label="Toggle rest unit"
-                >
-                  REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
-                </button>
-              </th>
+              {!hideRest ? (
+                <th className="ex-col-hdr-rest">
+                  <button
+                    className="ex-col-toggle"
+                    onClick={cycleRestUnit}
+                    type="button"
+                    aria-label="Toggle rest unit"
+                  >
+                    REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
+                  </button>
+                  <button
+                    className="ex-col-icon-btn"
+                    onClick={() => update({ hideRest: true })}
+                    type="button"
+                    aria-label="Hide rest column"
+                  >
+                    <LuEyeOff size={10} />
+                  </button>
+                </th>
+              ) : (
+                <th className="ex-col-hdr-rest ex-col-hdr--hidden">
+                  <button
+                    className="ex-col-icon-btn"
+                    onClick={() => update({ hideRest: false })}
+                    type="button"
+                    aria-label="Show rest column"
+                  >
+                    REST <LuEye size={10} />
+                  </button>
+                </th>
+              )}
               <th aria-label="Notes">📝</th>
               <th></th>
             </tr>
@@ -721,35 +744,38 @@ const ExerciseItem: React.FC<Props> = ({
                   </td>
                 )}
 
-                <td>
-                  <div className="ex-rest-cell">
-                    <input
-                      className="ex-set-input"
-                      type="number" min={0}
-                      style={{ width: 44 }}
-                      value={
-                        rawKey(i, 'rest') in rawValues
-                          ? rawValues[rawKey(i, 'rest')]
-                          : displayRest(set.rest, getRowRestUnit(set))
-                      }
-                      onChange={(e) => onRawChange(i, 'rest', e.target.value)}
-                      onBlur={(e) => {
-                        updateSet(i, 'rest', parseRest(e.target.value, getRowRestUnit(set)));
-                        setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
-                      }}
-                      onFocus={(e) => e.target.select()}
-                      aria-label={`Set ${i + 1} rest`}
-                    />
-                    <button
-                      className={`ex-rest-unit-btn${set.restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
-                      onClick={() => toggleRowRestUnit(i)}
-                      type="button"
-                      aria-label="Toggle rest unit for this set"
-                    >
-                      {getRowRestUnit(set) === 'seconds' ? 's' : 'min'} ⟳
-                    </button>
-                  </div>
-                </td>
+                {!hideRest && (
+                  <td>
+                    <div className="ex-rest-cell">
+                      <input
+                        className="ex-set-input"
+                        type="number" min={0}
+                        style={{ width: 44 }}
+                        value={
+                          rawKey(i, 'rest') in rawValues
+                            ? rawValues[rawKey(i, 'rest')]
+                            : displayRest(set.rest, getRowRestUnit(set))
+                        }
+                        onChange={(e) => onRawChange(i, 'rest', e.target.value)}
+                        onBlur={(e) => {
+                          updateSet(i, 'rest', parseRest(e.target.value, getRowRestUnit(set)));
+                          setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        aria-label={`Set ${i + 1} rest`}
+                      />
+                      <button
+                        className={`ex-rest-unit-btn${set.restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
+                        onClick={() => toggleRowRestUnit(i)}
+                        type="button"
+                        aria-label="Toggle rest unit for this set"
+                      >
+                        {getRowRestUnit(set) === 'seconds' ? 's' : 'min'} ⟳
+                      </button>
+                    </div>
+                  </td>
+                )}
+                {hideRest && <td />}
 
                 <td>
                   <button

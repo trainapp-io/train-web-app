@@ -309,3 +309,48 @@ describe('ExerciseItem — REST column default + row override', () => {
       .not.toHaveClass('ex-rest-unit-btn--override');
   });
 });
+
+describe('ExerciseItem — REST column hide/show', () => {
+  it('shows the REST column by default', () => {
+    render(
+      <ExerciseItem
+        exercise={makeExercise()}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /hide rest column/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Set 1 rest')).toBeInTheDocument();
+  });
+
+  it('hides the REST inputs when hideRest is true', () => {
+    render(
+      <ExerciseItem
+        exercise={makeExercise({ hideRest: true })}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    expect(screen.queryByLabelText('Set 1 rest')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show rest column/i })).toBeInTheDocument();
+  });
+
+  it('clicking hide sets hideRest true', () => {
+    const update = vi.fn();
+    render(
+      <ExerciseItem
+        exercise={makeExercise()}
+        editMode={true}
+        blockIndex={0} exerciseIndex={0}
+        updateExerciseInBlockPartial={update}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /hide rest column/i }));
+    expect(update).toHaveBeenCalledWith(0, 0, expect.objectContaining({ hideRest: true }));
+  });
+});

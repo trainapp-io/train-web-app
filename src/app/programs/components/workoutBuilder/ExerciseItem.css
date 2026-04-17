@@ -175,6 +175,25 @@
 }
 .ex-unit-select:focus { border-color: #7c3aed; }
 
+/* REST column header — flex layout for toggle + hide/show icon */
+.ex-col-hdr-rest {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.ex-col-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d1d5db;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+}
+.ex-col-icon-btn:hover { color: #9ca3af; }
+.ex-col-hdr--hidden .ex-col-icon-btn { color: #9ca3af; font-size: 9px; font-weight: 700; }
+
 /* Clickable column header toggle */
 .ex-col-toggle {
   background: none;
