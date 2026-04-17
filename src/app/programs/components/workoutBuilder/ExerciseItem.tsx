@@ -58,7 +58,7 @@ const MEASUREMENT_LABELS: Record<MeasurementType, string> = {
   [MeasurementType.REPS]: 'reps',
   [MeasurementType.TIME]: 'time',
   [MeasurementType.DISTANCE]: 'dist',
-  [MeasurementType.BODYWEIGHT]: 'reps',
+  [MeasurementType.BODYWEIGHT]: 'bw',
   [MeasurementType.CALORIES]: 'cal',
   [MeasurementType.PERCENTAGE]: '%',
 };
@@ -366,7 +366,7 @@ const ExerciseItem: React.FC<Props> = ({
               <tr>
                 <th className="ex-th-set">{setColumnLabel}</th>
                 {hasWeight && <th className="ex-th-weight">{weightUnit.toUpperCase()}</th>}
-                <th className="ex-th-metric">{measurementType === MeasurementType.DISTANCE ? 'DIST' : MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
+                <th className="ex-th-metric">{measurementType === MeasurementType.DISTANCE ? 'DIST' : measurementType === MeasurementType.BODYWEIGHT ? 'REPS' : MEASUREMENT_LABELS[measurementType].toUpperCase()}</th>
                 {measurementType === MeasurementType.DISTANCE && <th className="ex-th-rest-col">TIME</th>}
                 <th className="ex-th-remove"></th>
               </tr>
@@ -688,7 +688,7 @@ const ExerciseItem: React.FC<Props> = ({
                     </select>
                   </span>
                 ) : (
-                  MEASUREMENT_LABELS[measurementType]?.toUpperCase() ?? measurementType.toUpperCase()
+                  measurementType === MeasurementType.BODYWEIGHT ? 'REPS' : (MEASUREMENT_LABELS[measurementType]?.toUpperCase() ?? measurementType.toUpperCase())
                 )}
               </th>
               {measurementType === MeasurementType.TIME && (
