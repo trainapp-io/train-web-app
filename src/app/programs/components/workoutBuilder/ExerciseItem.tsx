@@ -262,7 +262,8 @@ const ExerciseItem: React.FC<Props> = ({
       if (measurementType === MeasurementType.DISTANCE) {
         const distances = setLogs.map((s) => s.actualDistance).filter((d): d is number => d != null);
         const times = setLogs.map((s) => s.actualDurationSec).filter((t): t is number => t != null && t > 0);
-        const distStr = distances.length ? `${distances[0]} m` : '';
+        const distUnit = exercise.measurement?.measurementUnit ?? 'm';
+        const distStr = distances.length ? `${distances[0]} ${distUnit}` : '';
         const timeStr = times.length ? formatDuration(times[0]) : '—';
         summary = [`${setLogs.length} ×`, distStr, timeStr ? `· ${timeStr}` : ''].filter(Boolean).join(' ');
       } else {
