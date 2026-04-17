@@ -149,77 +149,98 @@ const WorkoutLogForm: React.FC<WorkoutLogFormProps> = ({
       />
 
       <div className="wl-body">
-        {blocks.map((block, index) => {
-          const sectionForBlock = workoutSnapshot.sectionSnapshot?.find(
-            (s) => s.blockOrders[0] === index
-          );
+        {(() => {
+          const sectionSnapshot = workoutSnapshot.sectionSnapshot ?? [];
+          const seenSections = new Set<number>();
 
-          const completedInSection = sectionForBlock
-            ? blocks
-                .filter((_, bi) => sectionForBlock.blockOrders.includes(bi))
-                .flatMap((b) => b.exercises)
-                .filter((ex) => {
-                  const logs = ex.setLogs;
-                  return logs != null && logs.length > 0 && logs.every((s) => s.isCompleted);
-                }).length
-            : 0;
-          const totalInSection = sectionForBlock
-            ? blocks
-                .filter((_, bi) => sectionForBlock.blockOrders.includes(bi))
-                .flatMap((b) => b.exercises).length
-            : 0;
+          type RenderGroup =
+            | { type: 'section'; section: typeof sectionSnapshot[number]; blockIndices: number[] }
+            | { type: 'standalone'; blockIndex: number };
 
-          if (sectionForBlock) {
-            return (
-              <div key={block.order} className="wl-section-card">
-                <div className="wl-section-card__header">
-                  <span className="wl-section-badge">SECTION</span>
-                  <span className="wl-section-card__name">{sectionForBlock.name}</span>
-                  <span className="wl-section-card__count">{completedInSection} / {totalInSection}</span>
-                </div>
-                <div className="wl-section-card__body">
+          const renderGroups: RenderGroup[] = [];
+          blocks.forEach((_, index) => {
+            const section = sectionSnapshot.find((s) => s.blockOrders.includes(index));
+            if (section) {
+              if (!seenSections.has(section.order)) {
+                seenSections.add(section.order);
+                const blockIndices = section.blockOrders
+                  .filter((bi) => bi < blocks.length)
+                  .sort((a, b) => a - b);
+                renderGroups.push({ type: 'section', section, blockIndices });
+              }
+            } else {
+              renderGroups.push({ type: 'standalone', blockIndex: index });
+            }
+          });
+
+          return renderGroups.map((group) => {
+            if (group.type === 'standalone') {
+              const { blockIndex } = group;
+              const block = blocks[blockIndex];
+              return (
+                <React.Fragment key={block.order}>
                   <CircuitItem
                     block={block}
-                    blockNumber={index + 1}
+                    blockNumber={blockIndex + 1}
                     editMode={true}
                     logMode={true}
                     workout={workoutShell}
-                    onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
+                    onUpdateBlock={(updated) => handleUpdateBlock(blockIndex, updated)}
                     onRemoveBlock={() => {}}
                     onSetHasUnsavedChanges={() => {}}
                     updateExerciseInBlockPartial={updateExerciseInBlockPartial}
                     removeExerciseFromBlock={() => {}}
                     onSetCompleted={handleSetCompleted}
-                    isBlockActive={activeBlockIndex === index}
-                    onJumpTo={() => handleJumpTo(index)}
+                    isBlockActive={activeBlockIndex === blockIndex}
+                    onJumpTo={() => handleJumpTo(blockIndex)}
                     activeExerciseIndex={0}
                   />
+                </React.Fragment>
+              );
+            }
+
+            const { section, blockIndices } = group;
+            const allExercises = blockIndices.flatMap((bi) => blocks[bi].exercises);
+            const completedCount = allExercises.filter((ex) => {
+              const logs = ex.setLogs;
+              return logs != null && logs.length > 0 && logs.every((s) => s.isCompleted);
+            }).length;
+
+            return (
+              <div key={section.order} className="wl-section-card">
+                <div className="wl-section-card__header">
+                  <span className="wl-section-badge">SECTION</span>
+                  <span className="wl-section-card__name">{section.name}</span>
+                  <span className="wl-section-card__count">{completedCount} / {allExercises.length}</span>
+                </div>
+                <div className="wl-section-card__body">
+                  {blockIndices.map((blockIndex) => {
+                    const block = blocks[blockIndex];
+                    return (
+                      <CircuitItem
+                        key={block.order}
+                        block={block}
+                        blockNumber={blockIndex + 1}
+                        editMode={true}
+                        logMode={true}
+                        workout={workoutShell}
+                        onUpdateBlock={(updated) => handleUpdateBlock(blockIndex, updated)}
+                        onRemoveBlock={() => {}}
+                        onSetHasUnsavedChanges={() => {}}
+                        updateExerciseInBlockPartial={updateExerciseInBlockPartial}
+                        removeExerciseFromBlock={() => {}}
+                        onSetCompleted={handleSetCompleted}
+                        isBlockActive={activeBlockIndex === blockIndex}
+                        onJumpTo={() => handleJumpTo(blockIndex)}
+                        activeExerciseIndex={0}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             );
-          }
-
-          return (
-            <React.Fragment key={block.order}>
-              <CircuitItem
-                block={block}
-                blockNumber={index + 1}
-                editMode={true}
-                logMode={true}
-                workout={workoutShell}
-                onUpdateBlock={(updated) => handleUpdateBlock(index, updated)}
-                onRemoveBlock={() => {}}
-                onSetHasUnsavedChanges={() => {}}
-                updateExerciseInBlockPartial={updateExerciseInBlockPartial}
-                removeExerciseFromBlock={() => {}}
-                onSetCompleted={handleSetCompleted}
-                isBlockActive={activeBlockIndex === index}
-                onJumpTo={() => handleJumpTo(index)}
-                activeExerciseIndex={0}
-              />
-            </React.Fragment>
-          );
-        })}
+          });
+        })()}
       </div>
 
       <CompletionFooter
