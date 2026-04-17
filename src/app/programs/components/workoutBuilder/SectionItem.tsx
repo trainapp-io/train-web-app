@@ -25,9 +25,9 @@ function createEmptyExercise(order: number): Exercise {
     measurement: { measurementType: MeasurementType.REPS, measurementUnit: MeasurementUnit.POUND },
     notes: '',
     order,
-    sets: 3,
+    sets: 1,
     hasSuperset: false,
-    setData: Array.from({ length: 3 }, () => ({ reps: 10, weight: 0, rest: 0 })),
+    setData: [{ reps: 10, weight: 0, rest: 0 }],
   };
 }
 

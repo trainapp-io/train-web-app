@@ -133,4 +133,26 @@ describe('SectionItem', () => {
       ]),
     }));
   });
+
+  it('clicking "Add Exercise to Section" creates an exercise with 1 set row', async () => {
+    const onUpdate = vi.fn();
+    render(
+      <SectionItem
+        section={makeSection('Main')}
+        editMode={true}
+        workout={makeWorkout() as any}
+        onUpdate={onUpdate}
+        onRemove={vi.fn()}
+        onSetHasUnsavedChanges={vi.fn()}
+        updateExerciseInBlockPartial={vi.fn()}
+        removeExerciseFromBlock={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /add exercise/i }));
+    expect(onUpdate).toHaveBeenCalledOnce();
+    const updatedSection = onUpdate.mock.calls[0][0];
+    const newBlock = updatedSection.blocks[0];
+    expect(newBlock.exercises[0].sets).toBe(1);
+    expect(newBlock.exercises[0].setData).toHaveLength(1);
+  });
 });
