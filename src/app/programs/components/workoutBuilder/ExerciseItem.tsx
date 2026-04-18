@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LuGripVertical, LuX, LuEyeOff, LuEye } from 'react-icons/lu';
+import { LuGripVertical, LuX, LuStickyNote } from 'react-icons/lu';
 import { Exercise, MeasurementType, MeasurementUnit, Unit, SetTarget, SetLog } from '@trainapp-io/train-core';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -86,6 +86,12 @@ const TIME_UNITS: MeasurementUnit[] = [
   MeasurementUnit.HOUR,
 ];
 
+const TIME_UNIT_SHORT: Partial<Record<MeasurementUnit, string>> = {
+  [MeasurementUnit.SECOND]: 'sec',
+  [MeasurementUnit.MINUTE]: 'min',
+  [MeasurementUnit.HOUR]: 'hr',
+};
+
 /** Build initial setData from exercise, falling back to single-value fields */
 function getSetData(exercise: Exercise): SetTarget[] {
   if (exercise.setData?.length) return exercise.setData;
@@ -146,6 +152,7 @@ const ExerciseItem: React.FC<Props> = ({
   // Raw string values while user is mid-edit (key: `${rowIndex}-${field}`)
   const [rawValues, setRawValues] = useState<Record<string, string>>({});
   const [measureDropdownOpen, setMeasureDropdownOpen] = useState(false);
+  const [distTimeUnit, setDistTimeUnit] = useState<MeasurementUnit>(MeasurementUnit.SECOND);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitializedSetData = useRef(false);
   const measureDropdownRef = useRef<HTMLDivElement>(null);
@@ -181,7 +188,7 @@ const ExerciseItem: React.FC<Props> = ({
   const restUnit: 'seconds' | 'minutes' = exercise.restUnit || 'seconds';
   const avatar = getAvatarStyle(exercise.name || 'X');
   const initial = (exercise.name || '?').charAt(0).toUpperCase();
-  const hasWeight = measurementType === MeasurementType.REPS;
+  const hasWeight = measurementType === MeasurementType.REPS || measurementType === MeasurementType.TIME;
 
   const update = (updates: Partial<Exercise>) =>
     updateExerciseInBlockPartial(blockIndex, exerciseIndex, updates);
@@ -522,6 +529,24 @@ const ExerciseItem: React.FC<Props> = ({
     return unit === 'minutes' ? Math.round(n * 60) : n;
   };
 
+  const DIST_TIME_SCALE: Partial<Record<MeasurementUnit, number>> = {
+    [MeasurementUnit.SECOND]: 1,
+    [MeasurementUnit.MINUTE]: 60,
+    [MeasurementUnit.HOUR]: 3600,
+  };
+
+  const displayDistTime = (sec: number | undefined) => {
+    if (sec == null) return '';
+    const scale = DIST_TIME_SCALE[distTimeUnit] ?? 1;
+    return scale === 1 ? String(sec) : String(+(sec / scale).toFixed(2));
+  };
+
+  const parseDistTime = (val: string) => {
+    const n = parseFloat(val) || 0;
+    const scale = DIST_TIME_SCALE[distTimeUnit] ?? 1;
+    return Math.round(n * scale);
+  };
+
   // Effective REST unit for a specific row
   const getRowRestUnit = (set: SetTarget): 'seconds' | 'minutes' => set.restUnit ?? restUnit;
 
@@ -529,9 +554,6 @@ const ExerciseItem: React.FC<Props> = ({
   const cycleRestUnit = () => {
     update({ restUnit: restUnit === 'seconds' ? 'minutes' : 'seconds' });
   };
-
-  const hideRest = exercise.hideRest ?? false;
-  const showTimeCol = measurementType === MeasurementType.DISTANCE && (exercise.showTime ?? true);
 
   // Toggle a row-level override; if the new unit matches the column default, clear the override
   const toggleRowRestUnit = (index: number) => {
@@ -624,11 +646,7 @@ const ExerciseItem: React.FC<Props> = ({
                       color: mt === measurementType ? '#6d28d9' : '#111827',
                     }}
                     onClick={() => {
-                      const updates: Partial<Exercise> = { measurement: { ...exercise.measurement, measurementType: mt } };
-                      if (mt === MeasurementType.DISTANCE && exercise.showTime === undefined) {
-                        updates.showTime = true;
-                      }
-                      update(updates);
+                      update({ measurement: { ...exercise.measurement, measurementType: mt } });
                       setMeasureDropdownOpen(false);
                     }}
                     type="button"
@@ -669,7 +687,7 @@ const ExerciseItem: React.FC<Props> = ({
                   </button>
                 </th>
               )}
-              {/* Measurement column header — DIST gets an inline unit selector */}
+              {/* Measurement column header — DIST and TIME get an inline unit selector */}
               <th className="ex-th-metric">
                 {measurementType === MeasurementType.DISTANCE ? (
                   <span className="ex-col-dist-hdr">
@@ -687,75 +705,54 @@ const ExerciseItem: React.FC<Props> = ({
                       ))}
                     </select>
                   </span>
+                ) : measurementType === MeasurementType.TIME ? (
+                  <span className="ex-col-dist-hdr">
+                    <span>TIME</span>
+                    <select
+                      className="ex-unit-select"
+                      value={currentTimeUnit}
+                      onChange={(e) =>
+                        update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })
+                      }
+                      aria-label="Time unit"
+                    >
+                      {TIME_UNITS.map((u) => (
+                        <option key={u} value={u}>{TIME_UNIT_SHORT[u] ?? u}</option>
+                      ))}
+                    </select>
+                  </span>
                 ) : (
                   measurementType === MeasurementType.BODYWEIGHT ? 'REPS' : (MEASUREMENT_LABELS[measurementType]?.toUpperCase() ?? measurementType.toUpperCase())
                 )}
               </th>
-              {measurementType === MeasurementType.TIME && (
-                <th className="ex-th-weight">UNIT</th>
-              )}
               {measurementType === MeasurementType.DISTANCE && (
-                showTimeCol ? (
-                  <th className="ex-col-hdr-rest ex-th-rest-col">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                      <span>TIME (s)</span>
-                      <button
-                        className="ex-col-icon-btn"
-                        onClick={() => update({ showTime: false })}
-                        type="button"
-                        aria-label="Hide time column"
-                      >
-                        <LuEyeOff size={10} />
-                      </button>
-                    </div>
-                  </th>
-                ) : (
-                  <th className="ex-col-hdr-rest ex-col-hdr--hidden ex-th-rest-col">
-                    <button
-                      className="ex-col-icon-btn"
-                      onClick={() => update({ showTime: true })}
-                      type="button"
-                      aria-label="Show time column"
-                    >
-                      TIME <LuEye size={10} />
-                    </button>
-                  </th>
-                )
-              )}
-              {!hideRest ? (
                 <th className="ex-col-hdr-rest ex-th-rest-col">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                    <button
-                      className="ex-col-toggle"
-                      onClick={cycleRestUnit}
-                      type="button"
-                      aria-label="Toggle rest unit"
+                  <span className="ex-col-dist-hdr">
+                    <span>TIME</span>
+                    <select
+                      className="ex-unit-select"
+                      value={distTimeUnit}
+                      onChange={(e) => setDistTimeUnit(e.target.value as MeasurementUnit)}
+                      aria-label="Time unit"
                     >
-                      REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
-                    </button>
-                    <button
-                      className="ex-col-icon-btn"
-                      onClick={() => update({ hideRest: true })}
-                      type="button"
-                      aria-label="Hide rest column"
-                    >
-                      <LuEyeOff size={10} />
-                    </button>
-                  </div>
-                </th>
-              ) : (
-                <th className="ex-col-hdr-rest ex-col-hdr--hidden ex-th-rest-col">
-                  <button
-                    className="ex-col-icon-btn"
-                    onClick={() => update({ hideRest: false })}
-                    type="button"
-                    aria-label="Show rest column"
-                  >
-                    REST <LuEye size={10} />
-                  </button>
+                      {TIME_UNITS.map((u) => (
+                        <option key={u} value={u}>{TIME_UNIT_SHORT[u] ?? u}</option>
+                      ))}
+                    </select>
+                  </span>
                 </th>
               )}
-              <th className="ex-th-notes" aria-label="Notes">📝</th>
+              <th className="ex-col-hdr-rest ex-th-rest-col">
+                <button
+                  className="ex-col-toggle"
+                  onClick={cycleRestUnit}
+                  type="button"
+                  aria-label="Toggle rest unit"
+                >
+                  REST ({restUnit === 'seconds' ? 's' : 'min'}) ⟳
+                </button>
+              </th>
+              <th className="ex-th-notes" aria-label="Notes"><LuStickyNote size={13} /></th>
               <th className="ex-th-remove"></th>
             </tr>
           </thead>
@@ -803,69 +800,54 @@ const ExerciseItem: React.FC<Props> = ({
                 </td>
 
                 {/* TIME cell for DISTANCE exercises */}
-                {measurementType === MeasurementType.DISTANCE && showTimeCol && (
+                {measurementType === MeasurementType.DISTANCE && (
                   <td>
                     <input
                       className="ex-set-input"
                       type="number" min={0}
                       value={rawKey(i, 'durationSec') in rawValues
                         ? rawValues[rawKey(i, 'durationSec')]
-                        : (set.durationSec ?? 0).toString()}
+                        : displayDistTime(set.durationSec)}
                       onChange={(e) => onRawChange(i, 'durationSec', e.target.value)}
-                      onBlur={(e) => onRawBlur(i, 'durationSec' as keyof SetTarget, e.target.value)}
+                      onBlur={(e) => {
+                        updateSet(i, 'durationSec', parseDistTime(e.target.value));
+                        setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'durationSec')]; return next; });
+                      }}
                       onFocus={(e) => e.target.select()}
-                      aria-label={`Set ${i + 1} duration in seconds`}
+                      aria-label={`Set ${i + 1} duration`}
                     />
                   </td>
                 )}
-                {measurementType === MeasurementType.DISTANCE && !showTimeCol && <td />}
-                {measurementType === MeasurementType.TIME && (
-                  <td>
-                    <select
-                      className="ex-unit-select"
-                      value={currentTimeUnit}
-                      onChange={(e) => update({ measurement: { ...exercise.measurement, measurementUnit: e.target.value as MeasurementUnit } })}
-                      aria-label="Time unit"
-                    >
-                      {TIME_UNITS.map((u) => (
-                        <option key={u} value={u}>{u}</option>
-                      ))}
-                    </select>
-                  </td>
-                )}
 
-                {!hideRest && (
-                  <td>
-                    <div className="ex-rest-cell">
-                      <input
-                        className="ex-set-input"
-                        type="number" min={0}
-                        style={{ width: 44 }}
-                        value={
-                          rawKey(i, 'rest') in rawValues
-                            ? rawValues[rawKey(i, 'rest')]
-                            : displayRest(set.rest, getRowRestUnit(set))
-                        }
-                        onChange={(e) => onRawChange(i, 'rest', e.target.value)}
-                        onBlur={(e) => {
-                          updateSet(i, 'rest', parseRest(e.target.value, getRowRestUnit(set)));
-                          setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
-                        }}
-                        onFocus={(e) => e.target.select()}
-                        aria-label={`Set ${i + 1} rest`}
-                      />
-                      <button
-                        className={`ex-rest-unit-btn${set.restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
-                        onClick={() => toggleRowRestUnit(i)}
-                        type="button"
-                        aria-label="Toggle rest unit for this set"
-                      >
-                        {getRowRestUnit(set) === 'seconds' ? 's' : 'min'} ⟳
-                      </button>
-                    </div>
-                  </td>
-                )}
-                {hideRest && <td />}
+                <td>
+                  <div className="ex-rest-cell">
+                    <input
+                      className="ex-set-input"
+                      type="number" min={0}
+                      style={{ width: 44 }}
+                      value={
+                        rawKey(i, 'rest') in rawValues
+                          ? rawValues[rawKey(i, 'rest')]
+                          : displayRest(set.rest, getRowRestUnit(set))
+                      }
+                      onChange={(e) => onRawChange(i, 'rest', e.target.value)}
+                      onBlur={(e) => {
+                        updateSet(i, 'rest', parseRest(e.target.value, getRowRestUnit(set)));
+                        setRawValues((prev) => { const next = { ...prev }; delete next[rawKey(i, 'rest')]; return next; });
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      aria-label={`Set ${i + 1} rest`}
+                    />
+                    <button
+                      className={`ex-rest-unit-btn${set.restUnit !== undefined ? ' ex-rest-unit-btn--override' : ''}`}
+                      onClick={() => toggleRowRestUnit(i)}
+                      type="button"
+                      aria-label="Toggle rest unit for this set"
+                    >
+                      {getRowRestUnit(set) === 'seconds' ? 's' : 'min'} ⟳
+                    </button>
+                  </div>
+                </td>
 
                 <td>
                   <button
@@ -874,7 +856,7 @@ const ExerciseItem: React.FC<Props> = ({
                     aria-label={`Note for set ${i + 1}`}
                     type="button"
                   >
-                    📝
+                    <LuStickyNote size={13} />
                   </button>
                 </td>
 

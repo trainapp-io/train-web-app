@@ -96,9 +96,6 @@ const CircuitItem: React.FC<Props> = ({
   };
 
   const blockIndex = workout.blocks?.findIndex((b) => b.order === block.order) ?? 0;
-  const restSeconds = (block as any).rest || 0;
-
-  const [restUnit, setRestUnit] = useState<'seconds' | 'minutes'>('seconds');
 
   // ── Group exercise advancement (log mode only) ──
   // For group blocks, CircuitItem owns which exercise is currently active.
@@ -108,16 +105,6 @@ const CircuitItem: React.FC<Props> = ({
   const [groupActiveExIdx, setGroupActiveExIdx] = useState(0);
 
   const isSingle = block.type === BlockType.SINGLE;
-
-  const displayGroupRest = () => {
-    if (!restSeconds) return '';
-    return restUnit === 'minutes' ? String(+(restSeconds / 60).toFixed(1)) : String(restSeconds);
-  };
-
-  const parseGroupRest = (val: string) => {
-    const n = parseFloat(val) || 0;
-    return restUnit === 'minutes' ? Math.round(n * 60) : Math.round(n);
-  };
 
   // Reset to first exercise whenever this block becomes the active block
   useEffect(() => {
@@ -254,41 +241,8 @@ const CircuitItem: React.FC<Props> = ({
               style={{ color }}
             />
 
-            <div className="ex-m" style={{ marginLeft: 'auto' }}>
-              <input
-                className="ex-m__input"
-                type="number" min={1}
-                value={block.targetSets}
-                onChange={(e) => onUpdateBlock({ ...block, targetSets: parseInt(e.target.value) || 1 })}
-                aria-label="Rounds"
-              />
-              <span className="ex-m__label">rounds</span>
-            </div>
-
-            <div className="ex-m" style={{ marginLeft: 8 }}>
-              <input
-                className="ex-m__input"
-                type="number" min={0}
-                value={displayGroupRest()}
-                onChange={(e) => {
-                  const stored = parseGroupRest(e.target.value);
-                  onUpdateBlock({ ...block, rest: stored } as any);
-                }}
-                placeholder="0"
-                aria-label="Rest between rounds"
-              />
-              <button
-                className="ex-rest-unit"
-                onClick={() => setRestUnit((u) => u === 'seconds' ? 'minutes' : 'seconds')}
-                type="button"
-                aria-label={restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
-              >
-                {restUnit === 'seconds' ? 's ⟳' : 'min ⟳'}
-              </button>
-            </div>
-
             {!logMode && (
-              <button className="ex-card__remove" onClick={onRemoveBlock} aria-label="Remove block">
+              <button className="ex-card__remove" style={{ marginLeft: 'auto' }} onClick={onRemoveBlock} aria-label="Remove block">
                 <LuX size={15} />
               </button>
             )}
@@ -298,9 +252,6 @@ const CircuitItem: React.FC<Props> = ({
             <h3 className="block-card__name" style={{ color }}>{block.name}</h3>
             <div className="block-card__pills">
               <span className="block-pill block-pill--sets">{block.targetSets} rounds</span>
-              {restSeconds > 0 && (
-                <span className="block-pill block-pill--rest">{restSeconds}s rest</span>
-              )}
             </div>
           </>
         )}
@@ -340,7 +291,7 @@ const CircuitItem: React.FC<Props> = ({
                     }
                   } : onSetCompleted}
                   onGroupExercise={editMode && !logMode ? addExercise : undefined}
-                  setColumnLabel="Rnd"
+                  setColumnLabel="Set"
                 />
               </React.Fragment>
             ))}
